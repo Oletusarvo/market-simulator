@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<title>Market simulator</title>
+
+<head>
+    <meta name="Author" content="Jens Österberg">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="dist/css/main.css">
+</head>
+
+<html lang="en-US">
+    <body>  
+		<main>
+			<div id="menu-button">
+				<div class="button-line"></div>
+				<div class="button-line"></div>
+				<div class="button-line"></div>
+			</div>
+
+			<!--Menu-->
+			<div id="menu-create">
+				<fieldset>
+					<legend>Create Symbol</legend>
+					<div id="menu-create-container">
+						<label>Symbol Name: </label><input id="input-create-symbol" maxlength="5" value="DEF">
+						<label>Offer Price:</label><input id="input-create-price" type="number" min="0" value="1">
+						<label>Offer Size:</label><input id="input-create-size" type="number" min="1" max="10000" max="10000" value="1000">
+					</div>
+					<button class="menu-confirm-button" id="create-ok-button" type="button">OK</button>
+				</fieldset>
+
+				<fieldset>
+					<legend>Short Locate</legend>
+					<div id="menu-short-locate">
+						<label>Symbol</label><input id="input-locate-symbol">
+						<label>Quantity</label><input id="input-locate-quantity" type="number">
+					</div>
+					<button class="menu-confirm-button" id="locate-ok-button" type="button">Locate</button>
+				</fieldset>
+
+				<fieldset>
+					<legend>Offer Shares For Borrow</legend>
+					<div id="menu-offer-shares">
+						<label>Symbol</label><input id="input-offer-symbol">
+						<label>Quantity</label><input id="input-offer-quantity" type="number">
+						<label>Price</label><input id="input-offer-price" type="number" step="0.01">
+					</div>
+					<button class="menu-confirm-button" id="offer-ok-button">Offer</button>
+				</fieldset>
+			</div>
+
+			<!--Main Grid-->
+			<div id="main-grid">
+				<!--Level2 Window-->
+				<div class="level2-container">
+					<div class="container-item" id="level1">
+						<label>Symbol</label>
+						<input class="input-field" id="input-symbol" type="text" maxlength="5">
+						<output id="output-symbol"></output>
+						<label>Open:</label><output id="output-open"></output>
+						<label>Low:</label><output id="output-low"></output>
+						<label>High:</label><output id="output-high"></output>
+						<label>Last:</label><output id="output-last"></output>
+						<label>Bid:</label><output id="output-bid"></output>
+						<label>Ask:</label><output id="output-ask"></output>
+						<label>Gain:</label><output id="output-gain"></output>
+					</div>
+					
+					<div class="container-item" id="level2">
+						<table class="container-table" id="table-level2">
+							<tr>
+								<th>Bid</th>
+								<th>Size</th>
+								<th>Ask</th>
+								<th>Size</th>
+							</tr>
+						</table>
+					</div>
+					
+					<div class="container-item" id="price-history">
+						<table class="container-table" id="table-price-history">
+						</table>
+					</div>
+					
+					<div class="container-item" id="control">
+						<div id="settings">
+							<fieldset>
+								<legend>Order Setup</legend>
+								<label>Price</label>
+								<input class="input-field" id="input-price" min="0" step="0.01" value="1.00" type="number">
+								
+								<label>Size</label>
+								<input class="input-field" id="input-size" min="1" step="1" value="100" type="number">
+								
+								<label>ID</label>
+								<input class="input-field" id="input-id" min="0" max="100" step="1" value="0" type="number">
+								
+								<label>Type</label>
+								<select id="input-type">
+									<option value="MKT">MKT</option>
+									<option value="LMT">LMT</option>
+								</select>
+							</fieldset>
+							
+						</div>
+						
+						<div id="send-buttons">
+							<fieldset>
+								<legend>Send</legend>
+								<button class="send-button" id="buy-button" type="button">Buy</button>
+								<button class="send-button" id="sell-button" type="button">Sell</button>
+								<button class="send-button" id="short-button" type="button">Short</button>
+								<button class="send-button" id="cover-button" type="button">Cover</button>
+							</fieldset>
+							
+						</div>
+						
+						<div id="control-buttons">
+							<fieldset>
+								<legend>Control</legend>
+								<button class="control-button" id="position-button" type="button">Position</button>
+								<button class="control-button" id="half-pos-button" type="button">Half Pos</button>
+								<button class="control-button" id="cancel-button" type="button">Cancel</button>
+								<button class="control-button" id="run-button" type="button">Run AI</button>
+							</fieldset>
+						</div>
+					</div>
+				</div>
+				<div class="container-item" id="broker-interface">
+
+					<div id="broker-messages">
+						<fieldset id="field-broker-messages">
+							<legend>Messages</legend>
+							<table class="container-table" id="table-broker-messages">
+								
+							</table>
+						</fieldset>
+					</div>
+
+					<div id="symbol-list">
+						<fieldset>
+							<legend>Symbol List</legend>
+							<table class="container-table" id="table-symbol-list">
+								<th>Name</th>
+								<th>Last Price</th>
+								<th>Gain</th>
+							</table>
+						</fieldset>
+					</div>
+
+				</div>
+				
+				<div class="container-item" id="broker-interface2">
+					<div id="account-info">
+						<fieldset id="field-account-info">
+							<legend>Account</legend>
+							
+							<table class="container-table" id="table-account-info">
+								<tr>
+									<td>ID:</td>
+									<td class="output-cell"><output id="output-id"></output></td>
+								</tr>
+								
+								<tr>
+									<td>Balance:</td>
+									<td class="output-cell"><output id="output-balance"></output>€</td>
+								</tr>
+								
+								<tr>
+									<td>Buying Power:</td>
+									<td class="output-cell"><output id="output-bp"></output>€</td>
+								</tr>
+								
+								<tr>
+									<td>Margin:</td>
+									<td class="output-cell"><output id="output-margin"></output>€</td>
+								</tr>
+								
+								<tr>
+									<td>Open Equity:</td>
+									<td class="output-cell"><output id="output-oe"></output>€</td>
+								</tr>
+							</table>
+						</fieldset>
+					</div>
+
+					<fieldset>
+						<legend>Short Locate</legend>
+						<div id="menu-short-locate">
+							<label>Symbol</label><input id="input-locate-symbol">
+							<label>Quantity</label><input id="input-locate-quantity" type="number" step="100">
+						</div>
+						<button class="menu-confirm-button" id="locate-ok-button" type="button">Locate</button>
+					</fieldset>
+
+					<fieldset>
+						<legend>Offer Shares For Borrow</legend>
+						<div id="menu-offer-shares">
+							<label>Symbol</label><input id="input-offer-symbol">
+							<label>Quantity</label><input id="input-offer-quantity" type="number">
+							<label>Price</label><input id="input-offer-price" type="number" step="0.01" min="0">
+						</div>
+						<button class="menu-confirm-button" id="offer-ok-button">Offer</button>
+					</fieldset>
+				</div>
+				
+
+				<div class="container-item" id="open-orders">
+					<fieldset id="field-open-orders">
+						<legend>Open Orders</legend>
+						<table class="container-table" id="table-open-orders">
+							<tr>
+								<th>Symbol</th>
+								<th>Side</th>
+								<th>Size</th>
+								<th>Price</th>
+								<th>Type</th>
+							</tr>
+						</table>
+					</fieldset>
+				</div>
+
+				<div class="container-item" id="closed-positions">
+					<fieldset id="field-closed-positions">
+						<legend>Closed Positions</legend>
+						<table class="container-table" id="table-closed-positions">
+							<tr>
+								<th>Symbol</th>
+								<th>Side</th>
+								<th>Shares In</th>
+								<th>Price In</th>
+								<th>Price Out</th>
+								<th>Realized</th>
+								<th>Gain</th>
+							</tr>
+						</table>
+					</fieldset>
+				</div>
+
+				<div class="container-item" id="position-info">
+					<fieldset id="field-position-info">
+						<legend>Position</legend>
+						<table class="container-table" id="table-position-info">
+							<tr>
+								<th>Symbol</th>
+								<th>Side</th>
+								<th>Size</th>
+								<th>Avg Price</th>
+								<th>Realized</th>
+								<th>Unrealized</th>
+								<th>Gain</th>
+							</tr>
+						</table>
+					</fieldset>
+				</div>
+					
+			</div>
+			
+		</main> 
+    </body>
+
+    <script src="dist\js\constants.js"></script>
+    <script src="dist\js\transactioninfo.js"></script>
+    <script src="dist\js\order.js"></script>
+    <script src="dist\js\orderqueue.js"></script>
+    <script src="dist\js\orderbook.js"></script>
+    <script src="dist\js\exchange.js"></script>
+    <script src="dist\js\position.js"></script>
+    <script src="dist\js\brokeraccount.js"></script>
+	<script src="dist/js/receipt.js"></script>
+    <script src="dist\js\broker.js"></script>
+    <script src="dist\js\bankaccount.js"></script>
+    <script src="dist\js\bank.js"></script>
+    <script src="dist\js\trader.js"></script>
+    <script src="dist\js\sinegenerator.js"></script>
+    <script src="dist\js\uiupdate.js"></script>
+    <script src="dist\js\tradingLogicSimple.js"></script>
+    <script src="dist\js\tradingLogicComplex.js"></script>
+    <script src="dist\js\marketmaker.js"></script>
+    <script src="dist\js\index.js"></script>
+    <script src="dist\js\autotrade.js"></script>
+    
+</html>
