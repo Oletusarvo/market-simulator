@@ -4,9 +4,6 @@ const ASK = SEL;
 class BrokerAccount{
     constructor(id, bp){
         this.id = id;
-        this.positions = new Map();
-        this.borrowedShares = new Map();
-        this.openOrders = new Map();
         this.closedPositions = [];
         this.openEquity = 0;
         this.openOrderSize = 0;
@@ -22,6 +19,11 @@ class BrokerAccount{
         this.setBpMultiplier();
 
         this.willingToBorrow = false;
+        this.positionCloseLimit = new Map();
+        this.locatedShares      = new Map();
+        this.openOrders         = new Map();
+        this.positions          = new Map();
+        this.borrowedShares     = new Map();
     }
 
     addPosition(symbol, price, size, side){
