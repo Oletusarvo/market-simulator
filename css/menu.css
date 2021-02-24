@@ -1,0 +1,79 @@
+.button-line{
+	width: 30px;
+	height: 5px;
+	background: black;
+	margin-bottom: 2px;
+	transition: all 0.2s ease-out;
+}
+
+#menu-button{
+	position: fixed;
+	top: 15px;
+	left: 10px;
+	cursor: pointer;
+	z-index: 2;	
+}
+
+.menu-table{
+	font-size: 10px;
+	max-height: 200px;
+	overflow-y: scroll;
+}
+
+#menu-button.close .button-line{
+	background: white;
+}
+
+#menu-button.close .button-line:nth-child(1){
+	transform: translate3d(0, 6px, 0) rotate(45deg);
+}
+
+#menu-button.close .button-line:nth-child(2){
+	transform: translate3d(0, 0px, 0) rotate(45deg);
+	opacity: 0;
+}		
+
+#menu-button.close .button-line:nth-child(3){
+	transform: translate3d(0, -8px, 0) rotate(-45deg);
+}
+
+#menu-create{
+	position: fixed;
+	display: flex;
+	flex-flow: column wrap;
+	top: 0;
+	left: 0;
+	justify-self: center;
+	visibility: hidden;
+	height: 100%;
+	width: 300px;
+
+	background: rgba(0, 0, 0, 0.7);
+	padding: 40px 5px 0 5px;
+	z-index: 1;
+
+	color: white;
+
+	transform: translate3d(-100%, 0, 0);
+	transition: all 0.1s ease-out;
+}
+
+#menu-create-container, #menu-short-locate, #menu-offer-shares{
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	grid-gap: 2px;
+}
+
+#menu-create.show{
+	visibility: visible;
+	transform: translate3d(0, 0, 0);
+}
+
+#menu-create button, #broker-interface2 button{
+	margin-top: 5px;
+	width: 100%;
+}
+
+#menu-confirm-button{
+	width: 100%;
+}
