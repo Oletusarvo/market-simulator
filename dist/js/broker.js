@@ -380,4 +380,8 @@ class Broker{
             }
         }
     }
+
+    locate(id, symbol, size){
+        
+    }
 }

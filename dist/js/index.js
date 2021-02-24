@@ -168,6 +168,7 @@ buttonPos.onclick = function(){
         
 }
 
+//Half pos Button
 let buttonHalfPos = document.querySelector("#half-pos-button");
 buttonHalfPos.onclick = function(){
     const id = parseInt(document.querySelector("#input-id").value);
@@ -203,6 +204,17 @@ sab.onclick = function(){
     else{
         sab.innerHTML = "Run AI";
     }
+}
+
+//Short locate
+const shortLocateSymbol     = document.querySelector("#input-locate-symbol");
+const shortLocateSize       = document.querySelector("#input-locate-size");
+const shortLocateOkButton   = document.querySelector("#locate-ok-button");
+shortLocateOkButton.onclick = function(){
+    let symbol = shortLocateSymbol.value;
+    let size = parseInt(shortLocateSize.value);
+
+    broker.locate(id, symbol, size);
 }
 
 const menuButton      = document.querySelector("#menu-button");

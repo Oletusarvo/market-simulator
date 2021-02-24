@@ -6,7 +6,6 @@ updateBrokerInfo = function(){
 	let outputOpenEquity        = document.querySelector("#output-oe");
 	let outputBuyingPower       = document.querySelector("#output-bp");
 	let outputMargin            = document.querySelector("#output-margin");
-
 	let id                      = parseInt(inputId.value);
 	outputId.value              = id;
 
