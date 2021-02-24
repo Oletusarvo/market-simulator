@@ -382,6 +382,28 @@ class Broker{
     }
 
     locate(id, symbol, size){
-        
+        /*
+            Find an account that has enough shares available and is willing to lend shares.
+        */
+
+        let lender = 0;
+        let borrower = this.accounts.get(id);
+
+        for(let acc of this.accounts.values()){
+            if(acc.willingToBorrow){
+                lender = acc;
+                let pos = acc.positions.get(symbol);
+                if(pos && pos.sizeIn >= size){
+                    /*
+                        Move the shares to the borrowing account and prevent the lender from selling more
+                        shares than what has been lended out, until the borrower has returned them.
+                        Also imburse the lender's defined interest payment to them.
+                    */
+                }
+            }
+        }
+
+        //Return non-zero if shares could not be located.
+        return 0;
     }
 }
