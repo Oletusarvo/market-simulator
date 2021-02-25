@@ -149,7 +149,7 @@ body{
 	grid-row: 3;
 }
 
-#output-symbol{
+#output-symbol, #output-short-status{
 	font-weight: bold;
 }
 
