@@ -205,6 +205,14 @@ sab.onclick = function(){
     }
 }
 
+//Offer shares
+const shortOfferSymbol      = document.querySelector("#input-offer-symbol");
+const shortOfferSize        = document.querySelector("#input-offer-size");
+const shortOfferPrice       = document.querySelector("#input-offer-size");
+const shortOfferOkButton    = document.querySelector("#offer-ok-button");
+shortOfferOkButton.onclick = function(){
+    
+}
 //Short locate
 const shortLocateSymbol     = document.querySelector("#input-locate-symbol");
 const shortLocateSize       = document.querySelector("#input-locate-size");
