@@ -210,14 +210,18 @@ const shortOfferSymbol      = document.querySelector("#input-offer-symbol");
 const shortOfferSize        = document.querySelector("#input-offer-size");
 const shortOfferPrice       = document.querySelector("#input-offer-size");
 const shortOfferOkButton    = document.querySelector("#offer-ok-button");
+
 shortOfferOkButton.onclick = function(){
-    let id = parseId(document.querySelector("#input-id").value);
+    let id = parseInt(document.querySelector("#input-id").value);
     let symbol = shortOfferSymbol.value;
     let size = shortOfferSize.value;
     let result = broker.offer(id, symbol, size);
 
-    if(!result){
+    if(result){
         broker.messages.push("Error offering shares for borrow!");
+    }
+    else{
+        console.log("Offered shares for borrow!" + size);
     }
 }
 
@@ -233,6 +237,9 @@ shortLocateOkButton.onclick = function(){
     if(!result){
         broker.messages.push("Could not locate shares to borrow!");
         broker.drawMessages(berrtable);
+    }
+    else{
+        update();
     }
 }
 

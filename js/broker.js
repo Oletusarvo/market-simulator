@@ -15,6 +15,7 @@ const ERR_SELL_GREATER          = 13;
 const ERR_GREATER_THAN_POSITION = 14;
 const ERR_LOCATED_SHARES        = 15;
 const ERR_LOCATED_SHARES_NUM    = 16;
+const ERR_GREATER_THAN_CLOSE_LIMIT = 17;
 
 class Broker{
     constructor(name){
@@ -63,12 +64,25 @@ class Broker{
                 return ERR_OPPOSITE_POSITION;
             }
 
-            if(pos){
-                if(order.size > Math.abs(pos.sizeIn)){
-                    return ERR_GREATER_THAN_POSITION;
-                }
-                   
+            
 
+            if(pos){    
+                /*
+                    If the account has offered shares for borrow for this symbol,
+                    dissalow sending out orders for that amount.
+                */
+                let positionCloseLimit = acc.positionCloseLimit.get(order.symbol);
+                if(positionCloseLimit == undefined){
+                    if(order.size > Math.abs(pos.sizeIn)){
+                        return ERR_GREATER_THAN_POSITION;
+                    }
+                }
+                else{
+                    if(order.size > positionCloseLimit){
+                        return ERR_GREATER_THAN_CLOSE_LIMIT;
+                    }
+                }
+                
                 if(pos.side == SHT && order.side == SEL)
                     return ERR_SELL_SHORT;
     
@@ -381,6 +395,9 @@ class Broker{
             case ERR_LOCATED_SHARES_NUM:
                 return "Trying to short more than available located shares!";
 
+            case ERR_GREATER_THAN_CLOSE_LIMIT:
+                return "Trying to close more than available shares!";
+
             default:
                 return("Unknown error. Code: " + errcode);
         }
@@ -394,6 +411,7 @@ class Broker{
                 if(pos.sizeIn >= size){ 
                     acc.willingToBorrow = true;
                     acc.offeredShares.set(symbol, size);
+                    acc.positionCloseLimit.set(symbol, pos.size - size);
                 }
                 else{
                     return 3;
