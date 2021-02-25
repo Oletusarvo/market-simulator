@@ -234,12 +234,14 @@ shortLocateOkButton.onclick = function(){
     let size = parseInt(shortLocateSize.value);
     let id = parseInt(document.querySelector("#input-id"));
     let result = broker.locate(id, symbol, size);
+    
     if(!result){
-        broker.messages.push("Could not locate shares to borrow!");
-        broker.drawMessages(berrtable);
+        console.log("Located shares!");
+        update();
     }
     else{
-        update();
+        broker.messages.push("Could not locate shares to borrow!");
+        broker.drawMessages(berrtable);
     }
 }
 

@@ -52,9 +52,6 @@ class Broker{
                     return ERR_LOCATED_SHARES_NUM;
                 }
             }
-            else{
-                return ERR_LOCATED_SHARES;
-            }
 
             let newOpenEquity = acc.openEquity + order.size * order.price;
             if((order.side == SHT || order.side == BUY) && (newOpenEquity > acc.getBuyingPower()))
@@ -435,8 +432,8 @@ class Broker{
 
         for(let lender of this.accounts.values()){
             if(lender.willingToBorrow){
-                let offeredShares = lender.offeredShares(symbol);
-                if(pos && pos.sizeIn >= size){
+                let offeredShares = lender.offeredShares.get(symbol);
+                if(offeredShares && offeredShares >= size){
                     /*
                         Move the shares to the borrowing account and prevent the lender from selling more
                         shares than what has been lended out, until the borrower has returned them.
@@ -445,11 +442,15 @@ class Broker{
                     let borrower = this.accounts.get(id);
                     if(borrower){
                         borrower.locatedShares.set(symbol, size);
-                        pos.sharesAvailable -= size;
                         lender.willingToBorrow = false;
-                        return 1;
                     }
                 }
+                else{
+                    return 2;
+                }
+            }
+            else{
+                return 1;
             }
         }
 
