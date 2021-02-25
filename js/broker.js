@@ -13,11 +13,14 @@ const ERR_SELL_SHORT            = 11;
 const ERR_COVER_GREATER         = 12;
 const ERR_SELL_GREATER          = 13;
 const ERR_GREATER_THAN_POSITION = 14;
+const ERR_LOCATED_SHARES        = 15;
+const ERR_LOCATED_SHARES_NUM    = 16;
 
 class Broker{
     constructor(name){
         this.name = name;
         this.accounts = new Map();
+        this.shortStatus = new Map();
         //Used to reference possible error messages and display them.
         this.messages = [];
         this.nextOrderId = 0;
@@ -42,6 +45,16 @@ class Broker{
         let pos = acc.positions.get(order.symbol);
 
         if(acc){
+            const locatedShares = acc.locatedShares.get(order.symbol);
+            if(order.side == SHT && locatedShares != undefined){
+                if(order.size > locatedShares){
+                    return ERR_LOCATED_SHARES_NUM;
+                }
+            }
+            else{
+                return ERR_LOCATED_SHARES;
+            }
+
             let newOpenEquity = acc.openEquity + order.size * order.price;
             if((order.side == SHT || order.side == BUY) && (newOpenEquity > acc.getBuyingPower()))
                 return ERR_BUYINGPOWER;
@@ -361,6 +374,12 @@ class Broker{
 
             case ERR_SELL_SHORT:
                 return "No long position to sell!";
+
+            case ERR_LOCATED_SHARES:
+                return "No available located shares for this account!";
+
+            case ERR_LOCATED_SHARES_NUM:
+                return "Trying to short more than available located shares!";
 
             default:
                 return("Unknown error. Code: " + errcode);

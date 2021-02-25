@@ -217,6 +217,7 @@ update = function(){
     let outputOpen = document.getElementById("output-open");
     let outputSpread = document.getElementById("output-spread");
 	let outputSymbol = document.querySelector("#output-symbol");
+	let outputShortStatus = document.querySelector("#output-short-status");
 
     let ask = orderbook.bestAsk();
     let bid = orderbook.bestBid();
@@ -229,6 +230,9 @@ update = function(){
     outputLow.value = orderbook.low == Number.MAX_VALUE ? NaN : orderbook.low.toFixed(2);
     //outputSpread.value = (ask && bid) ? (ask.price - bid.price).toFixed(2) : NaN;
 	outputSymbol.value = k_symbol;
+	let status = broker.shortStatus.get(k_symbol);
+	outputShortStatus.value = status ? status : "NS";
+	outputShortStatus.style.color = status != "NS" ? "red" : "green";
 
     let prefix = last - orderbook.open >= 0 ? "+" : "-";
 
