@@ -246,7 +246,7 @@ update = function(){
     marketmaker.createMarket(k_symbol);
     orderbook.drawTable(table);
     orderbook.drawPriceHistory(ptable);
-
+	broker.drawMessages(berrtable);
     updateBrokerInfo();
     updateBankInfo();
 }

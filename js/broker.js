@@ -181,7 +181,6 @@ class Broker{
         //Limit the number of messages stored.
         if(this.messages.length == this.maxMessages + 10){
             this.messages.slice(0, this.messages.length - 10);
-
         }
     }
 
