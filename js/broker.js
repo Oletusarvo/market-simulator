@@ -46,22 +46,26 @@ class Broker{
         let pos = acc.positions.get(order.symbol);
 
         if(acc){
-            const locatedShares = acc.locatedShares.get(order.symbol);
-            if(order.side == SHT && locatedShares != undefined){
-                if(order.size > locatedShares){
+            //Disalow shorting unless there are located shares available.
+            if(order.side == SHT){
+                let locatedShares = acc.locatedShares.get(order.symbol);
+                if(locatedShares == undefined){
+                    return ERR_LOCATED_SHARES;
+                }
+                else if(locatedShares < order.size){
                     return ERR_LOCATED_SHARES_NUM;
                 }
             }
 
+            //Not enough buying power.
             let newOpenEquity = acc.openEquity + order.size * order.price;
             if((order.side == SHT || order.side == BUY) && (newOpenEquity > acc.getBuyingPower()))
                 return ERR_BUYINGPOWER;
-
+            
+            //Disalow orders out on opposite sides at the same time.
             if((acc.openOrderSide == SHT && order.side == BUY) || (acc.openOrderSide == BUY && order.side == SHT)){
                 return ERR_OPPOSITE_POSITION;
             }
-
-            
 
             if(pos){    
                 /*
@@ -453,5 +457,13 @@ class Broker{
 
         //Return non-zero if shares could not be located.
         return 0;
+    }
+
+    returnShares(id, symbol){
+        let acc = this.accounts.get(id);
+        if(acc){
+            acc.locatedShares.delete(symbol);
+        }
+        
     }
 }

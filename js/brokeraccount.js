@@ -24,7 +24,6 @@ class BrokerAccount{
         this.offeredShares      = new Map(); //Contains shares for a symbol offered to be borrowed.
         this.openOrders         = new Map();
         this.positions          = new Map();
-        this.borrowedShares     = new Map();
     }
 
     addPosition(symbol, price, size, side){

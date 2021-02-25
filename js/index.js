@@ -20,7 +20,6 @@ let bank        = new Bank();
 //exchange.marketmaker = marketmaker;
 
 exchange.addOrderBook(k_symbol);
-exchange.addOrderBook("KALA");
 var orderbook = exchange.getOrderBook(k_symbol);
 
 const numTraders = 50;
@@ -243,6 +242,15 @@ shortLocateOkButton.onclick = function(){
         broker.messages.push("Could not locate shares to borrow!");
         broker.drawMessages(berrtable);
     }
+}
+
+//Return shares
+let returnSharesButton = document.querySelector("#return-shares-button");
+returnSharesButton.onclick = function(){
+    let id = parseInt(document.querySelector("#input-id").value);
+    let symbol = document.querySelector("#input-locate-symbol").value;
+    broker.returnShares(id, symbol);
+    update();
 }
 
 //Menu
