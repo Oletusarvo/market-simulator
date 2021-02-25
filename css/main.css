@@ -98,6 +98,10 @@ body{
 	flex-flow: column;
 }
 
+#send-buttons button{
+	color: white;
+}
+
 #buy-button{
 	background: green;
 }
@@ -108,12 +112,10 @@ body{
 
 #short-button{
 	background: brown;
-	color: white;
 }
 
 #cover-button{
 	background: blue;
-	color: white;
 }
 
 #broker-interface{
@@ -134,9 +136,14 @@ body{
 	overflow-y: scroll;
 }
 
+#account-info{
+	height: 200px;
+}
+
 #field-account-info{
 	display: flex;
 	flex-flow: column wrap;
+	height: 90%;
 }
 
 #position-info{
