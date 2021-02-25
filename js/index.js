@@ -211,8 +211,16 @@ const shortOfferSize        = document.querySelector("#input-offer-size");
 const shortOfferPrice       = document.querySelector("#input-offer-size");
 const shortOfferOkButton    = document.querySelector("#offer-ok-button");
 shortOfferOkButton.onclick = function(){
-    
+    let id = parseId(document.querySelector("#input-id").value);
+    let symbol = shortOfferSymbol.value;
+    let size = shortOfferSize.value;
+    let result = broker.offer(id, symbol, size);
+
+    if(!result){
+        broker.messages.push("Error offering shares for borrow!");
+    }
 }
+
 //Short locate
 const shortLocateSymbol     = document.querySelector("#input-locate-symbol");
 const shortLocateSize       = document.querySelector("#input-locate-size");

@@ -21,6 +21,7 @@ class BrokerAccount{
         this.willingToBorrow = false;
         this.positionCloseLimit = new Map();
         this.locatedShares      = new Map(); //Contains shares for a symbol that can be shorted.
+        this.offeredShares      = new Map(); //Contains shares for a symbol offered to be borrowed.
         this.openOrders         = new Map();
         this.positions          = new Map();
         this.borrowedShares     = new Map();

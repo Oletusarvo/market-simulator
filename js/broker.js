@@ -386,18 +386,28 @@ class Broker{
         }
     }
 
-    borrowShares(accountId, symbol, size){
-        //Find an account that has the number of shares and is willing to borrow.
-        let borrower = 0;
-        for(let acc of this.accounts){
-            if(acc.willingToBorrow){
-                let accPos = acc.positions.get(symbol);
-                if(accPos){
-                    let myAcc = this.accounts.get(id);
-                    
+    offer(id, symbol, size){
+        let acc = this.accounts.get(id);
+        if(acc){
+            let pos = acc.positions.get(symbol);
+            if(pos){
+                if(pos.sizeIn >= size){ 
+                    acc.willingToBorrow = true;
+                    acc.offeredShares.set(symbol, size);
+                }
+                else{
+                    return 3;
                 }
             }
+            else{
+                return 2;
+            }
         }
+        else{
+            return 1;
+        }
+
+        return 0;
     }
 
     locate(id, symbol, size){
@@ -407,7 +417,7 @@ class Broker{
 
         for(let lender of this.accounts.values()){
             if(lender.willingToBorrow){
-                let pos = lender.positions.get(symbol);
+                let offeredShares = lender.offeredShares(symbol);
                 if(pos && pos.sizeIn >= size){
                     /*
                         Move the shares to the borrowing account and prevent the lender from selling more
