@@ -7,12 +7,14 @@ updateBrokerInfo = function(){
 	let outputBuyingPower       = document.querySelector("#output-bp");
 	let outputMargin            = document.querySelector("#output-margin");
 	let outputShortStatus		= document.querySelector("#output-short-status");
+	let outputSharesLocated		= document.querySelector("#output-shares-located");
 	let id                      = parseInt(inputId.value);
 	outputId.value              = id;
 
 	let acc						= broker.accounts.get(id);
 	let locatedShares			= acc.locatedShares.get(k_symbol);
-	outputShortStatus.value		= locatedShares != undefined ? locatedShares : "NS";
+	outputShortStatus.value		= locatedShares != undefined ? "S" : "NS";
+	outputSharesLocated.value	= locatedShares != undefined ? locatedShares : 0;
 	outputShortStatus.style.color = outputShortStatus.value == "NS" ? "red" : "green";
 
 	outputOpenEquity.value      = acc.openEquity.toFixed(2);

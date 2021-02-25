@@ -343,11 +343,14 @@ class Broker{
             }
         }
 
-        let offset = this.messages.length < 10 ? 0 : this.messages.length - 10;
-
-        for(let i = this.messages.length - 1, j = 0; i > offset; --i, ++j){
+        /*
+            Display the broker messages so that the most recent one is at the top.
+        */
+        let end = this.messages.length < 10 ? 0 : this.messages.length - 10;
+        let tablePos = 0;
+        for(let i = this.messages.length - 1; i >= end; --i){
             let message = this.messages[i];
-            table.rows[j].cells[0].innerHTML = message;
+            table.rows[tablePos++].cells[0].innerHTML = message;
         }
 
     }
@@ -434,6 +437,7 @@ class Broker{
             Find an account that has enough shares available and is willing to lend shares.
         */
 
+        let result = 0;
         for(let lender of this.accounts.values()){
             if(lender.willingToBorrow){
                 let offeredShares = lender.offeredShares.get(symbol);
@@ -447,16 +451,20 @@ class Broker{
                     if(borrower){
                         borrower.locatedShares.set(symbol, size);
                         lender.willingToBorrow = false;
+                        break;
                     }
+                }
+                else{
+                    result = 2;
                 }
             }
             else{
-                console.log("Not willing to borrow!");
+                result = 1;
             }
         }
 
         //Return non-zero if shares could not be located.
-        return 0;
+        return result;
     }
 
     returnShares(id, symbol){
