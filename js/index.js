@@ -232,11 +232,11 @@ const shortLocateOkButton   = document.querySelector("#locate-ok-button");
 shortLocateOkButton.onclick = function(){
     let symbol = shortLocateSymbol.value;
     let size = parseInt(shortLocateSize.value);
-    let id = parseInt(document.querySelector("#input-id"));
+    let id = parseInt(document.querySelector("#input-id").value);
     let result = broker.locate(id, symbol, size);
-    
+
     if(!result){
-        console.log("Located shares!");
+        console.log("Located " + size + " shares!");
         update();
     }
     else{

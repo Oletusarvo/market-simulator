@@ -445,12 +445,9 @@ class Broker{
                         lender.willingToBorrow = false;
                     }
                 }
-                else{
-                    return 2;
-                }
             }
             else{
-                return 1;
+                console.log("Not willing to borrow!");
             }
         }
 
