@@ -60,7 +60,6 @@ for(let r = 0; r < 10; ++r){
     }
 }
 
-
 let marketmaker = new MarketMaker(exchange);
 marketmaker.spread = 0.01;
 marketmaker.depth = 2;
@@ -213,10 +212,15 @@ const shortLocateOkButton   = document.querySelector("#locate-ok-button");
 shortLocateOkButton.onclick = function(){
     let symbol = shortLocateSymbol.value;
     let size = parseInt(shortLocateSize.value);
-
-    broker.locate(id, symbol, size);
+    let id = parseInt(document.querySelector("#input-id"));
+    let result = broker.locate(id, symbol, size);
+    if(!result){
+        broker.messages.push("Could not locate shares to borrow!");
+        broker.drawMessages(berrtable);
+    }
 }
 
+//Menu
 const menuButton      = document.querySelector("#menu-button");
 const createMenu        = document.querySelector("#menu-create");
 let showCreateMenu      = false;

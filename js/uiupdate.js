@@ -6,10 +6,15 @@ updateBrokerInfo = function(){
 	let outputOpenEquity        = document.querySelector("#output-oe");
 	let outputBuyingPower       = document.querySelector("#output-bp");
 	let outputMargin            = document.querySelector("#output-margin");
+	let outputShortStatus		= document.querySelector("#output-short-status");
 	let id                      = parseInt(inputId.value);
 	outputId.value              = id;
 
-	let acc                     = broker.accounts.get(id);
+	let acc						= broker.accounts.get(id);
+	let locatedShares			= acc.locatedShares.get(k_symbol);
+	outputShortStatus.value		= locatedShares != undefined ? locatedShares : "NS";
+	outputShortStatus.style.color = outputShortStatus.value == "NS" ? "red" : "green";
+
 	outputOpenEquity.value      = acc.openEquity.toFixed(2);
 	outputBuyingPower.value     = acc.getBuyingPower().toFixed(2);
 	outputMargin.value          = acc.cashBuyingPower < 0 ? -acc.cashBuyingPower.toFixed(2) : 0.00;
@@ -217,7 +222,6 @@ update = function(){
     let outputOpen = document.getElementById("output-open");
     let outputSpread = document.getElementById("output-spread");
 	let outputSymbol = document.querySelector("#output-symbol");
-	let outputShortStatus = document.querySelector("#output-short-status");
 
     let ask = orderbook.bestAsk();
     let bid = orderbook.bestBid();
@@ -230,9 +234,6 @@ update = function(){
     outputLow.value = orderbook.low == Number.MAX_VALUE ? NaN : orderbook.low.toFixed(2);
     //outputSpread.value = (ask && bid) ? (ask.price - bid.price).toFixed(2) : NaN;
 	outputSymbol.value = k_symbol;
-	let status = broker.shortStatus.get(k_symbol);
-	outputShortStatus.value = status ? status : "NS";
-	outputShortStatus.style.color = status != "NS" ? "red" : "green";
 
     let prefix = last - orderbook.open >= 0 ? "+" : "-";
 

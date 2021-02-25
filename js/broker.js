@@ -405,19 +405,22 @@ class Broker{
             Find an account that has enough shares available and is willing to lend shares.
         */
 
-        let lender = 0;
-        let borrower = this.accounts.get(id);
-
-        for(let acc of this.accounts.values()){
-            if(acc.willingToBorrow){
-                lender = acc;
-                let pos = acc.positions.get(symbol);
+        for(let lender of this.accounts.values()){
+            if(lender.willingToBorrow){
+                let pos = lender.positions.get(symbol);
                 if(pos && pos.sizeIn >= size){
                     /*
                         Move the shares to the borrowing account and prevent the lender from selling more
                         shares than what has been lended out, until the borrower has returned them.
                         Also imburse the lender's defined interest payment to them.
                     */
+                    let borrower = this.accounts.get(id);
+                    if(borrower){
+                        borrower.locatedShares.set(symbol, size);
+                        pos.sharesAvailable -= size;
+                        lender.willingToBorrow = false;
+                        return 1;
+                    }
                 }
             }
         }
