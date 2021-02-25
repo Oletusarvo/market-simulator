@@ -168,10 +168,21 @@ class Broker{
             }
         }
         else{
-            this.messages.push('(' + order.id + ") " + this.convertErrorCode(errcode));
+            let message = '(' + order.id + ") " + this.convertErrorCode(errcode);
+            this.addMessage(message);
         }
 
         return errcode
+    }
+
+    addMessage(message){
+        this.messages.push(message);
+
+        //Limit the number of messages stored.
+        if(this.messages.length == this.maxMessages + 10){
+            this.messages.slice(0, this.messages.length - 10);
+
+        }
     }
 
     registerCancel(id){
