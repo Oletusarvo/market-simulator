@@ -22,7 +22,8 @@ class BrokerAccount{
         this.positionCloseLimit = new Map();
         this.locatedShares      = new Map(); //Contains shares for a symbol that can be shorted.
         this.offeredShares      = new Map(); //Contains shares for a symbol offered to be borrowed.
-        this.borrowInfo         = new Map(); //Contains completed share borrow info. Each party shall have a copy, with the buyer representing the borrower and the seller representing the lender.
+        this.borrowInfo         = new Map(); //Contains completed share borrow info.
+        this.loanInfo           = new Map(); //Contains completed share loan info.
         this.openOrders         = new Map();
         this.positions          = new Map();
     }

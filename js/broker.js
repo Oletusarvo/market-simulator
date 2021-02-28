@@ -461,15 +461,16 @@ class Broker{
                     let borrower = this.accounts.get(id);
                     if(borrower){
                         borrower.locatedShares.set(symbol, size);
-                        
-                        let info = new TransactionInfo();
-                        info.seller = lender.id;
-                        info.buyer = borrower.id;
-                        info.price = 0;
-                        info.size = size;
-                        info.symbol = symbol;
+
+                        let info        = new TransactionInfo();
+                        info.seller     = lender.id;
+                        info.buyer      = borrower.id;
+                        info.price      = 0;
+                        info.size       = size;
+                        info.symbol     = symbol;
 
                         borrower.borrowInfo.set(symbol, info);
+                        lender.loanInfo.set(symbol, info);
                         lender.willingToBorrow = false;
                         break;
                     }
