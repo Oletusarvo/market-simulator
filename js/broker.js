@@ -148,6 +148,7 @@ class Broker{
                     acc.openOrderSide = order.side;
                 }
 
+                //Store the price and size of open orders.
                 let orderMap = acc.openOrders.get(order.symbol);
                 if(!orderMap){
                     acc.openOrders.set(order.symbol, new Map());
@@ -206,6 +207,7 @@ class Broker{
                if(pos.side == BUY){
                     pos.avgPriceIn = (pos.avgPriceIn * pos.sizeIn + info.price * info.size) / (info.size + pos.sizeIn);  
                     buyer.cashBuyingPower -= info.price * info.size;
+                    pos.totalSize += info.size;
                }
 
                /*
@@ -225,7 +227,6 @@ class Broker{
                 }
 
                pos.sizeIn += info.size;
-               pos.totalSize += info.size;
                 pos.calcGain(info.price);
 
                if(pos.sizeIn == 0){
@@ -281,6 +282,7 @@ class Broker{
                 if(pos.side == SHT){
                      pos.avgPriceIn = (pos.avgPriceIn * -pos.sizeIn + info.price * info.size) / (info.size + -pos.sizeIn);
                      seller.cashBuyingPower -= info.price * info.size;
+                     pos.totalSize -= info.size;
                 }
 
                 //An account selling a long position should have their buying power increased.
@@ -296,7 +298,6 @@ class Broker{
                 }
 
                 pos.sizeIn -= info.size;
-                pos.totalSize += info.size;
                 pos.calcGain(info.price);
 
                 if(pos.sizeIn == 0){
@@ -460,6 +461,15 @@ class Broker{
                     let borrower = this.accounts.get(id);
                     if(borrower){
                         borrower.locatedShares.set(symbol, size);
+                        
+                        let info = new TransactionInfo();
+                        info.seller = lender.id;
+                        info.buyer = borrower.id;
+                        info.price = 0;
+                        info.size = size;
+                        info.symbol = symbol;
+
+                        borrower.borrowInfo.set(symbol, info);
                         lender.willingToBorrow = false;
                         break;
                     }
@@ -480,6 +490,7 @@ class Broker{
     returnShares(id, symbol){
         let acc = this.accounts.get(id);
         if(acc){
+        
             acc.locatedShares.delete(symbol);
         }
         
