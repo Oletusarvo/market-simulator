@@ -253,69 +253,11 @@ returnSharesButton.onclick = function(){
     update();
 }
 
-//Menu
-const menuButton      = document.querySelector("#menu-button");
-const createMenu        = document.querySelector("#menu-create");
-let showCreateMenu      = false;
-
-menuButton.onclick = function(){
-    if(!showCreateMenu){
-        showCreateMenu = true;
-        createMenu.classList.add("show");
-        menuButton.classList.add("close");
-    }
-    else{
-        showCreateMenu = false;
-        createMenu.classList.remove("show");
-        menuButton.classList.remove("close");
-    }
-}
-
-const createOkButton = document.querySelector("#create-ok-button");
-const createSymbol  = document.querySelector("#input-create-symbol");
-const createPrice   = document.querySelector("#input-create-price");
-const createSize    = document.querySelector("#input-create-size");
-
-createOkButton.onclick = function(){
-    let symbol = createSymbol.value;
-    let price = parseFloat(createPrice.value).toFixed(2);
-    let size = parseInt(createSize.value).toFixed(2);
-
-    if(price == 0 || price > 10000){
-        console.log("Incorrect price! Must be between 0 and 10001.");
-        return;
-    }
-    else if(size == 0 || size > 10000){
-        console.log("Incorrect size! Must be between 0 and 10001.");
-        return;
-    }
-    
-    if(!exchange.getOrderBook(symbol)){
-        exchange.addOrderBook(symbol);
-        createMenu.classList.remove("show");
-        menuButton.classList.remove("close");
-        showCreateMenu = false;
-        broker.messages.push("Symbol " + symbol + " created!");
-        update();
-    }
-    else{
-        console.log("Symbol " + symbol + " already exists!");
-    }
-}
-
 let inputId = document.getElementById("input-id");
 inputId.oninput = function(){
     updateBrokerInfo();
     updateBankInfo();
 }
-
-/*
-//Sentiment slider
-let inputSentiment = document.getElementById("input_sentiment");
-inputSentiment.oninput = function(){
-    sentimentFrequencyModulator.frequency = inputSentiment.value;
-}
-*/
 
 //Allow setting price to the current ask price by clicking on it.
 let outputAsk = document.getElementById("output-ask");
