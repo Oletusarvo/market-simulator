@@ -5,6 +5,7 @@ html{
 
 body{
 	font-family: tahoma;
+	padding: 0 5vw 0 5vw;
 }
 
 .send-button, .control-button{
@@ -21,15 +22,13 @@ body{
 	'broker-messages broker-messages';
 	*/
 	grid-gap: 5px;
-
-	margin: 0 5vw 0 5vw;
 }
 
 .level2-container{
 	display: grid;
 	grid-template-areas: 
 	'level1 level1 level1'
-	'level2 level2 price-history '
+	'level2 price-history broker-messages'
 	'control control control';
 	grid-gap: 3px;
 }
@@ -70,6 +69,10 @@ body{
 	background: black;
 }
 
+#broker-messages{
+	grid-area: broker-messages;
+}
+
 #level2, #price-history, #broker-messages, #closed-positions, #open-orders, #symbol-list{
 	height: 200px;
 	max-height: 200px;
@@ -96,6 +99,7 @@ body{
 	grid-area: setting;
 	display: flex;
 	flex-flow: column;
+	justify-content: space-between;
 }
 
 #send-buttons button{

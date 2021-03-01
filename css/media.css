@@ -1,12 +1,30 @@
 @media screen and (min-width: 501px) and (max-width: 1000px){
+	#main-grid{
+		grid-template-columns: repeat(2, 1fr) !important;
 
+	}
+
+	#control button{
+		width: 100px;
+	}
+
+	#settings input, #settings select{
+		width: 75px;
+	}
+
+	.level2-container{
+		grid-template-areas:
+		'level1 level1'
+		'level2 price-history'
+		'control control';
+	}
 }
 
 @media screen and (max-width: 500px){
-
 	main{
-		overflow: hidden;
+		overflow: scroll;
 	}
+
 	#main-grid{
 		grid-template-columns: repeat(1, 1fr) !important;
 	}
@@ -18,14 +36,32 @@
 	.input-field{
 		width: 70px;
 	}
+
+	#broker-interface2{
+		display: grid;
+		grid-template-areas: 
+		'account-info account-info'
+		'short-locate short-offer';
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	#broker-interface2 #account-info{
+		grid-area: account-info;
+	}
+
+	#broker-interface2 #menu-short-locate{
+		grid-area: short-locate;
+	}
+
+	#broker-interface2 #menu-offer-shares{
+		grid-area: short-offer;
+	}
 	.level2-container{
 		grid-template-areas:
 		'level1'
-		'level2'
 		'price-history'
+		'level2'
 		'control' !important;
-		margin: 0 !important;
-		padding: 0 !important;
 		width: 100% !important;
 	}
 

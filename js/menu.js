@@ -3,7 +3,7 @@ const menu                  = document.querySelector("#menu");
 const menuButton            = document.querySelector("#menu-button");
 const menuLinks             = document.querySelectorAll(".menu-link");
 const menuLinkOpenPositions = document.querySelector("#menu-open-positions-link");
-const menuLinkClosedPositions = documnet.querySelector("#menu-closed-positions-link");
+const menuLinkClosedPositions = document.querySelector("#menu-closed-positions-link");
 const menuLinkOpenOrders    = document.querySelector("#menu-open-orders-link");
 const menuSymbolListLink    = document.querySelector("#menu-symbol-list-link");
 

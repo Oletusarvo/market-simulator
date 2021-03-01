@@ -37,13 +37,12 @@
 	transform: translate3d(0, -8px, 0) rotate(-45deg);
 }
 
-#menu-create{
+#menu{
 	position: fixed;
 	display: flex;
 	flex-flow: column wrap;
 	top: 0;
 	left: 0;
-	justify-self: center;
 	visibility: hidden;
 	height: 100%;
 	width: 300px;
@@ -58,13 +57,27 @@
 	transition: all 0.1s ease-out;
 }
 
+.menu-field{
+	display:flex;
+	flex-flow: column;
+}
+
+.menu-link{
+	cursor: pointer;
+	font-size: 20px;
+}
+
+.menu-link:hover{
+	color: yellow;
+}
+
 #menu-create-container, #menu-short-locate, #menu-offer-shares{
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 	grid-gap: 2px;
 }
 
-#menu-create.show{
+#menu.show{
 	visibility: visible;
 	transform: translate3d(0, 0, 0);
 }
