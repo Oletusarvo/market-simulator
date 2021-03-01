@@ -5,7 +5,12 @@ const menuLinks             = document.querySelectorAll(".menu-link");
 const menuLinkOpenPositions = document.querySelector("#menu-open-positions-link");
 const menuLinkClosedPositions = document.querySelector("#menu-closed-positions-link");
 const menuLinkOpenOrders    = document.querySelector("#menu-open-orders-link");
-const menuSymbolListLink    = document.querySelector("#menu-symbol-list-link");
+const menuLinkSymbolList    = document.querySelector("#menu-symbol-list-link");
+
+const areaOpenPositions     = document.querySelector("#menu-area-open-positions");
+const areaClosedPositions   = document.querySelector("#menu-area-closed-positions");
+const areaOpenOrders        = document.querySelector("#menu-area-open-orders");
+const areaSymbolList        = document.querySelector("#menu-area-symbol-list");
 
 let showMenu      = false;
 let showOpenPositions = false;
@@ -29,13 +34,44 @@ menuButton.onclick = function(){
 menuLinkOpenPositions.onclick = function(){
     if(!showOpenPositions){
         showOpenPositions = true;
-       // menu.classList.add("show");
-       // menuButton.classList.add("close");
+       areaOpenPositions.classList.add("show");
     }
     else{
         showOpenPositions = false;
-        //menu.classList.remove("show");
-        //menuButton.classList.remove("close");
+        areaOpenPositions.classList.remove("show");
+    }
+}
+
+menuLinkClosedPositions.onclick = function(){
+    if(!showClosedPositions){
+        showClosedPositions = true;
+       areaClosedPositions.classList.add("show");
+    }
+    else{
+        showClosedPositions = false;
+        areaClosedPositions.classList.remove("show");
+    }
+}
+
+menuLinkOpenOrders.onclick = function(){
+    if(!showOpenOrders){
+        showOpenOrders = true;
+       areaOpenOrders.classList.add("show");
+    }
+    else{
+        showOpenOrders = false;
+        areaOpenOrders.classList.remove("show");
+    }
+}
+
+menuLinkSymbolList.onclick = function(){
+    if(!showSymbolList){
+        showSymbolList = true;
+        areaSymbolList.classList.add("show");
+    }
+    else{
+        showSymbolList = false;
+        areaSymbolList.classList.remove("show");
     }
 }
 

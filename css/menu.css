@@ -57,6 +57,18 @@
 	transition: all 0.1s ease-out;
 }
 
+.menu-area{
+	position: absolute;
+	top: 0;
+	left: 300px; /*Same as the menu itself*/
+	visibility: hidden;
+	background: rgba(0, 0, 0, 0.7);
+}
+
+#menu-area-open-positions.show, #menu-area-closed-positions.show, #menu-area-open-orders.show, #menu-area-symbol-list.show{
+	visibility: visible;
+}
+
 .menu-field{
 	display:flex;
 	flex-flow: column;
