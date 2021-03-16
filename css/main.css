@@ -143,8 +143,8 @@ body{
 	width: 33.33%;
 }
 
-#field-position-info, #field-closed-positions{
-	width: 50%;
+#field-position-info, #field-closed-positions, #field-open-orders{
+	width: 33.33%;
 	overflow-y: scroll;
 }
 
