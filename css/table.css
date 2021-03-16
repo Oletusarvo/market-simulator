@@ -1,9 +1,12 @@
 #table-position-info, #table-closed-positions, #table-open-orders{
 	font-size: 13px;
+	width: 100%;
+	text-align: center;
 }
 
 #table-broker-messages{
 	font-size: 0.8rem;
+	width: 100%;
 }
 
 #table-broker-messages td{

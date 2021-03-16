@@ -24,7 +24,8 @@ body{
 	'level1 level1 level1'
 	'level2 price-history broker-messages'
 	'control control control'
-	'broker-interface broker-interface broker-interface';
+	'broker-interface1 broker-interface1 broker-interface1'
+	'broker-interface2 broker-interface2 broker-interface2';
 	grid-gap: 3px;
 }
 
@@ -57,6 +58,8 @@ body{
 
 #level2{
 	grid-area: level2;
+	height: 200px;
+	
 }
 
 #price-history{
@@ -66,9 +69,11 @@ body{
 
 #broker-messages{
 	grid-area: broker-messages;
+	display: flex;
+	height: 200px;
 }
 
-#level2, #price-history, #broker-messages, #closed-positions, #open-orders, #symbol-list{
+#level2, #price-history, #closed-positions, #open-orders, #symbol-list{
 	height: 200px;
 	max-height: 200px;
 	overflow-y: scroll;
@@ -117,22 +122,40 @@ body{
 	background: blue;
 }
 
+#broker-interface1{
+	grid-area: broker-interface1;
+	display: flex;
+	flex-flow: row;
+	height: 200px;
+}
+
 #broker-interface2{
-	grid-area: broker-interface;
-	display: grid;
-	grid-template-columns: repeat(3, 1fr);
-	grid-column: 1;
-	grid-row: 2;
+	grid-area: broker-interface2;
+	display: flex;
+	flex-flow: row;
 }
 
 #account-info{
 	height: 200px;
 }
 
+#field-account-info, #field-short-locate, #field-offer-shares{
+	width: 33.33%;
+}
+
+#field-position-info, #field-closed-positions{
+	width: 50%;
+	overflow-y: scroll;
+}
+
+#field-broker-messages{
+	overflow-y: scroll;
+	width: 100%;
+}
+
 #field-account-info{
 	display: flex;
-	flex-flow: column wrap;
-	height: 90%;
+	flex-flow: column;
 }
 
 #position-info{
