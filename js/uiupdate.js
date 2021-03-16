@@ -243,7 +243,9 @@ update = function(){
     outputOpen.value = orderbook.open.toFixed(2);
     outputGain.style.color = prefix == "+" ? "yellowgreen" : "red";
 
-    marketmaker.createMarket(k_symbol);
+	if(mmEnabled)
+    	marketmaker.createMarket(k_symbol);
+		
     orderbook.drawTable(table);
     orderbook.drawPriceHistory(ptable);
 	broker.drawMessages(berrtable);

@@ -15,6 +15,7 @@ let exchange    = new Exchange(k_ename);
 
 let broker      = new Broker("Brokkoli");
 let bank        = new Bank();
+var mmEnabled   = false;
 
 
 //exchange.marketmaker = marketmaker;
@@ -201,6 +202,19 @@ sab.onclick = function(){
     }
     else{
         sab.innerHTML = "Run AI";
+    }
+}
+
+//Run Market Maker button
+let rmb = document.querySelector("#mmaker-button");
+rmb.onclick = function(){
+    if(mmEnabled == true){
+        mmEnabled = false;
+        rmb.innerHTML = "Enable Market Maker"
+    }
+    else{
+        mmEnabled = true;
+        rmb.innerHTML = "Disable Market Maker";
     }
 }
 

@@ -9,7 +9,6 @@ body{
 }
 
 .send-button, .control-button{
-	width: 5rem;
 	font-weight: bold;
 }
 
@@ -104,6 +103,7 @@ body{
 
 #send-buttons button{
 	color: white;
+	width: calc(100% / 5);
 }
 
 #buy-button{

@@ -450,7 +450,7 @@ class Broker{
 
         let result = 0;
         for(let lender of this.accounts.values()){
-            if(lender.willingToBorrow){
+            if(lender.id != id && lender.willingToBorrow){
                 let offeredShares = lender.offeredShares.get(symbol);
                 if(offeredShares && offeredShares >= size){
                     /*
