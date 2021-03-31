@@ -25,6 +25,7 @@ class Broker{
         //Used to reference possible error messages and display them.
         this.messages = [];
         this.nextOrderId = 0;
+        this.allowNakedShort = true;
     }
 
     addAccount(id, equity){
@@ -47,7 +48,7 @@ class Broker{
 
         if(acc){
             //Disalow shorting unless there are located shares available.
-            if(order.side == SHT){
+            if(!this.allowNakedShorts && order.side == SHT){
                 let locatedShares = acc.locatedShares.get(order.symbol);
                 if(locatedShares == undefined){
                     return ERR_LOCATED_SHARES;
@@ -62,7 +63,7 @@ class Broker{
             if((order.side == SHT || order.side == BUY) && (newOpenEquity > acc.getBuyingPower()))
                 return ERR_BUYINGPOWER;
             
-            //Disalow orders out on opposite sides at the same time.
+            //Disallow orders out on opposite sides at the same time.
             if((acc.openOrderSide == SHT && order.side == BUY) || (acc.openOrderSide == BUY && order.side == SHT)){
                 return ERR_OPPOSITE_POSITION;
             }

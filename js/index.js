@@ -17,7 +17,6 @@ let broker      = new Broker("Brokkoli");
 let bank        = new Bank();
 var mmEnabled   = false;
 
-
 //exchange.marketmaker = marketmaker;
 
 exchange.addOrderBook(k_symbol);
