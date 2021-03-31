@@ -48,7 +48,7 @@ class Broker{
 
         if(acc){
             //Disalow shorting unless there are located shares available.
-            if(!this.allowNakedShorts && order.side == SHT){
+            if(!this.allowNakedShort && order.side == SHT){
                 let locatedShares = acc.locatedShares.get(order.symbol);
                 if(locatedShares == undefined){
                     return ERR_LOCATED_SHARES;
