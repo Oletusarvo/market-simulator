@@ -13,7 +13,7 @@ updateBrokerInfo = function(){
 
 	let acc						= broker.accounts.get(id);
 	let locatedShares			= acc.locatedShares.get(k_symbol);
-	outputShortStatus.value		= locatedShares != undefined ? "S" : "NS";
+	outputShortStatus.value		= locatedShares != undefined || broker.allowNakedShort ? "S" : "NS";
 	outputSharesLocated.value	= locatedShares != undefined ? locatedShares : 0;
 	outputShortStatus.style.color = outputShortStatus.value == "NS" ? "red" : "green";
 

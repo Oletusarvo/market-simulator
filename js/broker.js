@@ -16,6 +16,8 @@ const ERR_GREATER_THAN_POSITION = 14;
 const ERR_LOCATED_SHARES        = 15;
 const ERR_LOCATED_SHARES_NUM    = 16;
 const ERR_GREATER_THAN_CLOSE_LIMIT = 17;
+const ERR_ACCOUNT 				= 18;
+const ERR_SIZE 					= 19;
 
 class Broker{
     constructor(name){
@@ -26,6 +28,7 @@ class Broker{
         this.messages = [];
         this.nextOrderId = 0;
         this.allowNakedShort = true;
+		this.infiniteShortSupply = false;
     }
 
     addAccount(id, equity){
@@ -418,9 +421,10 @@ class Broker{
                 return("Unknown error. Code: " + errcode);
         }
     }
-
+	
     offer(id, symbol, size){
         let acc = this.accounts.get(id);
+		let result = 0;
         if(acc){
             let pos = acc.positions.get(symbol);
             if(pos){
@@ -430,60 +434,73 @@ class Broker{
                     acc.positionCloseLimit.set(symbol, pos.size - size);
                 }
                 else{
-                    return 3;
+                    result = ERR_SIZE;
                 }
             }
             else{
-                return 2;
+                result = ERR_NO_POSITION;
             }
         }
         else{
-            return 1;
+            result =  ERR_ACCOUNT;
         }
 
-        return 0;
+        return result;
     }
-
+	
     locate(id, symbol, size){
         /*
             Find an account that has enough shares available and is willing to lend shares.
         */
-
+		
         let result = 0;
-        for(let lender of this.accounts.values()){
-            if(lender.id != id && lender.willingToBorrow){
-                let offeredShares = lender.offeredShares.get(symbol);
-                if(offeredShares && offeredShares >= size){
-                    /*
-                        Move the shares to the borrowing account and prevent the lender from selling more
-                        shares than what has been lended out, until the borrower has returned them.
-                        Also imburse the lender's defined interest payment to them.
-                    */
-                    let borrower = this.accounts.get(id);
-                    if(borrower){
-                        borrower.locatedShares.set(symbol, size);
+		
+		if(this.infiniteShortSupply){
+			let borrower = this.accounts.get(id);
+			if(borrower){
+				borrower.locatedShares.set(symbol, size);
+			}
+		}
+		else{
+			for(let lender of this.accounts.values()){
+				if(lender.id != id/*The account is not the one wanting to borrow*/ && lender.willingToBorrow){
+					let offeredShares = lender.offeredShares.get(symbol);
+					if(offeredShares && offeredShares >= size){
+						/*
+							Move the shares to the borrowing account and prevent the lender from selling more
+							shares than what has been lended out, until the borrower has returned them.
+							Also imburse the lender's defined interest payment to them.
+						*/
+						let borrower = this.accounts.get(id);
+						if(borrower){
+							borrower.locatedShares.set(symbol, size);
 
-                        let info        = new TransactionInfo();
-                        info.seller     = lender.id;
-                        info.buyer      = borrower.id;
-                        info.price      = 0;
-                        info.size       = size;
-                        info.symbol     = symbol;
+							let info        = new TransactionInfo();
+							info.seller     = lender.id;
+							info.buyer      = borrower.id;
+							info.price      = 0;
+							info.size       = size;
+							info.symbol     = symbol;
 
-                        borrower.borrowInfo.set(symbol, info);
-                        lender.loanInfo.set(symbol, info);
-                        lender.willingToBorrow = false;
-                        break;
-                    }
-                }
-                else{
-                    result = 2;
-                }
-            }
-            else{
-                result = 1;
-            }
-        }
+							borrower.borrowInfo.set(symbol, info);
+							lender.loanInfo.set(symbol, info);
+							lender.willingToBorrow = false;
+							break;
+						}
+						else{
+							
+						}
+					}
+					else{
+						result = 2;
+					}
+				}
+				else{
+					result = 1;
+				}
+			}
+		}
+       
 
         //Return non-zero if shares could not be located.
         return result;
@@ -492,9 +509,26 @@ class Broker{
     returnShares(id, symbol){
         let acc = this.accounts.get(id);
         if(acc){
-        
-            acc.locatedShares.delete(symbol);
+			
+			if(acc.openEquity != 0){
+				return 3;
+			}
+			else{
+				const numshares = acc.locatedShares.size;
+			
+				if(numshares != 0){
+					acc.locatedShares.delete(symbol);
+				}
+				else{
+					return 1;
+				}
+			}	
         }
+		else{
+			return 2;
+		}
+		
+		return 0;
         
     }
 }

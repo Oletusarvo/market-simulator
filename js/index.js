@@ -17,6 +17,9 @@ let broker      = new Broker("Brokkoli");
 let bank        = new Bank();
 var mmEnabled   = false;
 
+broker.allowNakedShort = false;
+broker.infiniteShortSupply = true;
+
 //exchange.marketmaker = marketmaker;
 
 exchange.addOrderBook(k_symbol);
@@ -92,13 +95,18 @@ inputSymbol.onkeydown = function(key){
         if(ob){
             k_symbol = symbol;
             orderbook = ob;
-            update();
-            console.log("Symbol set to " + symbol);
+			
+			let message = "Symbol set to " + symbol;
+			
+			broker.addMessage(message)
         } 
         else{
-            console.log(symbol + " does not exist!");
+			let message = "Symbol " + symbol + " does not exist!";
+			broker.addMessage(message);
         }
     }
+	
+	update();
 }
 
 //Buy button
@@ -228,19 +236,32 @@ shortOfferOkButton.onclick = function(){
     let symbol = shortOfferSymbol.value;
     let size = shortOfferSize.value;
     let result = broker.offer(id, symbol, size);
-
-    if(result){
-        broker.messages.push("Error offering shares for borrow!");
-    }
-    else{
-        console.log("Offered shares for borrow!" + size);
-    }
+	
+	switch(result){
+		case broker.ERR_ACCOUNT:
+		broker.addMessage("Account with id " + id + " does not exist!");
+		break;
+		
+		case ERR_NO_POSITION:
+		broker.addMessage("(" + id + ") no position for symbol " + symbol + "!");
+		break;
+		
+		case broker.ERR_SIZE:
+		broker.addMessage("(" + id + ") not enough shares to borrow!");
+		break;
+		
+		default:
+		broker.addMessage("(" + id + ") offered " + size + "shares for borrow.");
+	}
+	
+	update();
 }
 
 //Short locate
 const shortLocateSymbol     = document.querySelector("#input-locate-symbol");
 const shortLocateSize       = document.querySelector("#input-locate-size");
 const shortLocateOkButton   = document.querySelector("#locate-ok-button");
+
 shortLocateOkButton.onclick = function(){
     let symbol = shortLocateSymbol.value;
     let size = parseInt(shortLocateSize.value);
@@ -262,7 +283,25 @@ let returnSharesButton = document.querySelector("#return-shares-button");
 returnSharesButton.onclick = function(){
     let id = parseInt(document.querySelector("#input-id").value);
     let symbol = document.querySelector("#input-locate-symbol").value;
-    broker.returnShares(id, symbol);
+    let result = broker.returnShares(id, symbol);
+	
+	switch(result){
+		case 1:
+		broker.addMessage("(" + id + ") no shares to return!");
+		break;
+		
+		case 2:
+		broker.addMessage("Account does not exist!");
+		break;
+		
+		case 3:
+		broker.addMessage("(" + id + ") Cannot return shares while there is open equity!");
+		break;
+		
+		default:
+		broker.addMessage("(" + id + ") returned borrowed shares.");
+	}
+	
     update();
 }
 

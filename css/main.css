@@ -92,6 +92,8 @@ body{
 
 #control-buttons{
 	grid-area: control;
+	display: flex;
+	justify-content: left;
 }
 
 #settings{

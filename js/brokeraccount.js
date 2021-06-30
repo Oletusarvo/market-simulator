@@ -18,7 +18,7 @@ class BrokerAccount{
         this.margin = 0;
         this.setBpMultiplier();
 
-        this.willingToBorrow = false;
+        this.willingToBorrow 	= false;
         this.positionCloseLimit = new Map();
         this.locatedShares      = new Map(); //Contains shares for a symbol that can be shorted.
         this.offeredShares      = new Map(); //Contains shares for a symbol offered to be borrowed.
