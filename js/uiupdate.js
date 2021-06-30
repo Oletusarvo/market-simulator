@@ -8,6 +8,7 @@ updateBrokerInfo = function(){
 	let outputMargin            = document.querySelector("#output-margin");
 	let outputShortStatus		= document.querySelector("#output-short-status");
 	let outputSharesLocated		= document.querySelector("#output-shares-located");
+
 	let id                      = parseInt(inputId.value);
 	outputId.value              = id;
 
@@ -172,7 +173,8 @@ updateBrokerInfo = function(){
 			tablePos++;
 		}
 	}
-
+	
+	/*
 	//Draw symbol list
 	let symbolTable = document.querySelector("#table-symbol-list");
 	let orderbooks = exchange.orderbooks;
@@ -199,7 +201,7 @@ updateBrokerInfo = function(){
 			symbolTable.rows[tablePos].cells[2].innerHTML = ((last - ob.open) / ob.open * 100).toFixed(2);
 			tablePos++;
 		}
-	}
+	}*/
 
 	
 }
