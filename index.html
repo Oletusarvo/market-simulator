@@ -22,66 +22,24 @@
 			<!--Menu-->
 			<div id="menu">
 				<fieldset class="menu-field">
-					<legend>Broker Info</legend>
-					<span class="menu-link" id="menu-open-positions-link">Open Positions</span>
-					<span class="menu-link" id="menu-closed-positions-link">Closed Positions</span>
-					<span class="menu-link" id="menu-open-orders-link">Open Orders</span>
-					<span class="menu-link" id="menu-symbol-list-link">Symbol List</span>
-				</fieldset>
-				<!--
-				<div class="menu-area" id="menu-area-open-positions">
-					<fieldset>
-						<legend>Open Positions</legend>
-						<table id="table-position-info">
-							<th>Symbol</th>
-							<th>Side</th>
-							<th>Size</th>
-							<th>Price</th>
-							<th>Avg Price</th>
-							<th>Realized</th>
-							<th>Unrealized</th>
-							<th>Gain</th>
-						</table>
-					</fieldset>
-				</div>
-			
-				<div class="menu-area" id="menu-area-closed-positions">
-					<fieldset>
-						<legend>Closed Positions</legend>
-						<table id="table-closed-positions">
-							<th>Symbol</th>
-							<th>Side</th>
-							<th>Size</th>
-							<th>Price In</th>
-							<th>Price Out</th>
-							<th>Realized</th>
-							<th>Gain</th>
-						</table>
-					</fieldset>
-				</div>
-				-->
-				<div class="menu-area" id="menu-area-open-orders">
-					<fieldset>
-						<legend>Open Orders</legend>
-						<table id="table-open-orders">
-							<th>Symbol</th>
-							<th>Side</th>
-							<th>Size</th>
-							<th>Price</th>
-						</table>
-					</fieldset>
-				</div>
+					<legend>Settings</legend>
 
-				<div class="menu-area" id="menu-area-symbol-list">
-					<fieldset>
-						<legend>Symbol List</legend>
-						<table id="table-symbol-list">
-							<th>Symbol</th>
-							<th>Last Price</th>
-							<th>Gain</th>
-						</table>
+					<fieldset class="menu-field">
+						<legend>Broker</legend>
+						<label>Allow naked shorting</label>
+						<select id="input-naked-short">
+							<option>True</option>
+							<option>False</option>
+						</select>
+
+						<label id="label-infinite-short-supply">Infinite short supply</label>
+						<select id="input-is-supply">
+							<option>True</option>
+							<option>False</option>
+						</select>
 					</fieldset>
-				</div>
+					
+				</fieldset>
 				
 			</div>
 		</header>

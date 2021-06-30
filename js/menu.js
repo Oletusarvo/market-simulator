@@ -1,11 +1,23 @@
 //Menu
 const menu                  = document.querySelector("#menu");
 const menuButton            = document.querySelector("#menu-button");
-const menuLinks             = document.querySelectorAll(".menu-link");
-const menuLinkOpenPositions = document.querySelector("#menu-open-positions-link");
-const menuLinkClosedPositions = document.querySelector("#menu-closed-positions-link");
-const menuLinkOpenOrders    = document.querySelector("#menu-open-orders-link");
-const menuLinkSymbolList    = document.querySelector("#menu-symbol-list-link");
+const settingAllowNakedShort= document.querySelector("#input-naked-short");
+const settingInfiniteShortSupply = document.querySelector("#input-is-supply");
+
+settingAllowNakedShort.addEventListener("change", nakedFun);
+settingInfiniteShortSupply.addEventListener("change", infiniteFun);
+
+function nakedFun(){
+    const setting = settingAllowNakedShort.value;
+    broker.allowNakedShort = setting == "True";
+    update();
+}
+
+function infiniteFun(){
+    const setting = settingInfiniteShortSupply.value;
+    broker.infiniteShortSupply = setting == "True";
+    update();
+}
 
 const areaOpenPositions     = document.querySelector("#menu-area-open-positions");
 const areaClosedPositions   = document.querySelector("#menu-area-closed-positions");
@@ -28,50 +40,6 @@ menuButton.onclick = function(){
         showMenu = false;
         menu.classList.remove("show");
         menuButton.classList.remove("close");
-    }
-}
-
-menuLinkOpenPositions.onclick = function(){
-    if(!showOpenPositions){
-        showOpenPositions = true;
-       areaOpenPositions.classList.add("show");
-    }
-    else{
-        showOpenPositions = false;
-        areaOpenPositions.classList.remove("show");
-    }
-}
-
-menuLinkClosedPositions.onclick = function(){
-    if(!showClosedPositions){
-        showClosedPositions = true;
-       areaClosedPositions.classList.add("show");
-    }
-    else{
-        showClosedPositions = false;
-        areaClosedPositions.classList.remove("show");
-    }
-}
-
-menuLinkOpenOrders.onclick = function(){
-    if(!showOpenOrders){
-        showOpenOrders = true;
-       areaOpenOrders.classList.add("show");
-    }
-    else{
-        showOpenOrders = false;
-        areaOpenOrders.classList.remove("show");
-    }
-}
-
-menuLinkSymbolList.onclick = function(){
-    if(!showSymbolList){
-        showSymbolList = true;
-        areaSymbolList.classList.add("show");
-    }
-    else{
-        showSymbolList = false;
-        areaSymbolList.classList.remove("show");
     }
 }
 
