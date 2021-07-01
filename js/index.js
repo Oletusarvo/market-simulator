@@ -18,7 +18,7 @@ let bank        = new Bank();
 var mmEnabled   = false;
 
 broker.allowNakedShort = false;
-broker.infiniteShortSupply = true;
+broker.infiniteShortSupply = false;
 
 //exchange.marketmaker = marketmaker;
 
@@ -82,8 +82,6 @@ setInterval(function(){
 }, 150);
 
 //Create a symbol
-
-
 //Symbol select
 const inputSymbol = document.querySelector("#input-symbol");
 inputSymbol.onkeydown = function(key){
@@ -98,7 +96,10 @@ inputSymbol.onkeydown = function(key){
 			
 			let message = "Symbol set to " + symbol;
 			
-			broker.addMessage(message)
+			broker.addMessage(message);
+
+            const offerShares = document.querySelector("#input-offer-symbol");
+            offerShares.value = symbol;
         } 
         else{
 			let message = "Symbol " + symbol + " does not exist!";
