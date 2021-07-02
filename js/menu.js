@@ -43,6 +43,42 @@ menuButton.onclick = function(){
     }
 }
 
+const menuButtonOkNumBots = document.querySelector("#button-ok-num-bots");
+menuButtonOkNumBots.onclick = function(){
+	const inputNumBots = document.querySelector("#input-num-bots");
+	const num = inputNumBots.value;
+	
+	broker.addMessage("Bot number set to " + num);
+	update();
+}
+
+let rmb = document.querySelector("#input-enable-mm");
+rmb.addEventListener("change", toggleMM);
+
+function toggleMM(){
+	mmEnabled = rmb.value == "True";
+	
+	if(mmEnabled){
+		broker.addMessage("Market maker enabled.");
+	}
+	else{
+		broker.addMessage("Market maker disabled.");
+	}
+	
+	update();
+}
+
+const buttonOkAddSymbol = document.querySelector("#button-ok-add-symbol");
+buttonOkAddSymbol.onclick = function(){
+	const symbol = document.querySelector("#input-add-symbol").value;
+	const price = parseFloat(document.querySelector("#input-add-symbol-price").value);
+	
+	exchange.addOrderBook(symbol);
+	
+	broker.addMessage("Added symbol \'" + symbol + "\'.");
+	update();
+}
+
 /*
 Reintroduce this later.
 const createOkButton = document.querySelector("#create-ok-button");

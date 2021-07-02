@@ -216,23 +216,6 @@ sab.onclick = function(){
     }
 }
 
-//Run Market Maker button
-let rmb = document.querySelector("#input-enable-mm");
-rmb.addEventListener("change", toggleMM);
-
-function toggleMM(){
-	mmEnabled = rmb.value == "True";
-	
-	if(mmEnabled){
-		broker.addMessage("Market maker enabled.");
-	}
-	else{
-		broker.addMessage("Market maker disabled.");
-	}
-	
-	update();
-}
-
 //Offer shares
 const shortOfferSymbol      = document.querySelector("#input-offer-symbol");
 const shortOfferSize        = document.querySelector("#input-offer-size");
