@@ -11,7 +11,7 @@ function nakedFun(){
     const setting = settingAllowNakedShort.value;
     broker.allowNakedShort = setting == "True";
 	
-	if(setting){
+	if(broker.allowNakedShort){
 		broker.addMessage("Naked shorting enabled.");
 	}
 	else{
@@ -24,7 +24,7 @@ function infiniteFun(){
     const setting = settingInfiniteShortSupply.value;
     broker.infiniteShortSupply = setting == "True";
 	
-	if(setting){
+	if(broker.infiniteSHortSupply){
 		broker.addMessage("Infinite short supply enabled.");
 	}
 	else{
