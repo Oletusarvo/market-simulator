@@ -94,15 +94,18 @@ inputSymbol.onkeydown = function(key){
             k_symbol = symbol;
             orderbook = ob;
 			
-			let message = "Symbol set to " + symbol;
+			let message = "Symbol set to \'" + symbol + "\'";
 			
 			broker.addMessage(message);
 
             const offerShares = document.querySelector("#input-offer-symbol");
             offerShares.value = symbol;
+			
+			const locateShares = document.querySelector("#input-locate-symbol");
+			locateShares.value = symbol;
         } 
         else{
-			let message = "Symbol " + symbol + " does not exist!";
+			let message = "Symbol \'" + symbol + "' does not exist!";
 			broker.addMessage(message);
         }
     }
@@ -214,16 +217,20 @@ sab.onclick = function(){
 }
 
 //Run Market Maker button
-let rmb = document.querySelector("#mmaker-button");
-rmb.onclick = function(){
-    if(mmEnabled == true){
-        mmEnabled = false;
-        rmb.innerHTML = "Enable Market Maker"
-    }
-    else{
-        mmEnabled = true;
-        rmb.innerHTML = "Disable Market Maker";
-    }
+let rmb = document.querySelector("#input-enable-mm");
+rmb.addEventListener("change", toggleMM);
+
+function toggleMM(){
+	mmEnabled = rmb.value == "True";
+	
+	if(mmEnabled){
+		broker.addMessage("Market maker enabled.");
+	}
+	else{
+		broker.addMessage("Market maker disabled.");
+	}
+	
+	update();
 }
 
 //Offer shares

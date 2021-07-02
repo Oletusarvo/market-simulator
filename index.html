@@ -21,25 +21,56 @@
 
 			<!--Menu-->
 			<div id="menu">
-				<fieldset class="menu-field">
-					<legend>Settings</legend>
 
 					<fieldset class="menu-field">
-						<legend>Broker</legend>
-						<label>Allow naked shorting</label>
-						<select id="input-naked-short">
-							<option>True</option>
-							<option>False</option>
-						</select>
-
-						<label id="label-infinite-short-supply">Infinite short supply</label>
-						<select id="input-is-supply">
-							<option>True</option>
-							<option>False</option>
-						</select>
+						<legend>Broker Settings</legend>
+						<fieldset class="menu-field">
+							<legend>Allow naked shorting</legend>
+							<select id="input-naked-short">
+								<option>True</option>
+								<option>False</option>
+							</select>
+						
+						</fieldset>
+						
+						<fieldset class="menu-field">
+							<legend>Infinite short supply</legend>
+							<select id="input-is-supply">
+								<option>True</option>
+								<option>False</option>
+							</select>
+						</fieldset>
+						
+						<fieldset class="menu-field">
+							<legend>Num bots</legend>
+							<input id="input-num-bots">
+							<button id="button-ok-num-bots">OK</button>
+						</fieldset>
+						
 					</fieldset>
 					
-				</fieldset>
+					<fieldset class="menu-field">
+						<legend>Exchange Settings</legend>
+						
+						<fieldset class="menu-field">
+							<legend>Add symbol</legend>
+							<label>Name</label>
+							<input id="input-add-symbol">
+							<label>Price</label>
+							<input id="input-add-symbol-price">
+							<button id="button-ok-add-symbol">OK</button>
+						</fieldset>
+						
+						<fieldset class="menu-field">
+							<legend>Enable market maker</legend>
+							<select id="input-enable-mm">
+								<option>True</option>
+								<option>False</option>
+							</select>
+						</fieldset>
+					</fieldset>
+					
+				
 				
 			</div>
 		</header>
@@ -118,7 +149,6 @@
 								<button class="control-button" id="half-pos-button" type="button">Half Pos</button>
 								<button class="control-button" id="cancel-button" type="button">Cancel All</button>
 								<button class="control-button" id="run-button" type="button">Run AI</button>
-								<button class="control-button" id="mmaker-button" type=button>Enable Market Maker</button>
 							</fieldset>
 						</div>
 					</div>
