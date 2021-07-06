@@ -174,6 +174,10 @@ class Broker{
         }
         else{
             let message = new Message(this.convertErrorCode(errcode), order.id);
+			
+			if(errcode == ERR_ORDER_PRICE){
+				message.message += " (" + order.price + ").";
+			}
             this.addMessage(message);
         }
 
