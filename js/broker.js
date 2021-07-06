@@ -173,7 +173,7 @@ class Broker{
             }
         }
         else{
-            let message = '(' + order.id + ") " + this.convertErrorCode(errcode);
+            let message = new Message(this.convertErrorCode(errcode), order.id);
             this.addMessage(message);
         }
 
@@ -365,7 +365,8 @@ class Broker{
         let tablePos = 0;
         for(let i = this.messages.length - 1; i >= end; --i){
             let message = this.messages[i];
-            table.rows[tablePos++].cells[0].innerHTML = message;
+			
+            table.rows[tablePos++].cells[0].innerHTML = "(" + message.from + ") " + message.message;
         }
 
     }

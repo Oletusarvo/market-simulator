@@ -79,7 +79,7 @@ setInterval(function(){
         update(); 
     }
        
-}, 150);
+}, 34);
 
 //Create a symbol
 //Symbol select
@@ -94,9 +94,9 @@ inputSymbol.onkeydown = function(key){
             k_symbol = symbol;
             orderbook = ob;
 			
-			let message = "Symbol set to \'" + symbol + "\'";
+			let message = new Message("Symbol set to \'" + symbol + "\'", "Broker");
 			
-			broker.addMessage("(Broker)" + message);
+			broker.addMessage(message);
 
             const offerShares = document.querySelector("#input-offer-symbol");
             offerShares.value = symbol;
@@ -105,8 +105,8 @@ inputSymbol.onkeydown = function(key){
 			locateShares.value = symbol;
         } 
         else{
-			let message = "Symbol \'" + symbol + "' does not exist!";
-			broker.addMessage("(Broker)" + message);
+			let message = new Message("Symbol \'" + symbol + "' does not exist!", "Broker");
+			broker.addMessage(message);
         }
     }
 	
@@ -190,8 +190,8 @@ buttonHalfPos.onclick = function(){
         size.value = Math.floor(pos.sizeIn / 2);
     }
     else{
-       const message = "No open position for " + k_symbol + " id: " + id;
-	   broker.addMessage("(Broker) " + message);
+       let message = new Message("No open position for " + k_symbol, id);
+	   broker.addMessage(message);
 	   update();
     }
 	
@@ -233,20 +233,31 @@ shortOfferOkButton.onclick = function(){
     let result = broker.offer(id, symbol, size);
 	
 	switch(result){
-		case broker.ERR_ACCOUNT:
-		broker.addMessage("(Broker) Account with id " + id + " does not exist!");
+		case broker.ERR_ACCOUNT:{
+			let message = new Message("Account with id " + id + " does not exist!", "Broker");
+			broker.addMessage(message);
+		}
 		break;
 		
-		case ERR_NO_POSITION:
-		broker.addMessage("(" + id + ") no position for symbol " + symbol + "!");
+		case ERR_NO_POSITION:{
+			let message = new Message("No position for symbol " + symbol + "!", toString(id))
+			broker.addMessage(message);
+		}
+		
 		break;
 		
-		case broker.ERR_SIZE:
-		broker.addMessage("(" + id + ") not enough shares to borrow!");
+		case broker.ERR_SIZE:{
+			let message = new Message("Not enough shares to borrow!", toString(id));
+			broker.addMessage(message);
+		}
+		
 		break;
 		
-		default:
-		broker.addMessage("(" + id + ") offered " + size + "shares for borrow.");
+		default:{
+			let message = new Message("Offered shares for borrow.", toString(id));
+			broker.addMessage(message);
+		}
+		
 	}
 	
 	update();
@@ -264,10 +275,12 @@ shortLocateOkButton.onclick = function(){
     let result = broker.locate(id, symbol, size);
 
     if(!result){
-       broker.addMessage("(Broker) Located " + size + " shares!");
+		let message = new Message("Located " + size + " shares!", "Broker");
+       broker.addMessage(message);
     }
     else{
-        broker.addMessage("(Broker) Could not locate shares to borrow!");
+		let message = new Message("Could not locate shares to borrow!", "Broker");
+        broker.addMessage(message);
     }
 
     update();
@@ -279,22 +292,31 @@ returnSharesButton.onclick = function(){
     let id = parseInt(document.querySelector("#input-id").value);
     let symbol = document.querySelector("#input-locate-symbol").value;
     let result = broker.returnShares(id, symbol);
+	let msg = new Message();
 	
 	switch(result){
 		case 1:
-		broker.addMessage("(" + id + ") no shares to return!");
+		msg.message = "No shares to return!";
+		msg.from = id;
+		broker.addMessage(msg);
 		break;
 		
 		case 2:
-		broker.addMessage("(Broker) Account does not exist!");
+		msg.message = "Account does not exist!";
+		msg.from = "Broker";
+		broker.addMessage(msg);
 		break;
 		
 		case 3:
-		broker.addMessage("(" + id + ") Cannot return shares while there is open equity!");
+		msg.message = "Cannot return shares while there is open equity!";
+		msg.from = id;
+		broker.addMessage(msg);
 		break;
 		
 		default:
-		broker.addMessage("(" + id + ") returned borrowed shares.");
+		msg.message = "Returned borrowed shares.";
+		msg.from = id;
+		broker.addMessage(msg);
 	}
 	
     update();

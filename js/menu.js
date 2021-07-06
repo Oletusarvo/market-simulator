@@ -12,10 +12,12 @@ function nakedFun(){
     broker.allowNakedShort = setting == "True";
 	
 	if(broker.allowNakedShort){
-		broker.addMessage("(Broker) Naked shorting enabled.");
+		let message = new Message("Naked shorting enabled.", "Broker");
+		broker.addMessage(message);
 	}
 	else{
-		broker.addMessage("(Broker) Naked shorting disabled.");
+		let message = new Message("Naked shorting disabled.", "Broker");
+		broker.addMessage(message);
 	}
     update();
 }
@@ -25,10 +27,12 @@ function infiniteFun(){
     broker.infiniteShortSupply = setting == "True";
 	
 	if(broker.infiniteShortSupply){
-		broker.addMessage("(Broker) Infinite short supply enabled.");
+		let message = new Message("Infinite short supply enabled", "Broker");
+		broker.addMessage(message);
 	}
 	else{
-		broker.addMessage("(Broker) Infinite short supply disabled.");
+		let message = new Message("Infinite short supply disabled", "Broker");
+		broker.addMessage(message);
 	}
     update();
 }
@@ -62,7 +66,8 @@ menuButtonOkNumBots.onclick = function(){
 	const inputNumBots = document.querySelector("#input-num-bots");
 	const num = inputNumBots.value;
 	
-	broker.addMessage("(Broker) Bot number set to " + num);
+	let message = new Message("Bot number set to \'" + num + "\'", "Broker");
+	broker.addMessage(message);
 	update();
 }
 
@@ -73,10 +78,12 @@ function toggleMM(){
 	mmEnabled = rmb.value == "True";
 	
 	if(mmEnabled){
-		broker.addMessage("(Exchange) Market maker enabled.");
+		let message = new Message("Market maker enabled.", "Exchange");
+		broker.addMessage(message);
 	}
 	else{
-		broker.addMessage("(Exchange) Market maker disabled.");
+		let message = new Message("Market maker disabled.", "Exchange");
+		broker.addMessage(message);
 	}
 	
 	update();
@@ -89,10 +96,12 @@ buttonOkAddSymbol.onclick = function(){
 	
 	if(symbol != ""){
 		exchange.addOrderBook(symbol);
-		broker.addMessage("(Exchange) Added symbol \'" + symbol + "\'.");
+		let message = new Message("Added symbol \'" + symbol + "\'.", "Exchange");
+		broker.addMessage(message);
 	}
 	else{
-		broker.addMessage("(Exchange) Cannot have an empty string as symbol name!");
+		let message = new Message("Cannot have an empty string as symbol name!", "Exchange");
+		broker.addMessage(message);
 	}
 	
 	update();
