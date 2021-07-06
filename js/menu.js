@@ -12,10 +12,10 @@ function nakedFun(){
     broker.allowNakedShort = setting == "True";
 	
 	if(broker.allowNakedShort){
-		broker.addMessage("Naked shorting enabled.");
+		broker.addMessage("(Broker) Naked shorting enabled.");
 	}
 	else{
-		broker.addMessage("Naked shorting disabled.");
+		broker.addMessage("(Broker) Naked shorting disabled.");
 	}
     update();
 }
@@ -24,11 +24,11 @@ function infiniteFun(){
     const setting = settingInfiniteShortSupply.value;
     broker.infiniteShortSupply = setting == "True";
 	
-	if(broker.infiniteSHortSupply){
-		broker.addMessage("Infinite short supply enabled.");
+	if(broker.infiniteShortSupply){
+		broker.addMessage("(Broker) Infinite short supply enabled.");
 	}
 	else{
-		broker.addMessage("Infinite short supply disabled.");
+		broker.addMessage("(Broker) Infinite short supply disabled.");
 	}
     update();
 }
@@ -62,7 +62,7 @@ menuButtonOkNumBots.onclick = function(){
 	const inputNumBots = document.querySelector("#input-num-bots");
 	const num = inputNumBots.value;
 	
-	broker.addMessage("Bot number set to " + num);
+	broker.addMessage("(Broker) Bot number set to " + num);
 	update();
 }
 
@@ -73,10 +73,10 @@ function toggleMM(){
 	mmEnabled = rmb.value == "True";
 	
 	if(mmEnabled){
-		broker.addMessage("Market maker enabled.");
+		broker.addMessage("(Exchange) Market maker enabled.");
 	}
 	else{
-		broker.addMessage("Market maker disabled.");
+		broker.addMessage("(Exchange) Market maker disabled.");
 	}
 	
 	update();
@@ -87,9 +87,14 @@ buttonOkAddSymbol.onclick = function(){
 	const symbol = document.querySelector("#input-add-symbol").value;
 	const price = parseFloat(document.querySelector("#input-add-symbol-price").value);
 	
-	exchange.addOrderBook(symbol);
+	if(symbol != ""){
+		exchange.addOrderBook(symbol);
+		broker.addMessage("(Exchange) Added symbol \'" + symbol + "\'.");
+	}
+	else{
+		broker.addMessage("(Exchange) Cannot have an empty string as symbol name!");
+	}
 	
-	broker.addMessage("Added symbol \'" + symbol + "\'.");
 	update();
 }
 

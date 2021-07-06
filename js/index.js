@@ -96,7 +96,7 @@ inputSymbol.onkeydown = function(key){
 			
 			let message = "Symbol set to \'" + symbol + "\'";
 			
-			broker.addMessage(message);
+			broker.addMessage("(Broker)" + message);
 
             const offerShares = document.querySelector("#input-offer-symbol");
             offerShares.value = symbol;
@@ -106,7 +106,7 @@ inputSymbol.onkeydown = function(key){
         } 
         else{
 			let message = "Symbol \'" + symbol + "' does not exist!";
-			broker.addMessage(message);
+			broker.addMessage("(Broker)" + message);
         }
     }
 	
@@ -190,8 +190,12 @@ buttonHalfPos.onclick = function(){
         size.value = Math.floor(pos.sizeIn / 2);
     }
     else{
-        console.log("No open position for " + k_symbol + " id: " + id);
+       const message = "No open position for " + k_symbol + " id: " + id;
+	   broker.addMessage("(Broker) " + message);
+	   update();
     }
+	
+	
 }
 
 //Cancel button
@@ -230,7 +234,7 @@ shortOfferOkButton.onclick = function(){
 	
 	switch(result){
 		case broker.ERR_ACCOUNT:
-		broker.addMessage("Account with id " + id + " does not exist!");
+		broker.addMessage("(Broker) Account with id " + id + " does not exist!");
 		break;
 		
 		case ERR_NO_POSITION:
@@ -260,10 +264,10 @@ shortLocateOkButton.onclick = function(){
     let result = broker.locate(id, symbol, size);
 
     if(!result){
-       broker.addMessage("Located " + size + " shares!");
+       broker.addMessage("(Broker) Located " + size + " shares!");
     }
     else{
-        broker.addMessage("Could not locate shares to borrow!");
+        broker.addMessage("(Broker) Could not locate shares to borrow!");
     }
 
     update();
@@ -282,7 +286,7 @@ returnSharesButton.onclick = function(){
 		break;
 		
 		case 2:
-		broker.addMessage("Account does not exist!");
+		broker.addMessage("(Broker) Account does not exist!");
 		break;
 		
 		case 3:
