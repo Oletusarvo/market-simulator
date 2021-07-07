@@ -422,7 +422,7 @@ class Broker{
                 return "Trying to short more than available located shares!";
 
             case ERR_GREATER_THAN_CLOSE_LIMIT:
-                return "Trying to close more than available shares!";
+                return "Trying to close more than available non-short offered shares!";
 
             default:
                 return("Unknown error. Code: " + errcode);
@@ -438,7 +438,7 @@ class Broker{
                 if(pos.sizeIn >= size){ 
                     acc.willingToBorrow = true;
                     acc.offeredShares.set(symbol, size);
-                    acc.positionCloseLimit.set(symbol, pos.size - size);
+                    acc.positionCloseLimit.set(symbol, pos.sizeIn - size);
                 }
                 else{
                     result = ERR_SIZE;
