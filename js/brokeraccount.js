@@ -4,6 +4,7 @@ const ASK = SEL;
 class BrokerAccount{
     constructor(id, bp){
         this.id = id;
+		this.pnl = 0.0;
         this.closedPositions = [];
         this.openEquity = 0;
         this.openOrderSize = 0;

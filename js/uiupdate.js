@@ -5,6 +5,7 @@ updateBrokerInfo = function(){
 	let outputId                = document.getElementById("output-id");
 	let outputOpenEquity        = document.querySelector("#output-oe");
 	let outputBuyingPower       = document.querySelector("#output-bp");
+	let outputPnl				= document.querySelector("#output-pnl");
 	let outputMargin            = document.querySelector("#output-margin");
 	let outputShortStatus		= document.querySelector("#output-short-status");
 	let outputSharesLocated		= document.querySelector("#output-shares-located");
@@ -21,6 +22,8 @@ updateBrokerInfo = function(){
 	outputOpenEquity.value      = acc.openEquity.toFixed(2);
 	outputBuyingPower.value     = acc.getBuyingPower().toFixed(2);
 	outputMargin.value          = acc.cashBuyingPower < 0 ? -acc.cashBuyingPower.toFixed(2) : 0.00;
+	outputPnl.value				= acc.pnl.toFixed(2);
+	outputPnl.style.color		= acc.pnl >= 0 ? "green" : "red";
 
 	//Display all open positions on the positions table.
 	let posTable				= document.querySelector("#table-position-info");

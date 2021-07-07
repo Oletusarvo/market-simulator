@@ -251,6 +251,7 @@ class Broker{
                     rec.realized = pos.realized;
 
                     buyer.closedPositions.push(rec);
+					buyer.pnl += rec.realized;
                     buyer.positions.delete(info.symbol);
                }
             }
@@ -311,7 +312,7 @@ class Broker{
                 if(pos.sizeIn == 0){
                     /*
 						If the seller covered a long position, it is now unwinded fully and can be deleted.
-						But save it into  the closed positions first.
+						But save it into the closed positions first.
 					*/
                     let rec = new Receipt();
                     rec.avgPriceIn = pos.avgPriceIn;
@@ -322,6 +323,7 @@ class Broker{
                     rec.realized = pos.realized;
 
                     seller.closedPositions.push(rec);
+					seller.pnl += rec.realized;
                     seller.positions.delete(info.symbol);
                 }
              }
