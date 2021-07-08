@@ -43,6 +43,54 @@ menuButton.onclick = function(){
     }
 }
 
+const menuButtonOkNumBots = document.querySelector("#button-ok-num-bots");
+menuButtonOkNumBots.onclick = function(){
+	const inputNumBots = document.querySelector("#input-num-bots");
+	const num = inputNumBots.value;
+	
+	let message = new Message("Bot number set to \'" + num + "\'", "Broker");
+	BROKER.addMessage(message);
+	update();
+}
+
+let rmb = document.querySelector("#input-enable-mm");
+rmb.addEventListener("change", toggleMM);
+
+function toggleMM(){
+	mmEnabled = rmb.value == "True";
+	
+	if(mmEnabled){
+		let message = new Message("Market maker enabled.", "Exchange");
+		BROKER.addMessage(message);
+	}
+	else{
+		let message = new Message("Market maker disabled.", "Exchange");
+		BROKER.addMessage(message);
+		orderbook.cancel(-1);
+	}
+	
+	update();
+}
+
+const buttonOkAddSymbol = document.querySelector("#button-ok-add-symbol");
+
+buttonOkAddSymbol.onclick = function(){
+	const symbol = document.querySelector("#input-add-symbol").value;
+	const price = parseFloat(document.querySelector("#input-add-symbol-price").value);
+	
+	if(symbol != ""){
+		EXCHANGE.addOrderBook(symbol);
+		let message = new Message("Added symbol \'" + symbol + "\'.", "Exchange");
+		BROKER.addMessage(message);
+	}
+	else{
+		let message = new Message("Cannot have an empty string as symbol name!", "Exchange");
+		BROKER.addMessage(message);
+	}
+	
+	update();
+}
+
 const inputPoSymbol = document.querySelector("#input-po-symbol");
 const inputPoAmount = document.querySelector("#input-po-amount");
 const inputPoPrice = document.querySelector("#input-po-price");
