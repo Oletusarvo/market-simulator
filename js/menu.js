@@ -84,6 +84,7 @@ function toggleMM(){
 	else{
 		let message = new Message("Market maker disabled.", "Exchange");
 		BROKER.addMessage(message);
+		orderbook.cancel(-1);
 	}
 	
 	update();

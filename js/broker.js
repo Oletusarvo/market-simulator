@@ -455,6 +455,28 @@ class Broker{
         return result;
     }
 	
+	cancelOffer(id, symbol){
+		let acc = this.accounts.get(id);
+		let errcode = 0;
+		
+		if(acc){
+			let closeLimit = acc.closeLimit.get(symbol);
+			
+			if(closeLimit == undefined){
+				acc.offeredShares.delete(symbol);
+			}
+			else{
+				
+			}
+			
+		}
+		else{
+			errcode = ERR_ACCOUNT;
+		}
+		
+		return errcode;
+	}
+	
     locate(id, symbol, size){
         /*
             Find an account that has enough shares available and is willing to lend shares.
