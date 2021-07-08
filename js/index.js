@@ -9,29 +9,29 @@ let table       = document.getElementById("table-level2");
 let berrtable   = document.getElementById("table-broker-messages");
 let ptable      = document.getElementById("table-price-history");
 
-let k_symbol    = "DEF";
+let SYMBOL    = "DEF";
 const k_ename   = "HHSE"; 
-let exchange    = new Exchange(k_ename);
+let EXCHANGE    = new Exchange(k_ename);
 
-let broker      = new Broker("Brokkoli");
-let bank        = new Bank();
+let BROKER      = new Broker("Brokkoli");
+let BANK        = new Bank();
 var mmEnabled   = false;
 
-broker.allowNakedShort = false;
-broker.infiniteShortSupply = false;
+BROKER.allowNakedShort = false;
+BROKER.infiniteShortSupply = false;
 
 //exchange.marketmaker = marketmaker;
 
-exchange.addOrderBook(k_symbol);
-var orderbook = exchange.getOrderBook(k_symbol);
+EXCHANGE.addOrderBook(SYMBOL);
+var orderbook = EXCHANGE.getOrderBook(SYMBOL);
 
 const numTraders = 50;
 let traders = [];
 
 for(let i = 0; i < numTraders; ++i){
     let equity = 3151.51;
-    broker.addAccount(i, equity);
-    bank.addAccount(i, equity);
+    BROKER.addAccount(i, equity);
+    BANK.addAccount(i, equity);
     traders.push(new Trader(i));
 }
 
@@ -62,7 +62,7 @@ for(let r = 0; r < 10; ++r){
     }
 }
 
-let marketmaker = new MarketMaker(exchange);
+let marketmaker = new MarketMaker(EXCHANGE);
 marketmaker.spread = 0.01;
 marketmaker.depth = 2;
 
@@ -88,15 +88,15 @@ inputSymbol.onkeydown = function(key){
     if(key.keyCode === 13){
         //13 Is Enter.
         let symbol = inputSymbol.value;
-        let ob = exchange.getOrderBook(symbol);
+        let ob = EXCHANGE.getOrderBook(symbol);
 
         if(ob){
-            k_symbol = symbol;
+            SYMBOL = symbol;
             orderbook = ob;
 			
 			let message = new Message("Symbol set to \'" + symbol + "\'", "Broker");
 			
-			broker.addMessage(message);
+			BROKER.addMessage(message);
 
             const offerShares = document.querySelector("#input-offer-symbol");
             offerShares.value = symbol;
@@ -106,7 +106,7 @@ inputSymbol.onkeydown = function(key){
         } 
         else{
 			let message = new Message("Symbol \'" + symbol + "' does not exist!", "Broker");
-			broker.addMessage(message);
+			BROKER.addMessage(message);
         }
     }
 	
@@ -120,7 +120,7 @@ bb.onclick = function(){
     const id = parseInt(document.getElementById("input-id").value);
     const type = document.getElementById("input-type").value == "MKT" ? MKT : LMT;
 
-    let order = new Order(id, k_symbol, k_ename, price, size, BUY, type);
+    let order = new Order(id, SYMBOL, k_ename, price, size, BUY, type);
     execute(order);
     update();
 }
@@ -132,7 +132,7 @@ cvb.onclick = function(){
     const id = parseInt(document.getElementById("input-id").value);
     const type = document.getElementById("input-type").value == "MKT" ? MKT : LMT;
 
-    let order = new Order(id, k_symbol, k_ename, price, size, CVR, type);
+    let order = new Order(id, SYMBOL, k_ename, price, size, CVR, type);
     execute(order);
     update();
 }
@@ -144,7 +144,7 @@ sb.onclick = function(){
     const id = parseInt(document.getElementById("input-id").value);
     const type = document.getElementById("input-type").value == "MKT" ? MKT : LMT;
 
-    let order = new Order(id, k_symbol, k_ename, price, size, SEL, type);
+    let order = new Order(id, SYMBOL, k_ename, price, size, SEL, type);
     execute(order);
     update();
 }
@@ -156,7 +156,7 @@ shb.onclick = function(){
     const id = parseInt(document.getElementById("input-id").value);
     const type = document.getElementById("input-type").value == "MKT" ? MKT : LMT;
 
-    let order = new Order(id, k_symbol, k_ename, price, size, SHT, type);
+    let order = new Order(id, SYMBOL, k_ename, price, size, SHT, type);
     execute(order);
     update();
 }
@@ -167,9 +167,9 @@ buttonPos.onclick = function(){
     const size = document.getElementById("input-size");
     const id = parseInt(document.getElementById("input-id").value);
 
-    let acc = broker.accounts.get(id);
+    let acc = BROKER.accounts.get(id);
     if(acc){
-        let pos = acc.positions.get(k_symbol);
+        let pos = acc.positions.get(SYMBOL);
         if(pos){
             size.value = Math.abs(pos.sizeIn);
         }
@@ -182,7 +182,7 @@ buttonPos.onclick = function(){
 let buttonHalfPos = document.querySelector("#half-pos-button");
 buttonHalfPos.onclick = function(){
     const id = parseInt(document.querySelector("#input-id").value);
-    const acc = broker.accounts.get(id);
+    const acc = BROKER.accounts.get(id);
     const pos = acc.positions.get(k_symbol);
 
     if(pos){
@@ -190,8 +190,8 @@ buttonHalfPos.onclick = function(){
         size.value = Math.floor(pos.sizeIn / 2);
     }
     else{
-       let message = new Message("No open position for " + k_symbol, id);
-	   broker.addMessage(message);
+       let message = new Message("No open position for " + SYMBOL, id);
+	   BROKER.addMessage(message);
 	   update();
     }
 	
@@ -201,9 +201,9 @@ buttonHalfPos.onclick = function(){
 //Cancel button
 cb.onclick = function(){
     const id = parseInt(document.getElementById("input-id").value);
-    exchange.cancel(id, k_symbol);
+    EXCHANGE.cancel(id, SYMBOL);
 
-    broker.registerCancel(id);
+    BROKER.registerCancel(id);
 
     update();
 }
@@ -233,34 +233,48 @@ shortOfferOkButton.onclick = function(){
     let result = broker.offer(id, symbol, size);
 	
 	switch(result){
-		case broker.ERR_ACCOUNT:{
-			let message = new Message("Account with id " + id + " does not exist!", "Broker");
-			broker.addMessage(message);
+		case BROKER.ERR_ACCOUNT:{
+			let message = new Message("Account with id \'" + id + "\' does not exist!", "Broker");
+			BROKER.addMessage(message);
 		}
 		break;
 		
 		case ERR_NO_POSITION:{
-			let message = new Message("No position for symbol " + symbol + "!", toString(id))
-			broker.addMessage(message);
+			let message = new Message("No position for symbol \'" + symbol + "\'!", id)
+			BROKER.addMessage(message);
 		}
 		
 		break;
 		
-		case broker.ERR_SIZE:{
-			let message = new Message("Not enough shares to borrow!", toString(id));
-			broker.addMessage(message);
+		case BROKER.ERR_SIZE:{
+			let message = new Message("Not enough shares to borrow!", id);
+			BROKER.addMessage(message);
 		}
 		
 		break;
 		
 		default:{
-			let message = new Message("Offered shares for borrow.", toString(id));
-			broker.addMessage(message);
+			let message = new Message("Offered shares for borrow.", id);
+			BROKER.addMessage(message);
 		}
 		
 	}
 	
 	update();
+}
+
+//Cancel offered shares
+const shortOfferCancelButton = document.querySelector("#offer-cancel-button");
+
+shortOfferCancelButton.onclick = function(){
+	//Allow canceling an offer if no shares are currently borrowed out.
+	const symbol = SYMBOL;
+	const id = parseInt(document.querySelector("#input-id").value);
+	const result = BROKER.cancelOffer(symbol, id);
+	
+	switch(result){
+		
+	}
 }
 
 //Short locate
@@ -272,15 +286,15 @@ shortLocateOkButton.onclick = function(){
     let symbol = shortLocateSymbol.value;
     let size = parseInt(shortLocateSize.value);
     let id = parseInt(document.querySelector("#input-id").value);
-    let result = broker.locate(id, symbol, size);
+    let result = BROKER.locate(id, symbol, size);
 
     if(!result){
 		let message = new Message("Located " + size + " shares!", "Broker");
-       broker.addMessage(message);
+       BROKER.addMessage(message);
     }
     else{
 		let message = new Message("Could not locate shares to borrow!", "Broker");
-        broker.addMessage(message);
+        BROKER.addMessage(message);
     }
 
     update();
@@ -291,32 +305,32 @@ let returnSharesButton = document.querySelector("#return-shares-button");
 returnSharesButton.onclick = function(){
     let id = parseInt(document.querySelector("#input-id").value);
     let symbol = document.querySelector("#input-locate-symbol").value;
-    let result = broker.returnShares(id, symbol);
+    let result = BROKER.returnShares(id, symbol);
 	let msg = new Message();
 	
 	switch(result){
 		case 1:
 		msg.message = "No shares to return!";
 		msg.from = id;
-		broker.addMessage(msg);
+		BROKER.addMessage(msg);
 		break;
 		
 		case 2:
 		msg.message = "Account does not exist!";
 		msg.from = "Broker";
-		broker.addMessage(msg);
+		BROKER.addMessage(msg);
 		break;
 		
 		case 3:
 		msg.message = "Cannot return shares while there is open equity!";
 		msg.from = id;
-		broker.addMessage(msg);
+		BROKER.addMessage(msg);
 		break;
 		
 		default:
 		msg.message = "Returned borrowed shares.";
 		msg.from = id;
-		broker.addMessage(msg);
+		BROKER.addMessage(msg);
 	}
 	
     update();

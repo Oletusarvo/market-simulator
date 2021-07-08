@@ -5,7 +5,7 @@ function tradingLogicComplex(){
     var bid = orderbook.bestBid();
 
     var id = Math.trunc(randomRange(1, numTraders - 1));
-    var acc = broker.accounts.get(id);
+    var acc = BROKER.accounts.get(id);
     var pos = acc.positions.get(k_symbol);
 
     let trader = traders[id];
@@ -21,9 +21,8 @@ function tradingLogicComplex(){
     if(pos){
         //If current sentiment has changed and there are open orders, cancel them.
         if(trader.previousSentiment != sentiment && acc.openOrderSize > 0){
-            console.log("Canceling order for account " + id);
-            exchange.cancel(id, k_symbol);
-            broker.registerCancel(id);
+            EXCHANGE.cancel(id, k_symbol);
+            BROKER.registerCancel(id);
             trader.previousSentiment = sentiment;
         }
         
@@ -47,7 +46,7 @@ function tradingLogicComplex(){
                 side = CVR;
                 if(acc.openOrderSize > 0){
                     exchange.cancel(id, k_symbol);
-                    broker.registerCancel(id);
+                    BROKER.registerCancel(id);
                 }
                 //type = MKT;
                 price = ask.price + 1.00;
@@ -63,8 +62,8 @@ function tradingLogicComplex(){
                 //Long position is desired to be sold in a sell-market.
                 side = SEL;
                 if(acc.openOrderSize > 0){
-                    exchange.cancel(id, k_symbol);
-                    broker.registerCancel(id);
+                    EXCHANGE.cancel(id, k_symbol);
+                    BROKER.registerCancel(id);
                 }
 
                 //type = MKT;
@@ -90,5 +89,5 @@ function tradingLogicComplex(){
     }
 
     
-    return new Order(id, k_symbol, k_ename, price, size, side, type);
+    return new Order(id, SYMBOL, k_ename, price, size, side, type);
 }

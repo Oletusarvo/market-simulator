@@ -14,9 +14,9 @@ updateBrokerInfo = function(){
 	let id                      = parseInt(inputId.value);
 	outputId.value              = id;
 
-	let acc						= broker.accounts.get(id);
-	let locatedShares			= acc.locatedShares.get(k_symbol);
-	outputShortStatus.value		= locatedShares != undefined || broker.allowNakedShort ? "S" : "NS";
+	let acc						= BROKER.accounts.get(id);
+	let locatedShares			= acc.locatedShares.get(SYMBOL);
+	outputShortStatus.value		= locatedShares != undefined || BROKER.allowNakedShort ? "S" : "NS";
 	outputSharesLocated.value	= locatedShares != undefined ? locatedShares : 0;
 	outputShortStatus.style.color = outputShortStatus.value == "NS" ? "red" : "green";
 
@@ -26,7 +26,7 @@ updateBrokerInfo = function(){
 	outputPnl.value				= acc.pnl.toFixed(2);
 	outputPnl.style.color		= acc.pnl >= 0 ? "green" : "red";
 	
-	const shares 				= acc.offeredShares.get(k_symbol);
+	const shares 				= acc.offeredShares.get(SYMBOL);
 	outputOfferedShares.value	= shares != undefined ? shares : "No offer";
 
 	//Display all open positions on the positions table.
@@ -166,7 +166,7 @@ updateBrokerInfo = function(){
 			//Side
 			cposTable.rows[tablePos].cells[1].innerHTML = rec.side == BUY ? "Long" : "Short";
 			//Size
-			cposTable.rows[tablePos].cells[2].innerHTML = rec.size / 2;
+			cposTable.rows[tablePos].cells[2].innerHTML = rec.size;
 			//PriceIn
 			cposTable.rows[tablePos].cells[3].innerHTML = rec.avgPriceIn.toFixed(pricePrecision);
 			//PriceOut
@@ -219,7 +219,7 @@ updateBankInfo = function(){
     let outputBalance           = document.getElementById("output-balance");
 
     let id                      = parseInt(inputId.value);
-    let acc                     = bank.accounts.get(id);
+    let acc                     = BANK.accounts.get(id);
     outputBalance.value         = acc.balance;
 }
 
@@ -244,7 +244,7 @@ update = function(){
     outputHigh.value = orderbook.high.toFixed(2);
     outputLow.value = orderbook.low == Number.MAX_VALUE ? NaN : orderbook.low.toFixed(2);
     //outputSpread.value = (ask && bid) ? (ask.price - bid.price).toFixed(2) : NaN;
-	outputSymbol.value = k_symbol;
+	outputSymbol.value = SYMBOL;
 
     let prefix = last - orderbook.open >= 0 ? "+" : "-";
 
@@ -253,11 +253,11 @@ update = function(){
     outputGain.style.color = prefix == "+" ? "yellowgreen" : "red";
 
 	if(mmEnabled)
-    	marketmaker.createMarket(k_symbol);
+    	marketmaker.createMarket(SYMBOL);
 		
     orderbook.drawTable(table);
     orderbook.drawPriceHistory(ptable);
-	broker.drawMessages(berrtable);
+	BROKER.drawMessages(berrtable);
     updateBrokerInfo();
     updateBankInfo();
 }

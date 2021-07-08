@@ -9,30 +9,30 @@ settingInfiniteShortSupply.addEventListener("change", infiniteFun);
 
 function nakedFun(){
     const setting = settingAllowNakedShort.value;
-    broker.allowNakedShort = setting == "True";
+    BROKER.allowNakedShort = setting == "True";
 	
-	if(broker.allowNakedShort){
+	if(BROKER.allowNakedShort){
 		let message = new Message("Naked shorting enabled.", "Broker");
-		broker.addMessage(message);
+		BROKER.addMessage(message);
 	}
 	else{
 		let message = new Message("Naked shorting disabled.", "Broker");
-		broker.addMessage(message);
+		BROKER.addMessage(message);
 	}
     update();
 }
 
 function infiniteFun(){
     const setting = settingInfiniteShortSupply.value;
-    broker.infiniteShortSupply = setting == "True";
+    BROKER.infiniteShortSupply = setting == "True";
 	
-	if(broker.infiniteShortSupply){
+	if(BROKER.infiniteShortSupply){
 		let message = new Message("Infinite short supply enabled", "Broker");
-		broker.addMessage(message);
+		BROKER.addMessage(message);
 	}
 	else{
 		let message = new Message("Infinite short supply disabled", "Broker");
-		broker.addMessage(message);
+		BROKER.addMessage(message);
 	}
     update();
 }
@@ -67,7 +67,7 @@ menuButtonOkNumBots.onclick = function(){
 	const num = inputNumBots.value;
 	
 	let message = new Message("Bot number set to \'" + num + "\'", "Broker");
-	broker.addMessage(message);
+	BROKER.addMessage(message);
 	update();
 }
 
@@ -79,11 +79,11 @@ function toggleMM(){
 	
 	if(mmEnabled){
 		let message = new Message("Market maker enabled.", "Exchange");
-		broker.addMessage(message);
+		BROKER.addMessage(message);
 	}
 	else{
 		let message = new Message("Market maker disabled.", "Exchange");
-		broker.addMessage(message);
+		BROKER.addMessage(message);
 	}
 	
 	update();
@@ -95,13 +95,13 @@ buttonOkAddSymbol.onclick = function(){
 	const price = parseFloat(document.querySelector("#input-add-symbol-price").value);
 	
 	if(symbol != ""){
-		exchange.addOrderBook(symbol);
+		EXCHANGE.addOrderBook(symbol);
 		let message = new Message("Added symbol \'" + symbol + "\'.", "Exchange");
-		broker.addMessage(message);
+		BROKER.addMessage(message);
 	}
 	else{
 		let message = new Message("Cannot have an empty string as symbol name!", "Exchange");
-		broker.addMessage(message);
+		BROKER.addMessage(message);
 	}
 	
 	update();
