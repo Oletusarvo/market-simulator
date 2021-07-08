@@ -8,14 +8,17 @@ var borrowBtn   = document.querySelector("#borrow-button");
 let table       = document.getElementById("table-level2");
 let berrtable   = document.getElementById("table-broker-messages");
 let ptable      = document.getElementById("table-price-history");
+RANDOM_RANGE 	= (min, max) => Math.random() * (max - min) + min;
+let SYMBOL    	= "DEF";
+let NEXT_ID		= 1; //Used by trading logic functions to determine the next trader to make a move.
+let LAST_SIDE = FLT;
 
-let SYMBOL    = "DEF";
 const k_ename   = "HHSE"; 
 let EXCHANGE    = new Exchange(k_ename);
 
 let BROKER      = new Broker("Brokkoli");
 let BANK        = new Bank();
-var mmEnabled   = false;
+var mmEnabled   = document.querySelector("#input-enable-mm").value != "False";
 
 BROKER.allowNakedShort = false;
 BROKER.infiniteShortSupply = false;
@@ -79,7 +82,7 @@ setInterval(function(){
         update(); 
     }
        
-}, 34);
+}, 150);
 
 //Create a symbol
 //Symbol select

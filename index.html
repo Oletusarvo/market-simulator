@@ -62,6 +62,15 @@
 						</fieldset>
 						
 						<fieldset class="menu-field">
+							<legend>Public offering</legend>
+							<label>Symbol</label>
+							<input id="input-po-symbol">
+							<label>Amount</label>
+							<input id="input-po-amount">
+							<button id="button-ok-po-symbol">OK</button>
+						</fieldset>
+						
+						<fieldset class="menu-field">
 							<legend>Enable market maker</legend>
 							<select id="input-enable-mm">
 								<option>True</option>
@@ -254,6 +263,7 @@
 								<label>Offered:</label><output id="output-offered-shares"></output>
 							</div>
 							<button class="menu-confirm-button" id="offer-ok-button">Offer</button>
+							<button class="menu-confirm-button" id="offer-cancel-button">Cancel</button>
 						</fieldset>
 
 					</div>
@@ -281,6 +291,7 @@
     <script src="js\uiupdate.js"></script>
     <script src="js\tradingLogicSimple.js"></script>
     <script src="js\tradingLogicComplex.js"></script>
+	<script src="js\tradingLogicComplex2.js"></script>
     <script src="js\marketmaker.js"></script>
     <script src="js\index.js"></script>
 	<script src="js\menu.js"></script>

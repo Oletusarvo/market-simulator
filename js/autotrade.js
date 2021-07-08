@@ -5,19 +5,19 @@ sentimentFrequencyModulator = new SineGenerator(0.01, 0.007, COS, 0.007 / 2);
 
 execute = function(order){
     order.price = parseFloat(order.price.toFixed(2));
-    const errcode = broker.registerOrder(order);
+    const errcode = BROKER.registerOrder(order);
     if(!errcode){
-        exchange.execute(order);
-        let transactions = exchange.transactions;
+        EXCHANGE.execute(order);
+        let transactions = EXCHANGE.transactions;
         
         while(transactions.length > 0){
             let info = transactions.pop();
-            broker.registerTransaction(info);
-            bank.registerTransaction(info);
+            BROKER.registerTransaction(info);
+            BANK.registerTransaction(info);
         }
     }    
     else{
-        broker.drawMessages(berrtable);
+        BROKER.drawMessages(berrtable);
     }
 }
 
@@ -35,22 +35,24 @@ function autoTrade(logic){
     //Figure out what order to send.
     let order = logic();
     
-    var acc = broker.accounts.get(order.id);
-    if(((acc.openOrderSide == SHT && (order.side == SHT || order.side == CVR)) || 
-        (acc.openOrderSide == BUY && (order.side == BUY || order.side == SEL)) || 
-        acc.openOrderSide == FLT) && 
-        sendOrder){
-        execute(order);
-    }
-    else{
-        //Cancel orders randomly.
-        
-        if(Math.abs(acc.openOrderPrice - last) >= 0.3){
-            exchange.cancel(order.id, k_symbol);
-            broker.registerCancel(order.id);
-        }
+	if(order != undefined){
+		var acc = BROKER.accounts.get(order.id);
+		if(((acc.openOrderSide == SHT && (order.side == SHT || order.side == CVR)) || 
+			(acc.openOrderSide == BUY && (order.side == BUY || order.side == SEL)) || 
+			acc.openOrderSide == FLT) && 
+			sendOrder){
+			execute(order);
+		}
+		else{
+			//Cancel orders randomly.
+			
+			if(Math.abs(acc.openOrderPrice - last) >= 0.3){
+				EXCHANGE.cancel(order.id, SYMBOL);
+				BROKER.registerCancel(order.id);
+			}
 
-    }
+		}
+	}
     
     generator.update();
     sentimentFrequencyModulator.update();
