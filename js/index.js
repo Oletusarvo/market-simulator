@@ -233,7 +233,7 @@ shortOfferOkButton.onclick = function(){
     let id = parseInt(document.querySelector("#input-id").value);
     let symbol = shortOfferSymbol.value;
     let size = shortOfferSize.value;
-    let result = broker.offer(id, symbol, size);
+    let result = BROKER.offer(id, symbol, size);
 	
 	switch(result){
 		case BROKER.ERR_ACCOUNT:{

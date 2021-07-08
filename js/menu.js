@@ -9,31 +9,13 @@ settingInfiniteShortSupply.addEventListener("change", infiniteFun);
 
 function nakedFun(){
     const setting = settingAllowNakedShort.value;
-    BROKER.allowNakedShort = setting == "True";
-	
-	if(BROKER.allowNakedShort){
-		let message = new Message("Naked shorting enabled.", "Broker");
-		BROKER.addMessage(message);
-	}
-	else{
-		let message = new Message("Naked shorting disabled.", "Broker");
-		BROKER.addMessage(message);
-	}
+    broker.allowNakedShort = setting == "True";
     update();
 }
 
 function infiniteFun(){
     const setting = settingInfiniteShortSupply.value;
-    BROKER.infiniteShortSupply = setting == "True";
-	
-	if(BROKER.infiniteShortSupply){
-		let message = new Message("Infinite short supply enabled", "Broker");
-		BROKER.addMessage(message);
-	}
-	else{
-		let message = new Message("Infinite short supply disabled", "Broker");
-		BROKER.addMessage(message);
-	}
+    broker.infiniteShortSupply = setting == "True";
     update();
 }
 
@@ -61,51 +43,33 @@ menuButton.onclick = function(){
     }
 }
 
-const menuButtonOkNumBots = document.querySelector("#button-ok-num-bots");
-menuButtonOkNumBots.onclick = function(){
-	const inputNumBots = document.querySelector("#input-num-bots");
-	const num = inputNumBots.value;
-	
-	let message = new Message("Bot number set to \'" + num + "\'", "Broker");
-	BROKER.addMessage(message);
-	update();
-}
+const inputPoSymbol = document.querySelector("#input-po-symbol");
+const inputPoAmount = document.querySelector("#input-po-amount");
+const inputPoPrice = document.querySelector("#input-po-price");
+const buttonPoOk = document.querySelector("#button-ok-po-symbol");
 
-let rmb = document.querySelector("#input-enable-mm");
-rmb.addEventListener("change", toggleMM);
+buttonPoOk.onclick = function(){
+    const amount = parseInt(inputPoAmount.value);
+    const symbol = inputPoSymbol.value;
+    const price = parseFloat(inputPoPrice.value);
+    const shares = amount / numTraders;
+    //const id = parseInt(document.querySelector("#input-id").value);
 
-function toggleMM(){
-	mmEnabled = rmb.value == "True";
-	
-	if(mmEnabled){
-		let message = new Message("Market maker enabled.", "Exchange");
-		BROKER.addMessage(message);
-	}
-	else{
-		let message = new Message("Market maker disabled.", "Exchange");
-		BROKER.addMessage(message);
-		orderbook.cancel(-1);
-	}
-	
-	update();
-}
+    for(let acc of BROKER.accounts.values()){
+        acc.addPosition(symbol, price, shares, BUY);
+    }
 
-const buttonOkAddSymbol = document.querySelector("#button-ok-add-symbol");
-buttonOkAddSymbol.onclick = function(){
-	const symbol = document.querySelector("#input-add-symbol").value;
-	const price = parseFloat(document.querySelector("#input-add-symbol-price").value);
-	
-	if(symbol != ""){
-		EXCHANGE.addOrderBook(symbol);
-		let message = new Message("Added symbol \'" + symbol + "\'.", "Exchange");
-		BROKER.addMessage(message);
-	}
-	else{
-		let message = new Message("Cannot have an empty string as symbol name!", "Exchange");
-		BROKER.addMessage(message);
-	}
-	
-	update();
+    let message = new Message("Performed public offering for symbol \'" + symbol + "\'.", "Broker");
+    EXCHANGE.addOrderBook(symbol);
+    BROKER.addMessage(message);
+
+    if(EXCHANGE.getOrderBook(symbol) == undefined){
+        let message = new Message("Added symbol \'" + symbol + "\'.", "Exchange");
+        EXCHANGE.addOrderBook(symbol);
+        broker.addMessage(message);
+    }
+    
+    update();
 }
 
 /*
