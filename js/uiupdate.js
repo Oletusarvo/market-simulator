@@ -35,10 +35,13 @@ updateBrokerInfo = function(){
 	let currentAsk          	= orderbook.bestAsk() ? orderbook.bestAsk().price : NaN;
 	let currentBid          	= orderbook.bestBid() ? orderbook.bestBid().price : NaN;
 	let pricePrecision			= 3;
-	if(positions.size > 0){
+
+	const positionsSize			= positions.size;
+
+	if(positionsSize > 0){
 		//Add rows and cells to the table to contain the data.
-		if(posTable.rows.length - 1 < positions.size){
-			for(let r = posTable.rows.length - 1; r < positions.size; ++r){
+		if(posTable.rows.length - 1 < positionsSize){
+			for(let r = posTable.rows.length - 1; r < positionsSize; ++r){
 				let row = posTable.insertRow();
 				for(let c = 0; c < 7; ++c){
 					row.insertCell();
@@ -47,9 +50,11 @@ updateBrokerInfo = function(){
 		}
 		
 		let tablePos = 1; //Skip the header.
-		for(let p of positions.keys()){
+		const positionKeys = positions.keys();
+
+		for(let p of positionKeys){
 			//Implied to exist.
-			let pos = positions.get(p);
+			const pos = positions.get(p);
 			
 			if((pos.side == BUY) && currentBid != undefined){
 				gain = ((currentBid - pos.avgPriceIn) / pos.avgPriceIn) * 100;
@@ -95,7 +100,9 @@ updateBrokerInfo = function(){
 	}
 	else{
 		//Clear shown positions.
-		for(let i = 1; i < posTable.rows.length; ++i){
+		const rowLength = posTable.rows.length;
+
+		for(let i = 1; i < rowLength; ++i){
 			for(let c = 0; c < 7; ++c){
 				posTable.rows[i].cells[c].innerHTML = "";
 			}
@@ -109,7 +116,9 @@ updateBrokerInfo = function(){
 
 	//Count the total number of orders.
 	let numOrders = 0;
-	for(let oo of openOrders.values()){
+	const openOrderValues = openOrders.values();
+
+	for(let oo of openOrderValues){
 		numOrders += oo.size;
 	}
 
@@ -122,7 +131,9 @@ updateBrokerInfo = function(){
 		}
 
 		let tablePos = 1; //Skip the header.
-		for(let om of openOrders.keys()){
+		const openOrderKeys = openOrders.keys();
+
+		for(let om of openOrderKeys){
 			let orders = openOrders.get(om);
 			for(let o of orders){
 				ooTable.rows[tablePos].cells[0].innerHTML = o[1].symbol;
@@ -135,7 +146,9 @@ updateBrokerInfo = function(){
 		}
 	}
 	else{
-		for(let i = 1; i < ooTable.rows.length; ++i){
+		const rowLength = ooTable.rows.length;
+
+		for(let i = 1; i < rowLength; ++i){
 			for(let j = 0; j < 5; ++j){
 				ooTable.rows[i].cells[j].innerHTML = "";
 			}
@@ -145,10 +158,12 @@ updateBrokerInfo = function(){
 	//Draw any positions that have been closed.
 	let cposTable = document.querySelector("#table-closed-positions");
 	let closedPositions = acc.closedPositions;
-	if(closedPositions.length > 0){
+	const numClosedPositions = closedPositions.length;
+
+	if(numClosedPositions > 0){
 		//Insert rows into the table.
-		if(cposTable.rows.length - 1 < closedPositions.length){
-			for(let r = cposTable.rows.length - 1; r < closedPositions.length; ++r){
+		if(cposTable.rows.length - 1 < numClosedPositions){
+			for(let r = cposTable.rows.length - 1; r < numClosedPositions; ++r){
 				let row = cposTable.insertRow();
 				for(let c = 0; c < 7; ++c){
 					row.insertCell();

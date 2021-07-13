@@ -491,7 +491,8 @@ class Broker{
 			}
 		}
 		else{
-			for(let lender of this.accounts.values()){
+            const accountValues = this.accounts.values();
+			for(let lender of accountValues){
 				if(lender.id != id/*The account is not the one wanting to borrow*/ && lender.willingToBorrow){
 					let offeredShares = lender.offeredShares.get(symbol);
 					if(offeredShares && offeredShares >= size){
