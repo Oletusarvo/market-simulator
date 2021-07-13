@@ -26,7 +26,9 @@ class OrderBook{
 
     cancelBuy(id){
         let bk = this.bid.keys();
-        for(let i = 0; i < this.bid.size; ++i){
+        const bidSize = this.bid.size;
+
+        for(let i = 0; i < bidSize; ++i){
             let k = bk.next().value;
             this.bid.get(k).cancel(id);
         }
@@ -36,7 +38,9 @@ class OrderBook{
 
     cancelSell(id){
         let ak = this.ask.keys();
-        for(let i = 0; i < this.ask.size; ++i){
+        const askSize = this.ask.size;
+
+        for(let i = 0; i < askSize; ++i){
             let k = ak.next().value;
             this.ask.get(k).cancel(id);
         }
@@ -60,12 +64,16 @@ class OrderBook{
         let sortedAskKeys = [];
 
         let bq = this.bid.keys();
-        for(let i = 0; i < this.bid.size; ++i){
+        const bidSize = this.bid.size;
+
+        for(let i = 0; i < bidSize; ++i){
             sortedBidKeys.push(bq.next().value);
         }
 
         let aq = this.ask.keys();
-        for(let i = 0; i < this.ask.size; ++i){
+        const askSize = this.ask.size;
+
+        for(let i = 0; i < askSize; ++i){
             sortedAskKeys.push(aq.next().value);
         }
 
@@ -114,13 +122,18 @@ class OrderBook{
 
         let displayPrices = [];
         if(this.priceHistory.length <= 10){
-            for(let val of this.priceHistory)
+            const priceHistory = this.priceHistory;
+
+            for(let val of priceHistory)
                 displayPrices.push(val);
         }
         else{
             let offset = this.priceHistory.length - 10;
-            for(let i = offset; i < this.priceHistory.length; ++i)
-                displayPrices.push(this.priceHistory[i]);
+            const priceHistory = this.priceHistory;
+            const historyLength = priceHistory.length;
+
+            for(let i = offset; i < historyLength; ++i)
+                displayPrices.push(priceHistory[i]);
         }
 
         //Scroll the transactions so the most recent transaction is at the top.
@@ -129,7 +142,9 @@ class OrderBook{
 
         //console.log(displayPrices.lenght);
 
-        for(let i = 0; i < displayPrices.length; ++i){
+        const displayLength = displayPrices.length;
+
+        for(let i = 0; i < displayLength; ++i){
             let info = displayPrices[i];
             let price = table.rows[i].cells[0];
             let size = table.rows[i].cells[1];
@@ -175,8 +190,9 @@ class OrderBook{
     bestAsk(){
         let best = Number.MAX_VALUE;
         let aq = this.ask.keys();
+        const askSize = this.ask.size;
 
-        for(let i = 0; i < this.ask.size; ++i){
+        for(let i = 0; i < askSize; ++i){
             let val = aq.next().value;
             best = val < best ? val : best;
         }
@@ -187,8 +203,9 @@ class OrderBook{
     bestBid(){
         let best = 0;
         let bq = this.bid.keys();
+        const bidSize = this.bid.size;
 
-        for(let i = 0; i < this.bid.size; ++i){
+        for(let i = 0; i < bidSize; ++i){
             let val = bq.next().value;
             best = val > best ? val : best;
         }
@@ -230,7 +247,9 @@ class OrderBook{
         //Remove all empty queues.
         let emptyBidKeys = [];
         let bk = this.bid.keys();
-        for(let i = 0; i < this.bid.size; ++i){
+        const bidSize = this.bid.size;
+
+        for(let i = 0; i < bidSize; ++i){
             let k = bk.next().value;
             let b = this.bid.get(k);
             if(b.shareSize == 0){
@@ -240,7 +259,9 @@ class OrderBook{
 
         let emptyAskKeys = [];
         let ak = this.ask.keys();
-        for(let i = 0; i < this.ask.size; ++i){
+        const askSize = this.ask.size;
+
+        for(let i = 0; i < askSize; ++i){
             let k = ak.next().value;
             let a = this.ask.get(k);
 
@@ -249,11 +270,15 @@ class OrderBook{
             }
         }
 
-        for(let i = 0; i < emptyBidKeys.length; ++i){
+        const emptyBidLength = emptyBidKeys.length;
+
+        for(let i = 0; i < emptyBidLength; ++i){
             this.bid.delete(emptyBidKeys[i]);
         }
 
-        for(let i = 0; i < emptyAskKeys.length; ++i){
+        const emptyAskLength = emptyAskKeys.length;
+
+        for(let i = 0; i < emptyAskLength; ++i){
             this.ask.delete(emptyAskKeys[i]);
         }
 
