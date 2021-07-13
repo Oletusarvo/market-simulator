@@ -268,7 +268,7 @@ update = function(){
     outputGain.style.color = prefix == "+" ? "yellowgreen" : "red";
 
 	if(mmEnabled)
-    	marketmaker.createMarket(SYMBOL);
+		MARKETMAKER.createMarket(SYMBOL);
 		
     orderbook.drawTable(table);
     orderbook.drawPriceHistory(ptable);
