@@ -9,13 +9,31 @@ settingInfiniteShortSupply.addEventListener("change", infiniteFun);
 
 function nakedFun(){
     const setting = settingAllowNakedShort.value;
-    broker.allowNakedShort = setting == "True";
+    BROKER.allowNakedShort = setting == "True";
+
+	if(BROKER.allowNakedShort){
+		let message = new Message("Naked shorting enabled.", "Broker");
+		BROKER.addMessage(message);
+	}
+	else{
+		let message = new Message("Naked shorting disabled.", "Broker");
+		BROKER.addMessage(message);
+	}
     update();
 }
 
 function infiniteFun(){
     const setting = settingInfiniteShortSupply.value;
-    broker.infiniteShortSupply = setting == "True";
+    BROKER.infiniteShortSupply = setting == "True";
+
+	if(BROKER.infiniteShortSupply){
+		let message = new Message("Infinite short supply enabled", "Broker");
+		BROKER.addMessage(message);
+	}
+	else{
+		let message = new Message("Infinite short supply disabled", "Broker");
+		BROKER.addMessage(message);
+	}
     update();
 }
 
@@ -73,7 +91,6 @@ function toggleMM(){
 }
 
 const buttonOkAddSymbol = document.querySelector("#button-ok-add-symbol");
-
 buttonOkAddSymbol.onclick = function(){
 	const symbol = document.querySelector("#input-add-symbol").value;
 	const price = parseFloat(document.querySelector("#input-add-symbol-price").value);
