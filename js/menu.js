@@ -137,6 +137,28 @@ buttonPoOk.onclick = function(){
     update();
 }
 
+const inputMMSpread = document.querySelector("#input-mm-spread");
+const inputMMDepth = document.querySelector("#input-mm-depth");
+const buttonOkMMSpread = document.querySelector("#button-ok-mm-spread");
+const buttonOkMMDepth = document.querySelector("#button-ok-mm-depth");
+
+buttonOkMMSpread.onclick = function(){
+    const spread = parseFloat(inputMMSpread.value);
+    MARKETMAKER.spread = spread;
+
+    const message = new Message("Spread set to " + spread, "Market maker");
+    BROKER.addMessage(message);
+    update();
+}
+
+buttonOkMMDepth.onclick = function(){
+    const depth = parseFloat(inputMMDepth.value);
+    MARKETMAKER.depth = depth;
+
+    const message = new Message("Depth set to " + depth, "Market maker");
+    BROKER.addMessage(message);
+    update();
+}
 /*
 Reintroduce this later.
 const createOkButton = document.querySelector("#create-ok-button");
