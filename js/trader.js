@@ -13,6 +13,30 @@ class Trader{
 
     updateBias(orderbook){
         //Set bias to be opposite of the apparent sentiment.
-        this.bias = orderbook.numBuy > orderbook.numSell ? BUY : SEL;
+        this.bias = orderbook.numBuy > orderbook.numSell ? SEL : BUY;
+    }
+
+    action(pos, currentPrice){
+
+        if(pos){
+            const priceIn = pos.avgPriceIn;
+            if(pos.side == BUY){
+                if(currentPrice >= priceIn + priceIn * this.profitTarget || currentPrice <= priceIn - priceIn * this.riskTolerance){
+                    return SEL
+                }
+            }
+            else{
+                if(currentPrice >= priceIn + priceIn * this.riskTolerance || currentPrice <= priceIn - priceIn * this.profitTarget){
+                    return CVR;
+                }
+            }
+        }
+        else{
+            if(this.confidence >= this.threshold){
+                return this.bias;
+            }
+        }
+        
+        return FLT;
     }
 }

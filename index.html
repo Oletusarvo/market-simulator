@@ -73,11 +73,20 @@
 						</fieldset>
 						
 						<fieldset class="menu-field">
-							<legend>Enable market maker</legend>
+							<legend>Market maker</legend>
+							<label>Enabled</label>
 							<select id="input-enable-mm">
 								<option>True</option>
 								<option>False</option>
 							</select>
+
+							<label>Spread</label>
+							<input id="input-mm-spread" type="number" min="0.01" step="0.01">
+							<button id="button-ok-mm-spread">OK</button>
+							<label>Depth</label>
+							<input id="input-mm-depth" type="number" min="1" step="1">
+							<button id="button-ok-mm-depth">OK</button>
+
 						</fieldset>
 					</fieldset>
 			</div>
@@ -128,7 +137,7 @@
 								<input class="input-field" id="input-size" min="1" step="1" value="100" type="number">
 								
 								<label>ID</label>
-								<input class="input-field" id="input-id" min="0" max="100" step="1" value="0" type="number">
+								<input class="input-field" id="input-id" min="0" max="0" step="1" value="0" type="number">
 								
 								<label>Type</label>
 								<select id="input-type">

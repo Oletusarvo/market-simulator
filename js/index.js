@@ -65,9 +65,9 @@ for(let r = 0; r < 10; ++r){
     }
 }
 
-let marketmaker = new MarketMaker(EXCHANGE);
-marketmaker.spread = 0.01;
-marketmaker.depth = 2;
+let MARKETMAKER = new MarketMaker(EXCHANGE);
+MARKETMAKER.spread = 0.01;
+MARKETMAKER.depth = 2;
 
 update();
 

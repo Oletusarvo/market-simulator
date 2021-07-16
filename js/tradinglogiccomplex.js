@@ -90,6 +90,7 @@ function tradingLogicComplex(){
 			
 			if(sentiment == BUY){
 				price = ask.price + RANDOM_RANGE(0.00, 0.1);
+                
 			}
 			else{
 				price = bid.price - RANDOM_RANGE(0.00, 0.1);

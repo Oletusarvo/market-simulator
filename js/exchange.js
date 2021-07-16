@@ -16,7 +16,7 @@ class Exchange{
         let seconds = time.getSeconds() < 10 ? "0" + time.getSeconds() : time.getSeconds();
 
         info.time = hours + ":" + minutes + ":" + seconds;
-
+        
         if(order.size > otherOrder.size){
             order.size -= otherOrder.size;
             info.size = otherOrder.size;
