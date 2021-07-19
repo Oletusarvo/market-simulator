@@ -44,6 +44,7 @@ class BrokerAccount{
 		
             pos.side = side;
             pos.id = this.id;
+            pos.openPrice = price;
             this.positions.set(symbol, pos);
         }
     }

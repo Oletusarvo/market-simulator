@@ -157,13 +157,13 @@ class Broker{
                     acc.openOrders.set(order.symbol, new Map());
                     orderMap = acc.openOrders.get(order.symbol);
                 }
-
+                
                 let o = orderMap.get(order.price);
                 if(!o){
                     orderMap.set(order.price, new Order(order.id, order.symbol, order.route, order.price, 0, order.side, order.type));
                     o = orderMap.get(order.price);
                 }
-
+                
                 o.size += order.size;
 
                 acc.openOrderSize += order.size;
@@ -264,6 +264,7 @@ class Broker{
             buyer.openOrderSize -= buyer.openOrderSize > 0 ? buyer.openOrderSize : 0;
             buyer.openOrderSide = buyer.openOrderSize == 0 ? FLT : buyer.openOrderSide;
 
+            //Remove any open orders that have been filled.
             let symbolOrders = buyer.openOrders.get(info.symbol);
             if(symbolOrders){
                 let openOrder = symbolOrders.get(info.price);
@@ -272,16 +273,16 @@ class Broker{
                     if(openOrder.size == 0){
                         symbolOrders.delete(info.price);
                     }
+                }
 
-                    if(symbolOrders.size == 0){
-                        buyer.openOrders.delete(info.symbol);
-                    }
+                if(symbolOrders.size == 0 || buyer.openOrderSize == 0){
+                    buyer.openOrders.delete(info.symbol);
                 }
             }
-            
-            buyer.setBpMultiplier();
 
             
+            
+            buyer.setBpMultiplier();  
         }
 
         if(seller){
@@ -338,7 +339,8 @@ class Broker{
             seller.openOrderSize -= seller.openOrderSize > 0 ? seller.openOrderSize : 0; 
             seller.openOrderSide = seller.openOrderSize == 0 ? FLT : seller.openOrderSide;
 			
-			let symbolOrders = seller.openOrders.get(info.symbol);
+			//Remove any open orders that have been filled.
+            let symbolOrders = seller.openOrders.get(info.symbol);
             if(symbolOrders){
                 let openOrder = symbolOrders.get(info.price);
                 if(openOrder != undefined){
@@ -346,10 +348,10 @@ class Broker{
                     if(openOrder.size == 0){
                         symbolOrders.delete(info.price);
                     }
-    
-                    if(symbolOrders.size == 0){
-                        seller.openOrders.delete(info.symbol);
-                    }
+                }
+
+                if(symbolOrders.size == 0 || seller.openOrderSize == 0){
+                    seller.openOrders.delete(info.symbol);
                 }
             }
 			

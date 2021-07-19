@@ -10,7 +10,7 @@ class Position{
         this.gain           = 0;
         this.sentiment      = FLT;
         this.realized       = 0;
-		
+		this.openPrice      = 0; //Used to identify open orders that have a higher price than where a transaction goes through.
 		this.totalSize      = 0;
         this.sharesAvailable = 0; //If the account has offered shares to be borrowed, this is used to limit how much of the position can be closed.
     }

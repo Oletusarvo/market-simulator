@@ -22,15 +22,19 @@ function tradingLogicComplex2(){
 		if(pos){
 			const gain = pos.side == BUY ? ((bid.price - pos.avgPriceIn) / pos.avgPriceIn) * 100 : ((pos.avgPriceIn - ask.price) / pos.avgPriceIn) * 100;
 			if(openOrders){
-				if(gain <= trader.riskTolerance){
+				if(gain <= -trader.riskTolerance){
 					EXCHANGE.cancel(id, SYMBOL);
 					BROKER.registerCancel(id);
+				}
+				else{
+					return undefined;
 				}
 			}
 
 			if(pos.side == BUY){
 				if(gain <= -trader.riskTolerance){
 					type = MKT;
+					trader.bias = SEL;
 				}
 				else{
 					price = pos.avgPriceIn + trader.profitTarget * pos.avgPriceIn;
@@ -40,6 +44,7 @@ function tradingLogicComplex2(){
 			else{
 				if(gain <= -trader.riskTolerance){
 					type = MKT;
+					trader.bias = BUY;
 				}
 				else{
 					price = pos.avgPriceIn - trader.profitTarget * pos.avgPriceIn;
@@ -65,7 +70,7 @@ function tradingLogicComplex2(){
 			}
 
 			trader.previousSentiment = sentiment;
-			trader.updateBias(orderbook);
+			//trader.updateBias(orderbook);
 		}
 	}
 	
