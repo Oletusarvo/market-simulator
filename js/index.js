@@ -174,7 +174,7 @@ buttonPos.onclick = function(){
     if(acc){
         let pos = acc.positions.get(SYMBOL);
         if(pos){
-            size.value = Math.abs(pos.sizeIn);
+            size.value = Math.abs(pos.totalSize);
         }
             
     }
@@ -190,7 +190,7 @@ buttonHalfPos.onclick = function(){
 
     if(pos){
         const size = document.querySelector("#input-size");
-        size.value = Math.floor(pos.sizeIn / 2);
+        size.value = Math.floor(pos.totalSize / 2);
     }
     else{
        let message = new Message("No open position for " + SYMBOL, id);
