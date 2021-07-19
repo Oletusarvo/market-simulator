@@ -280,6 +280,7 @@ update = function(){
 		MARKETMAKER.createMarket(SYMBOL);
 		
     orderbook.drawTable(table);
+	orderbook.updatePrecision();
     orderbook.drawPriceHistory(ptable);
 	BROKER.drawMessages(berrtable);
     updateBrokerInfo();

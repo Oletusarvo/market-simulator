@@ -78,7 +78,7 @@ let running = false;
 setInterval(function(){
     if(running){
         //generator.frequency = Math.abs(sentimentFrequencyModulator.val);
-        autoTrade(tradingLogicComplex); 
+        autoTrade(tradingLogicComplex2); 
         update(); 
     }
        
@@ -167,8 +167,8 @@ shb.onclick = function(){
 //Position button
 let buttonPos = document.getElementById("position-button");
 buttonPos.onclick = function(){
-    const size = document.getElementById("input-size");
-    const id = parseInt(document.getElementById("input-id").value);
+    let size = document.getElementById("input-size");
+    let id = parseInt(document.getElementById("input-id").value);
 
     let acc = BROKER.accounts.get(id);
     if(acc){
@@ -186,7 +186,7 @@ let buttonHalfPos = document.querySelector("#half-pos-button");
 buttonHalfPos.onclick = function(){
     const id = parseInt(document.querySelector("#input-id").value);
     const acc = BROKER.accounts.get(id);
-    const pos = acc.positions.get(k_symbol);
+    const pos = acc.positions.get(SYMBOL);
 
     if(pos){
         const size = document.querySelector("#input-size");

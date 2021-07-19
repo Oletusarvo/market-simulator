@@ -36,6 +36,24 @@ class OrderBook{
         this.flush();
     }
 
+    updatePrecision(){
+        if(this.last <= 1.00){
+            this.precision = 3;
+        }
+        else if(this.last <= 0.1){
+            this.precision = 4;
+        }
+        else if(this.last <= 0.01){
+            this.precision = 5;
+        }
+        else if(this.last <= 0.001){
+            this.precision = 6;
+        }
+        else{
+            this.precision = 2;
+        }
+    }
+
     cancelSell(id){
         let ak = this.ask.keys();
         const askSize = this.ask.size;
@@ -88,7 +106,7 @@ class OrderBook{
             let a = this.ask.get(sortedAskKeys.pop());
 
             if(b){
-                table.rows[rowNum].cells[BIDPRICECELL].innerHTML = b.price.toFixed(2);
+                table.rows[rowNum].cells[BIDPRICECELL].innerHTML = b.price.toFixed(this.precision);
                 table.rows[rowNum].cells[BIDSIZECELL].innerHTML = Math.trunc(b.shareSize / 100);
             }
             else{
@@ -97,7 +115,7 @@ class OrderBook{
             }
 
             if(a){
-                table.rows[rowNum].cells[ASKPRICECELL].innerHTML = a.price.toFixed(2);
+                table.rows[rowNum].cells[ASKPRICECELL].innerHTML = a.price.toFixed(this.precision);
                 table.rows[rowNum].cells[ASKSIZECELL].innerHTML = Math.trunc(a.shareSize / 100);
             }
             else{
