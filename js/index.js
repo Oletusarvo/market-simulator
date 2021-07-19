@@ -20,7 +20,7 @@ let BROKER      = new Broker("Brokkoli");
 let BANK        = new Bank();
 var mmEnabled   = document.querySelector("#input-enable-mm").value != "False";
 
-BROKER.allowNakedShort = false;
+BROKER.allowNakedShort = true;
 BROKER.infiniteShortSupply = false;
 
 //exchange.marketmaker = marketmaker;

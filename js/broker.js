@@ -78,12 +78,12 @@ class Broker{
                 */
                 let positionCloseLimit = acc.positionCloseLimit.get(order.symbol);
                 if(positionCloseLimit == undefined){
-                    if(order.size > Math.abs(pos.sizeIn)){
+                    if(order.size > Math.abs(pos.totalSize) && (order.side == CVR || order.side == SEL)){
                         return ERR_GREATER_THAN_POSITION;
                     }
                 }
                 else{
-                    if(order.size > positionCloseLimit){
+                    if(order.size > positionCloseLimit && (order.side == CVR || order.side == SEL)){
                         return ERR_GREATER_THAN_CLOSE_LIMIT;
                     }
                 }
@@ -103,10 +103,10 @@ class Broker{
                 }
     
                 let newOpenOrderSize = acc.openOrderSize + order.size;
-                if(order.side == CVR && pos.sizeIn > -newOpenOrderSize){
+                if(order.side == CVR && pos.totalSize < newOpenOrderSize){
                     return ERR_COVER_GREATER;
                 }
-                else if(order.side == SEL && pos.sizeIn < newOpenOrderSize){
+                else if(order.side == SEL && pos.totalSize < newOpenOrderSize){
                     return ERR_SELL_GREATER;
                 }
             }
@@ -117,7 +117,6 @@ class Broker{
             }
     
             if(order.price <= 0.00){
-                console.log(order.price);
                 return ERR_ORDER_PRICE;
             }
                 
@@ -216,6 +215,7 @@ class Broker{
                     pos.avgPriceIn = (pos.avgPriceIn * pos.sizeIn + info.price * info.size) / (info.size + pos.sizeIn);  
                     buyer.cashBuyingPower -= info.price * info.size;
                     pos.totalSize += info.size;
+                    pos.sizeIn += info.size;
                }
 
                /*
@@ -223,7 +223,7 @@ class Broker{
                     their average closing price updated.
                */
                 if(pos.side == SHT){
-                    let equity = -pos.sizeIn * pos.avgPriceIn;
+                    let equity = pos.sizeIn * pos.avgPriceIn;
                     let price = info.size * info.price;
                     let gain = equity - price;
 
@@ -231,13 +231,13 @@ class Broker{
 
                     pos.avgPriceOut = (pos.avgPriceOut * pos.sizeOut + info.size * info.price) / (info.size + pos.sizeOut);
                     pos.sizeOut += info.size; 
+					pos.totalSize -= info.size;
                     pos.realized += (pos.avgPriceIn - info.price) * info.size;
                 }
 
-               pos.sizeIn += info.size;
                 pos.calcGain(info.price);
 
-               if(pos.sizeIn == 0){
+               if(pos.sizeIn - pos.sizeOut == 0){
                    /*
 						If the buyer covered a short position, it is now unwinded fully and can be deleted.
 						But before doing that, add the position into the closed positions of this account.
@@ -245,7 +245,7 @@ class Broker{
                     let rec = new Receipt();
                     rec.avgPriceIn = pos.avgPriceIn;
                     rec.avgPriceOut = pos.avgPriceOut;
-                    rec.size = pos.totalSize;
+                    rec.size = pos.sizeIn;
                     rec.side = SHT;
                     rec.symbol = pos.symbol;
                     rec.realized = pos.realized;
@@ -289,9 +289,10 @@ class Broker{
             if(pos){    
                  //If adding to an existing short position, update average price and decrese buying power.
                 if(pos.side == SHT){
-                     pos.avgPriceIn = (pos.avgPriceIn * -pos.sizeIn + info.price * info.size) / (info.size + -pos.sizeIn);
+                     pos.avgPriceIn = (pos.avgPriceIn * pos.sizeIn + info.price * info.size) / (info.size + pos.sizeIn);
                      seller.cashBuyingPower -= info.price * info.size;
-                     pos.totalSize -= info.size;
+                     pos.totalSize += Math.abs(info.size);
+                     pos.sizeIn += Math.abs(info.size);
                 }
 
                 //An account selling a long position should have their buying power increased.
@@ -302,22 +303,23 @@ class Broker{
                     seller.cashBuyingPower += equity + gain;
 
                     pos.avgPriceOut = (pos.avgPriceOut * pos.sizeOut + info.size * info.price) / (info.size + pos.sizeOut);
-                    pos.sizeOut += info.size;
+                    pos.sizeOut += Math.abs(info.size);
+					pos.totalSize -= info.size;
                     pos.realized += (info.price - pos.avgPriceIn) * info.size;
                 }
 
-                pos.sizeIn -= info.size;
+                
                 pos.calcGain(info.price);
 
-                if(pos.sizeIn == 0){
+                if(pos.sizeIn - pos.sizeOut == 0){
                     /*
-						If the seller covered a long position, it is now unwinded fully and can be deleted.
+						If the seller sold a long position, it is now unwinded fully and can be deleted.
 						But save it into the closed positions first.
 					*/
                     let rec = new Receipt();
                     rec.avgPriceIn = pos.avgPriceIn;
                     rec.avgPriceOut = pos.avgPriceOut;
-                    rec.size = pos.totalSize;
+                    rec.size = pos.sizeIn;
                     rec.side = BUY;
                     rec.symbol = pos.symbol;
                     rec.realized = pos.realized;
@@ -328,15 +330,15 @@ class Broker{
                 }
              }
              else{
-                seller.addPosition(info.symbol, info.price, -info.size, SHT);
+                seller.addPosition(info.symbol, info.price, info.size, SHT);
                 seller.cashBuyingPower -= info.price * info.size;
              }
 
             seller.openEquity -= seller.openEquity > 0 ? info.price * info.size : 0;
             seller.openOrderSize -= seller.openOrderSize > 0 ? seller.openOrderSize : 0; 
             seller.openOrderSide = seller.openOrderSize == 0 ? FLT : seller.openOrderSide;
-
-            let symbolOrders = seller.openOrders.get(info.symbol);
+			
+			let symbolOrders = seller.openOrders.get(info.symbol);
             if(symbolOrders){
                 let openOrder = symbolOrders.get(info.price);
                 if(openOrder != undefined){
@@ -350,8 +352,7 @@ class Broker{
                     }
                 }
             }
-          
-            
+			
             seller.setBpMultiplier(); 
         }
     }

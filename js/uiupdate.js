@@ -11,11 +11,11 @@ updateBrokerInfo = function(){
 	let outputSharesLocated		= document.querySelector("#output-shares-located");
 	let outputOfferedShares		= document.querySelector("#output-offered-shares");
 
-	let id                      = parseInt(inputId.value);
+	const id                      = parseInt(inputId.value);
 	outputId.value              = id;
 
-	let acc						= BROKER.accounts.get(id);
-	let locatedShares			= acc.locatedShares.get(SYMBOL);
+	const acc					= BROKER.accounts.get(id);
+	const locatedShares			= acc.locatedShares.get(SYMBOL);
 	outputShortStatus.value		= locatedShares != undefined || BROKER.allowNakedShort ? "S" : "NS";
 	outputSharesLocated.value	= locatedShares != undefined ? locatedShares : 0;
 	outputShortStatus.style.color = outputShortStatus.value == "NS" ? "red" : "green";
@@ -80,7 +80,7 @@ updateBrokerInfo = function(){
 			//Side
 			row.cells[1].innerHTML = pos.side == BUY ? "Long" : "Short";
 			//Size
-			row.cells[2].innerHTML = pos.sizeIn;
+			row.cells[2].innerHTML = pos.totalSize;
 			//Average Price
 			row.cells[3].innerHTML = pos.avgPriceIn.toFixed(pricePrecision);
 			//Realized
@@ -195,6 +195,15 @@ updateBrokerInfo = function(){
 			tablePos++;
 		}
 	}
+	else{
+		const rowLength = cposTable.rows.length;
+
+		for(let i = 1; i < rowLength; ++i){
+			for(let j = 0; j < 7; ++j){
+				cposTable.rows[i].cells[j].innerHTML = "";
+			}
+		}
+	}
 	
 	/*
 	//Draw symbol list
@@ -253,18 +262,18 @@ update = function(){
     let bid = orderbook.bestBid();
     let last = orderbook.priceHistory.length > 0 ? orderbook.priceHistory[orderbook.priceHistory.length - 1].price : NaN;
     
-    outputAsk.value = ask ? ask.price.toFixed(2) : NaN;
-    outputBid.value = bid ? bid.price.toFixed(2) : NaN;
-    outputLast.value = last.toFixed(2);
-    outputHigh.value = orderbook.high.toFixed(2);
-    outputLow.value = orderbook.low == Number.MAX_VALUE ? NaN : orderbook.low.toFixed(2);
+    outputAsk.value = ask ? ask.price.toFixed(orderbook.precision) : NaN;
+    outputBid.value = bid ? bid.price.toFixed(orderbook.precision) : NaN;
+    outputLast.value = last.toFixed(orderbook.precision);
+    outputHigh.value = orderbook.high.toFixed(orderbook.precision);
+    outputLow.value = orderbook.low == Number.MAX_VALUE ? NaN : orderbook.low.toFixed(orderbook.precision);
     //outputSpread.value = (ask && bid) ? (ask.price - bid.price).toFixed(2) : NaN;
 	outputSymbol.value = SYMBOL;
 
     let prefix = last - orderbook.open >= 0 ? "+" : "-";
 
     outputGain.value = last != NaN ? prefix + Math.abs(((last - orderbook.open) / last * 100)).toFixed(2) + "%" : 0 + "%";
-    outputOpen.value = orderbook.open.toFixed(2);
+    outputOpen.value = orderbook.open.toFixed(orderbook.precision);
     outputGain.style.color = prefix == "+" ? "yellowgreen" : "red";
 
 	if(mmEnabled)
