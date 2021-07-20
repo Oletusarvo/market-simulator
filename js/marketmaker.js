@@ -54,7 +54,7 @@ class MarketMaker{
                 }
             }
             else{
-                price = parseFloat((Math.random() * 10).toFixed(2));
+                price = parseFloat(RANDOM_RANGE(1.00, 5.00).toFixed(2));
                 
                 //Fill the ask side.
                 while(orderbook.ask.size < this.depth){

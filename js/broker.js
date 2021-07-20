@@ -261,7 +261,7 @@ class Broker{
             }
 
             buyer.openEquity -= buyer.openEquity > 0 ? info.size * info.price : 0;
-            buyer.openOrderSize -= buyer.openOrderSize > 0 ? buyer.openOrderSize : 0;
+            buyer.openOrderSize -= buyer.openOrderSize > 0 ? info.size : 0;
             buyer.openOrderSide = buyer.openOrderSize == 0 ? FLT : buyer.openOrderSide;
 
             //Remove any open orders that have been filled.
@@ -336,7 +336,7 @@ class Broker{
              }
 
             seller.openEquity -= seller.openEquity > 0 ? info.price * info.size : 0;
-            seller.openOrderSize -= seller.openOrderSize > 0 ? seller.openOrderSize : 0; 
+            seller.openOrderSize -= seller.openOrderSize > 0 ? info.size : 0; 
             seller.openOrderSide = seller.openOrderSize == 0 ? FLT : seller.openOrderSide;
 			
 			//Remove any open orders that have been filled.

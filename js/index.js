@@ -28,7 +28,7 @@ BROKER.infiniteShortSupply = false;
 EXCHANGE.addOrderBook(SYMBOL);
 var orderbook = EXCHANGE.getOrderBook(SYMBOL);
 
-const numTraders = 50;
+const numTraders = 200;
 let traders = [];
 
 for(let i = 0; i < numTraders; ++i){
