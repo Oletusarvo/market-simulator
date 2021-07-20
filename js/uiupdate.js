@@ -48,6 +48,18 @@ updateBrokerInfo = function(){
 				}
 			}
 		}
+		else if(posTable.rows.length - 1 > positionsSize){
+			//Blank out the extra cells
+			const numExtra = posTable.rows.length - positionsSize;
+			const start = posTable.rows.length - numExtra;
+			const total = posTable.rows.length;
+
+			for(let i = start; i < total; ++i){
+				for(let c = 0; c < 7; ++c){
+					posTable.rows[i].cells[c].innerHTML = "";
+				}
+			}
+		}
 		
 		let tablePos = 1; //Skip the header.
 		const positionKeys = positions.keys();
@@ -170,9 +182,23 @@ updateBrokerInfo = function(){
 				}
 			}
 		}
+		else if(cposTable.rows.length - 1 > numClosedPositions){
+			//Blank out the extra cells
+			const numExtra = cposTable.rows.length - numClosedPositions;
+			const start = cposTable.rows.length - numExtra;
+			const total = cposTable.rows.length;
+
+			for(let i = start; i < total; ++i){
+				for(let c = 0; c < 7; ++c){
+					cposTable.rows[i].cells[c].innerHTML = "";
+				}
+			}
+		}
 
 		//Skip the header.
 		let tablePos = 1;
+
+		//Draw with most recent one at the top.
 		for(let r = closedPositions.length - 1; r >= 0; --r){
 			let rec = closedPositions[r];
 
@@ -196,11 +222,13 @@ updateBrokerInfo = function(){
 		}
 	}
 	else{
-		const rowLength = cposTable.rows.length;
-
-		for(let i = 1; i < rowLength; ++i){
-			for(let j = 0; j < 7; ++j){
-				cposTable.rows[i].cells[j].innerHTML = "";
+		//Reset the closed positions
+		
+		const numRows = cposTable.rows.length;
+		let rows = cposTable.rows;
+		for(let i = 1; i < numRows; ++i){
+			for(let c = 0; c < 7; ++c){
+				rows[i].cells[c].innerHTML = "";
 			}
 		}
 	}
