@@ -250,7 +250,7 @@ class Broker{
                     rec.symbol = pos.symbol;
                     rec.realized = pos.realized;
 
-                    buyer.closedPositions.push(rec);
+                    buyer.closePosition(rec);
 					buyer.pnl += rec.realized;
                     buyer.positions.delete(info.symbol);
                }
@@ -325,7 +325,7 @@ class Broker{
                     rec.symbol = pos.symbol;
                     rec.realized = pos.realized;
 
-                    seller.closedPositions.push(rec);
+                    seller.closePosition(rec);
 					seller.pnl += rec.realized;
                     seller.positions.delete(info.symbol);
                 }

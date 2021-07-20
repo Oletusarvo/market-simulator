@@ -29,6 +29,16 @@ class BrokerAccount{
         this.positions          = new Map();
     }
 
+    closePosition(rec){
+        //Limit closed positions to 10 per account.
+        if(this.closedPositions.length == 10){
+            this.closedPositions.splice(0, 1);
+        }
+
+        this.closedPositions.push(rec);
+      
+    }
+
     addPosition(symbol, price, size, side){
         let pos = this.positions.get(symbol);
         if(pos){
