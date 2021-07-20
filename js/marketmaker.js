@@ -10,6 +10,7 @@ class MarketMaker{
         this.exchange = exchange;
         this.spread = 0; 
         this.depth = 2;
+        this.increment = 0.01;
     }
 
     createMarket(symbol){
@@ -42,7 +43,7 @@ class MarketMaker{
                 while(orderbook.ask.size < this.depth){
                     order.price = price;
                     this.exchange.execute(order);
-                    price += this.spread;
+                    price += this.increment;
                 }
 
                 //Fill the bid side.
@@ -50,7 +51,7 @@ class MarketMaker{
                 while(orderbook.bid.size < this.depth){
                     order.price = price;
                     this.exchange.execute(order);
-                    price -= this.spread;
+                    price -= this.increment;
                 }
             }
             else{
@@ -60,7 +61,7 @@ class MarketMaker{
                 while(orderbook.ask.size < this.depth){
                     let order = new Order(-1, symbol, this.exchange.name, price, 100, SHT, LMT);
                     this.exchange.execute(order);
-                    price += this.spread;
+                    price += this.increment;
                 }
 
                 //Fill the bid side.
@@ -68,7 +69,7 @@ class MarketMaker{
                 while(orderbook.bid.size < this.depth){
                     let order = new Order(-1, symbol, this.exchange.name, price, 100, BUY, LMT);
                     this.exchange.execute(order);
-                    price -= this.spread;
+                    price -= this.increment;
                 }
             }
         }
@@ -89,7 +90,7 @@ class MarketMaker{
                     while(orderbook.ask.size < this.depth){
                         let order = new Order(-1, symbol, this.exchange.name, price, 100, SHT, LMT);
                         this.exchange.execute(order);
-                        price += this.spread;
+                        price += this.increment;
                     }
                 }
                 else{
@@ -98,7 +99,7 @@ class MarketMaker{
                     while(orderbook.ask.size < this.depth){
                         let order = new Order(-1, symbol, this.exchange.name, price, 100, SHT, LMT);
                         this.exchange.execute(order);
-                        price += this.spread;
+                        price += this.increment;
                     }
 
                     //The bid has to come up towards the ask.
@@ -108,7 +109,7 @@ class MarketMaker{
                     while(orderbook.bid.size < this.depth){
                         let order = new Order(-1, symbol, this.exchange.name, price, 100, BUY, LMT);
                         this.exchange.execute(order);
-                        price -= this.spread;
+                        price -= this.increment;
                     }
                 }
             }
@@ -125,7 +126,7 @@ class MarketMaker{
                     while(orderbook.bid.size < this.depth){
                         let order = new Order(-1, symbol, this.exchange.name, price, 100, BUY, LMT);
                         this.exchange.execute(order);
-                        price -= this.spread;
+                        price -= this.increment;
                     }
                 }
                 else{
@@ -134,7 +135,7 @@ class MarketMaker{
                     while(orderbook.bid.size < this.depth){
                         let order = new Order(-1, symbol, this.exchange.name, price, 100, BUY, LMT);
                         this.exchange.execute(order);
-                        price -= this.spread;
+                        price -= this.increment;
                     }
 
                     //The ask has to come down towards the bid.
@@ -145,7 +146,7 @@ class MarketMaker{
                     while(orderbook.ask.size < this.depth){
                         let order = new Order(-1, symbol, this.exchange.name, price, 100, SHT, LMT);
                         this.exchange.execute(order);
-                        price += this.spread;
+                        price += this.increment;
                     }
                 }  
             }
@@ -165,7 +166,7 @@ class MarketMaker{
                     while(orderbook.bid.size < this.depth){
                         let order = new Order(-1, symbol, this.exchange.name, price, 100, BUY, LMT);
                         this.exchange.execute(order);
-                        price -= this.spread;
+                        price -= this.increment;
                     }
                     
                     //Add new orders to the end of the ask side.
@@ -173,7 +174,7 @@ class MarketMaker{
                     while(orderbook.ask.size < this.depth){
                         let order = new Order(-1, symbol, this.exchange.name, price, 100, SHT, LMT);
                         this.exchange.execute(order);
-                        price += this.spread;
+                        price += this.increment;
                     }
                 }
                 else if(direction == SEL){
@@ -183,7 +184,7 @@ class MarketMaker{
                     while(orderbook.ask.size < this.depth){
                         let order = new Order(-1, symbol, this.exchange.name, price, bid.shareSize, SHT, LMT);
                         this.exchange.execute(order);
-                        price += this.spread;
+                        price += this.increment;
                     }
 
                     //Add new orders to the end of the bid side.
@@ -191,7 +192,7 @@ class MarketMaker{
                     while(orderbook.bid.size < this.depth){
                         let order = new Order(-1, symbol, this.exchange.name, price, 100, BUY, LMT);
                         this.exchange.execute(order);
-                        price -= this.spread;
+                        price -= this.increment;
                     }
                 }
             }
