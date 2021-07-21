@@ -272,7 +272,7 @@ updateBankInfo = function(){
 
     let id                      = parseInt(inputId.value);
     let acc                     = BANK.accounts.get(id);
-    outputBalance.value         = acc.balance;
+    outputBalance.value         = acc.balance.toFixed(2);
 }
 
 update = function(){  
