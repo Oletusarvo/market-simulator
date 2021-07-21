@@ -31,7 +31,7 @@ EXCHANGE.addOrderBook(SYMBOL);
 var orderbook = EXCHANGE.getOrderBook(SYMBOL);
 orderbook.dataSeriesOpen();
 
-const numTraders = 100;
+const numTraders = 10;
 let traders = [];
 
 for(let i = 0; i < numTraders; ++i){
@@ -80,7 +80,7 @@ let running = false;
 //let bailouts = [];
 let orderbookUpdateClock = 0;
 var cancelTimer = 0; //Timer until an unfilled open order is canceled.
-const runningSpeed = 40; //25 frames per second.
+const runningSpeed = 67; //~15 frames per second.
 
 setInterval(function(){
     if(running){
@@ -93,9 +93,6 @@ setInterval(function(){
             orderbookUpdateClock = 0;
             orderbook.dataSeriesClose();
             orderbook.dataSeriesOpen();
-
-            const message = new Message("Data series expanded. ", "Orderbook");
-            BROKER.addMessage(message);
         }
         else{
             orderbookUpdateClock += runningSpeed;

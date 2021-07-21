@@ -45,8 +45,8 @@ function tradingLogicComplex2(){
 					trader.bias = SEL;
 				}
 				else{
-					//price = pos.avgPriceIn + trader.profitTarget * pos.avgPriceIn * RANDOM_RANGE(0.05, 1.0);
-					price = pos.avgPriceIn + MARKETMAKER.increment * 5;
+					price = pos.avgPriceIn + trader.profitTarget * pos.avgPriceIn * RANDOM_RANGE(0.05, 1.0);
+					//price = pos.avgPriceIn + MARKETMAKER.increment * 5;
 				}
 				side = SEL;
 			}
@@ -56,8 +56,8 @@ function tradingLogicComplex2(){
 					trader.bias = BUY;
 				}
 				else{
-					//price = pos.avgPriceIn - trader.profitTarget * pos.avgPriceIn * RANDOM_RANGE(0.05, 1.0);
-					price = pos.avgPriceIn - MARKETMAKER.increment * 5;
+					price = pos.avgPriceIn - trader.profitTarget * pos.avgPriceIn * RANDOM_RANGE(0.05, 1.0);
+					//price = pos.avgPriceIn - MARKETMAKER.increment * 5;
 				}
 				side = CVR;
 			}

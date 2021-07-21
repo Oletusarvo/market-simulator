@@ -62,7 +62,8 @@ class Broker{
             }
 
             //Not enough buying power.
-            let newOpenEquity = acc.openEquity + order.size * order.price;
+            const newOpenEquity = acc.openEquity + order.size * order.price;
+            const newBalance = (Math.abs(acc.cashByingPower) + order.size * order.price) > acc.getBuyingPower();
             if((order.side == SHT || order.side == BUY) && (newOpenEquity > acc.getBuyingPower()))
                 return ERR_BUYINGPOWER;
             
@@ -227,7 +228,7 @@ class Broker{
                     let price = info.size * info.price;
                     let gain = equity - price;
 
-                    buyer.cashBuyingPower += equity + gain;
+                    buyer.cashBuyingPower += gain + equity;
 
                     pos.avgPriceOut = (pos.avgPriceOut * pos.sizeOut + info.size * info.price) / (info.size + pos.sizeOut);
                     pos.sizeOut += info.size; 
@@ -237,7 +238,7 @@ class Broker{
 
                 pos.calcGain(info.price);
 
-               if(pos.sizeIn - pos.sizeOut == 0){
+               if(pos.totalSize == 0){
                    /*
 						If the buyer covered a short position, it is now unwinded fully and can be deleted.
 						But before doing that, add the position into the closed positions of this account.
@@ -253,6 +254,8 @@ class Broker{
                     buyer.closePosition(rec);
 					buyer.pnl += rec.realized;
                     buyer.positions.delete(info.symbol);
+                    buyer.setBpMultiplier(); 
+
                }
             }
             else{
@@ -279,10 +282,6 @@ class Broker{
                     buyer.openOrders.delete(info.symbol);
                 }
             }
-
-            
-            
-            buyer.setBpMultiplier();  
         }
 
         if(seller){
@@ -312,7 +311,7 @@ class Broker{
                 
                 pos.calcGain(info.price);
 
-                if(pos.sizeIn - pos.sizeOut == 0){
+                if(pos.totalSize == 0){
                     /*
 						If the seller sold a long position, it is now unwinded fully and can be deleted.
 						But save it into the closed positions first.
@@ -328,11 +327,13 @@ class Broker{
                     seller.closePosition(rec);
 					seller.pnl += rec.realized;
                     seller.positions.delete(info.symbol);
+                    seller.setBpMultiplier(); 
                 }
              }
              else{
                 seller.addPosition(info.symbol, info.price, info.size, SHT);
                 seller.cashBuyingPower -= info.price * info.size;
+                console.log(seller.cashBuyingPower);
              }
 
             seller.openEquity -= seller.openEquity > 0 ? info.price * info.size : 0;
@@ -355,7 +356,7 @@ class Broker{
                 }
             }
 			
-            seller.setBpMultiplier(); 
+            
         }
 
         orderbook.periodVolume += info.size;

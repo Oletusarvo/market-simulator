@@ -8,7 +8,6 @@ const MENT_NERVOUS = 1;
 class Trader{
     constructor(id){
         this.lastCanceledPrice  = 0;
-        this.lastOpenPrice      = 0; //At what price the last open order was placed.
         this.bias               = Math.random() < 0.5 ? SEL : BUY;
         this.id                 = id;
         this.confidence         = 1; //Value between 0 and 1

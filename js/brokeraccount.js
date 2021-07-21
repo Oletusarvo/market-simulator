@@ -11,6 +11,7 @@ class BrokerAccount{
         this.openOrderSentiment = -1;
         this.cashBuyingPower = bp;
         this.bpMultiplier = 0;
+        this.marginBuyingPower = this.cashBuyingPower * this.bpMultiplier;
 		
         this.openOrderSide = FLT;
         this.openOrderPrice = 0;
@@ -70,18 +71,20 @@ class BrokerAccount{
 
     setBpMultiplier(){
        let cash = this.cashBuyingPower;
-       if(cash <= 0){
-           this.bpMultiplier = 0;
+       if(cash >= 500 && cash < 3000){
+           this.bpMultiplier = 2;
        }
        else if(cash > 0 && cash < 500){
            this.bpMultiplier = 1;
        }
-       else if(cash >= 500 && cash < 3000){
-           this.bpMultiplier = 2;
+       else if(cash <= 0){
+           this.bpMultiplier = 0;
        }
        else{
            this.bpMultiplier = 4;
        }
+
+       this.marginBuyingPower = this.cashBuyingPower * this.bpMultiplier;
     }
 
 }
