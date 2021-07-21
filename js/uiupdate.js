@@ -300,7 +300,7 @@ update = function(){
 
     let prefix = last - orderbook.open >= 0 ? "+" : "-";
 
-    outputGain.value = last != NaN ? prefix + Math.abs(((last - orderbook.open) / last * 100)).toFixed(2) + "%" : 0 + "%";
+    outputGain.value = last != NaN ? prefix + Math.abs((((last - orderbook.open) / orderbook.open) * 100)).toFixed(2) + "%" : 0 + "%";
     outputOpen.value = orderbook.open.toFixed(orderbook.precision);
     outputGain.style.color = prefix == "+" ? "yellowgreen" : "red";
 

@@ -17,8 +17,18 @@ class OrderBook{
         this.numBuy         = 0;
         this.numSell        = 0;
         this.precision      = 2;
+        this.halted         = false;
+
 
         this.periodVolume = 0;
+    }
+
+    halt(){
+        this.halted = true;
+    }
+
+    unhalt(){
+        this.halted = false;
     }
 
     dataSeriesOpen(){
@@ -66,17 +76,17 @@ class OrderBook{
     }
 
     updatePrecision(){
-        if(this.last.price <= 1.00){
-            this.precision = 3;
-        }
-        else if(this.last.price <= 0.1){
-            this.precision = 4;
+        if(this.last.price <= 0.001){
+            this.precision = 6;
         }
         else if(this.last.price <= 0.01){
             this.precision = 5;
         }
-        else if(this.last.price <= 0.001){
-            this.precision = 6;
+        else if(this.last.price <= 0.1){
+            this.precision = 4;
+        }
+        else if(this.last.price <= 1.00){
+            this.precision = 3;
         }
         else{
             this.precision = 2;
