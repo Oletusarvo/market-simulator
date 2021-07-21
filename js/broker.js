@@ -228,7 +228,8 @@ class Broker{
                     let price = info.size * info.price;
                     let gain = equity - price;
 
-                    buyer.cashBuyingPower += gain + equity;
+                    buyer.cashBuyingPower += + -gain + equity;
+                    console.log(buyer.cashBuyingPower);
 
                     pos.avgPriceOut = (pos.avgPriceOut * pos.sizeOut + info.size * info.price) / (info.size + pos.sizeOut);
                     pos.sizeOut += info.size; 
@@ -301,7 +302,7 @@ class Broker{
                     let price = info.size * info.price;
                     let gain = price - equity;
                     seller.cashBuyingPower += equity + gain;
-
+                    console.log(seller.cashBuyingPower);
                     pos.avgPriceOut = (pos.avgPriceOut * pos.sizeOut + info.size * info.price) / (info.size + pos.sizeOut);
                     pos.sizeOut += Math.abs(info.size);
 					pos.totalSize -= info.size;
@@ -333,7 +334,6 @@ class Broker{
              else{
                 seller.addPosition(info.symbol, info.price, info.size, SHT);
                 seller.cashBuyingPower -= info.price * info.size;
-                console.log(seller.cashBuyingPower);
              }
 
             seller.openEquity -= seller.openEquity > 0 ? info.price * info.size : 0;
