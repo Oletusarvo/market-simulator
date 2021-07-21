@@ -1,3 +1,6 @@
+const STRAT_DEFAULT = 0;
+const STRAT_DIP = 1;
+
 class Trader{
     constructor(id){
         this.lastCanceledPrice  = 0;
@@ -6,14 +9,27 @@ class Trader{
         this.confidence         = 1; //Value between 0 and 1
         this.threshold          = Math.random(); //How confident the trader must be before taking a position.
         this.numCancels         = 0;
-        this.riskTolerance      = 0.025 //How much in percentage (value * 100) a position must be down before we close it.
-        this.profitTarget       = 0.05 //How much in percentage a position must be up before we take profit.
+        this.riskTolerance      = RANDOM_RANGE(0.02, 0.1) //How much in percentage (value * 100) a position must be down before we close it.
+        this.profitTarget       = RANDOM_RANGE(0.05, 0.15) //How much in percentage a position must be up before we take profit.
         this.previousSentiment  = FLT;
+        this.strategy           = Math.trunc(RANDOM_RANGE(0, 1));
     }
 
     updateBias(orderbook){
-        //Set bias to be opposite of the apparent sentiment.
-        this.bias = orderbook.numBuy > orderbook.numSell ? SEL : BUY;
+        const dataSeries = orderbook.dataSeries;
+
+        if(orderbook.dataSeries.length >= 2){
+            const len = orderbook.dataSeries.length;
+            const candle1 = orderbook.dataSeries[len - 2];
+            const candle2 = orderbook.dataSeries[len - 1];
+
+            if(candle2.close > candle1.close){
+                this.previousSentiment = BUY;
+            }
+            else{
+                this.previousSentiment = SEL;
+            }
+        }
     }
 
     action(pos, currentPrice){

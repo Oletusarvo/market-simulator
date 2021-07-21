@@ -182,7 +182,7 @@ class MarketMaker{
                     orderbook.cancelSell(-1);
                     let price = bid.price + this.spread;
                     while(orderbook.ask.size < this.depth){
-                        let order = new Order(-1, symbol, this.exchange.name, price, bid.shareSize, SHT, LMT);
+                        let order = new Order(-1, symbol, this.exchange.name, price, 100, SHT, LMT);
                         this.exchange.execute(order);
                         price += this.increment;
                     }

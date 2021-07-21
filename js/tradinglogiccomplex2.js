@@ -6,7 +6,8 @@ function tradingLogicComplex2(){
 	const ask = orderbook.bestAsk();
 	const acc = BROKER.accounts.get(id);
 	const trader = traders[id];
-	const openOrders = acc.openOrderSize > 0;
+	let openOrders = acc.openOrderSize > 0;
+	const direction = (orderbook.numBuy - orderbook.numSell) >= 0 ? BUY : SEL;
 
 	const sizes = [100, 250, 500, 1000];
 	let price = 1.0;
@@ -37,7 +38,7 @@ function tradingLogicComplex2(){
 					trader.bias = SEL;
 				}
 				else{
-					price = pos.avgPriceIn + trader.profitTarget * pos.avgPriceIn;
+					price = pos.avgPriceIn + trader.profitTarget * pos.avgPriceIn * RANDOM_RANGE(0.05, 1.0);
 				}
 				side = SEL;
 			}
@@ -47,7 +48,7 @@ function tradingLogicComplex2(){
 					trader.bias = BUY;
 				}
 				else{
-					price = pos.avgPriceIn - trader.profitTarget * pos.avgPriceIn;
+					price = pos.avgPriceIn - trader.profitTarget * pos.avgPriceIn * RANDOM_RANGE(0.05, 1.0);
 				}
 				side = CVR;
 			}
@@ -55,22 +56,69 @@ function tradingLogicComplex2(){
 			size = pos.totalSize; //This might cause a problem where the open position display shows negative size.
 		}
 		else{
+			if(trader.previousSentiment != trader.bias){
+				EXCHANGE.cancel(id, SYMBOL);
+				BROKER.registerCancel(id);
+				openOrders = acc.openOrderSize > 0;
+			}
 
 			if(openOrders){
+				
 				return undefined;
 			}
 
 			type = LMT;
+			const previousCandle = orderbook.dataSeries[orderbook.dataSeries.length - 1];
+			const strategy = trader.strategy;
+
 			if(trader.bias == BUY){
-				price = ask.price;
+				switch(strategy){
+					case STRAT_DEFAULT:
+						price = ask.price;
+					break;
+
+					case STRAT_DIP:{
+						if(trader.previousSentiment == SEL){
+							price = previousCandle && previousCandle.low ? previousCandle.low : bid.price;
+						}
+						else{
+							price = ask.price;
+						}
+					}
+
+					default:
+						console.log("Unidentified strategy! \'" + startegy + "\'");
+						return undefined;
+
+				}
+				
+				
 				side = BUY;
 			}else{
-				price = bid.price;
+				switch(strategy){
+					case STRAT_DEFAULT:
+						price = bid.price;
+					break;
+
+					case STRAT_DIP:{
+						if(trader.previousSentiment == BUY){
+							price = previousCandle && previousCandle.high ? previousCandle.high : ask.price;
+						}
+						else{
+							price = bid.price;
+						}
+					}
+
+					default:
+						console.log("Unidentified strategy! \'" + startegy + "\'");
+						return undefined;
+
+				}
 				side = SHT;
 			}
 
 			trader.previousSentiment = sentiment;
-			//trader.updateBias(orderbook);
+			trader.updateBias(orderbook);
 		}
 	}
 	

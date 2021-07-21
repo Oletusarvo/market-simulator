@@ -9,6 +9,8 @@ let table       = document.getElementById("table-level2");
 let berrtable   = document.getElementById("table-broker-messages");
 let ptable      = document.getElementById("table-price-history");
 RANDOM_RANGE 	= (min, max) => Math.random() * (max - min) + min;
+RANDOM_RANGE_INT = (min, max) => Math.trunc(Math.random() * (max - min) + min);
+
 let SYMBOL    	= "DEF";
 let NEXT_ID		= 1; //Used by trading logic functions to determine the next trader to make a move.
 let LAST_SIDE = FLT;
@@ -27,8 +29,9 @@ BROKER.infiniteShortSupply = false;
 
 EXCHANGE.addOrderBook(SYMBOL);
 var orderbook = EXCHANGE.getOrderBook(SYMBOL);
+orderbook.dataSeriesOpen();
 
-const numTraders = 200;
+const numTraders = 100;
 let traders = [];
 
 for(let i = 0; i < numTraders; ++i){
@@ -67,7 +70,7 @@ for(let r = 0; r < 10; ++r){
 
 let MARKETMAKER = new MarketMaker(EXCHANGE);
 MARKETMAKER.spread = 0.01;
-MARKETMAKER.depth = 2;
+MARKETMAKER.depth = 10;
 
 update();
 
@@ -75,14 +78,31 @@ let running = false;
 
 //Prioritize traders that are bailing out of a position.
 //let bailouts = [];
+let orderbookUpdateClock = 0;
+var cancelTimer = 0; //Timer until an unfilled open order is canceled.
+const runningSpeed = 40; //25 frames per second.
+
 setInterval(function(){
     if(running){
         //generator.frequency = Math.abs(sentimentFrequencyModulator.val);
+        
         autoTrade(tradingLogicComplex2); 
         update(); 
+
+        if(orderbookUpdateClock >= 15000){
+            orderbookUpdateClock = 0;
+            orderbook.dataSeriesClose();
+            orderbook.dataSeriesOpen();
+
+            const message = new Message("Data series expanded. ", "Orderbook");
+            BROKER.addMessage(message);
+        }
+        else{
+            orderbookUpdateClock += runningSpeed;
+        }
     }
        
-}, 150);
+}, runningSpeed);
 
 //Create a symbol
 //Symbol select

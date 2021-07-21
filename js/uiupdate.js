@@ -304,12 +304,15 @@ update = function(){
     outputOpen.value = orderbook.open.toFixed(orderbook.precision);
     outputGain.style.color = prefix == "+" ? "yellowgreen" : "red";
 
-	if(mmEnabled)
+	if(mmEnabled){
+		MARKETMAKER.increment = orderbook.precision == 3 ? 0.001 : orderbook.precision == 4 ? 0.0001 : orderbook.precision == 5 ? 0.00001 : 0.01;
 		MARKETMAKER.createMarket(SYMBOL);
+	}
 		
-    orderbook.drawTable(table);
 	orderbook.updatePrecision();
+    orderbook.drawTable(table);
     orderbook.drawPriceHistory(ptable);
+	orderbook.dataSeriesUpdate();
 	BROKER.drawMessages(berrtable);
     updateBrokerInfo();
     updateBankInfo();

@@ -4,6 +4,7 @@ class OrderBook{
         this.ask            = new Map();
         this.bid            = new Map();
         this.priceHistory   = [];
+        this.dataSeries     = [];
         this.open           = 0;
         this.close          = 0;
         this.high           = 0;
@@ -12,9 +13,37 @@ class OrderBook{
         this.lastBuy        = 0;
         this.last           = 0;
         this.lastDirection  = FLT;
+        this.direction      = FLT;
         this.numBuy         = 0;
         this.numSell        = 0;
         this.precision      = 2;
+
+        this.periodVolume = 0;
+    }
+
+    dataSeriesOpen(){
+        let candle = new Candle(this.last.price);
+        this.periodVolume = 0;
+        this.dataSeries.push(candle);
+    }
+
+    dataSeriesClose(){
+        const candle = this.dataSeries[this.dataSeries.length - 1];
+        const lastPriceHistory = this.priceHistory[this.priceHistory.length - 1];
+
+        candle.close(lastPriceHistory.price);
+        console.log("Open: " + candle.open + " Low: " + candle.low + " High: " + candle.high + " Close: " + candle.closep + " Volume: " + candle.volume);
+    }
+
+    dataSeriesUpdate(){
+        let candle = this.dataSeries[this.dataSeries.length - 1];
+        const lastPriceHistory = this.priceHistory[this.priceHistory.length - 1];
+
+        if(lastPriceHistory)
+            candle.update(lastPriceHistory.price, this.periodVolume);
+        else{
+            candle.update(this.last, 0);
+        }
     }
 
     cancel(id){
@@ -37,16 +66,16 @@ class OrderBook{
     }
 
     updatePrecision(){
-        if(this.last <= 1.00){
+        if(this.last.price <= 1.00){
             this.precision = 3;
         }
-        else if(this.last <= 0.1){
+        else if(this.last.price <= 0.1){
             this.precision = 4;
         }
-        else if(this.last <= 0.01){
+        else if(this.last.price <= 0.01){
             this.precision = 5;
         }
-        else if(this.last <= 0.001){
+        else if(this.last.price <= 0.001){
             this.precision = 6;
         }
         else{
@@ -168,7 +197,7 @@ class OrderBook{
             let size = table.rows[i].cells[1];
             let time = table.rows[i].cells[2];
 
-            price.innerHTML = info.price.toFixed(2);
+            price.innerHTML = info.price.toFixed(this.precision);
             size.innerHTML = info.size;
             time.innerHTML = info.time;
             price.style.color = size.style.color = time.style.color = info.side == BUY ? "lightgreen" : "red";

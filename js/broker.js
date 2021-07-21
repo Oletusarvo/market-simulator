@@ -357,6 +357,8 @@ class Broker{
 			
             seller.setBpMultiplier(); 
         }
+
+        orderbook.periodVolume += info.size;
     }
 
     drawMessages(table){

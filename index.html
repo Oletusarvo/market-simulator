@@ -137,7 +137,7 @@
 								<input class="input-field" id="input-size" min="1" step="1" value="100" type="number">
 								
 								<label>ID</label>
-								<input class="input-field" id="input-id" min="0" max="0" step="1" value="0" type="number">
+								<input class="input-field" id="input-id" min="0" max="49" step="1" value="0" type="number">
 								
 								<label>Type</label>
 								<select id="input-type">
@@ -183,36 +183,45 @@
 						<fieldset id="field-position-info">
 							<legend>Open Positions</legend>
 							<table id="table-position-info">
-								<th>Sym</th>
-								<th>Side</th>
-								<th>Sze</th>
-								<th>Prc</th>
-								<th>Rlz</th>
-								<th>Unrlz</th>
-								<th>Gain</th>
+								<thead>
+									<th>Sym</th>
+									<th>Side</th>
+									<th>Sze</th>
+									<th>Prc</th>
+									<th>Rlz</th>
+									<th>Unrlz</th>
+									<th>Gain</th>
+								</thead>
+								
 							</table>
 						</fieldset>
 
 						<fieldset id="field-closed-positions">
 							<legend>Closed Positions</legend>
 							<table id="table-closed-positions">
-								<th>Sym</th>
-								<th>Side</th>
-								<th>Sze</th>
-								<th>Prc In</th>
-								<th>Prc Out</th>
-								<th>Rlz</th>
-								<th>Gain</th>
+								<thead>
+									<th>Sym</th>
+									<th>Side</th>
+									<th>Sze</th>
+									<th>Prc In</th>
+									<th>Prc Out</th>
+									<th>Rlz</th>
+									<th>Gain</th>
+								</thead>
+								
 							</table>
 						</fieldset>	
 
 						<fieldset id="field-open-orders">
 							<legend>Open Orders</legend>
 							<table id="table-open-orders">
-								<th>Symbol</th>
-								<th>Side</th>
-								<th>Size</th>
-								<th>Price</th>
+								<thead>
+									<th>Symbol</th>
+									<th>Side</th>
+									<th>Size</th>
+									<th>Price</th>
+								</thead>
+								
 							</table>
 						</fieldset>
 					</div>
@@ -288,6 +297,7 @@
     <script src="js\transactioninfo.js"></script>
     <script src="js\order.js"></script>
     <script src="js\orderqueue.js"></script>
+	<script src="js/candle.js"></script>
     <script src="js\orderbook.js"></script>
     <script src="js\exchange.js"></script>
     <script src="js\position.js"></script>
