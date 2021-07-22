@@ -18,6 +18,8 @@ const ERR_LOCATED_SHARES_NUM    = 16;
 const ERR_GREATER_THAN_CLOSE_LIMIT = 17;
 const ERR_ACCOUNT 				= 18;
 const ERR_SIZE 					= 19;
+const ERR_HALTED                = 20;
+const ERR_SSR                   = 21;
 
 class Broker{
     constructor(name){
@@ -50,6 +52,17 @@ class Broker{
         let pos = acc.positions.get(order.symbol);
 
         if(acc){
+            if(orderbook.halted){
+                return ERR_HALTED;
+            }
+
+            if(orderbook.shortSaleRestriction){
+                const ask = orderbook.bestAsk();
+                if(order.side == SHT && (order.type == MKT || order.price < ask.price)){
+                    return ERR_SSR;
+                }
+            }
+
             //Disalow shorting unless there are located shares available.
             if(!this.allowNakedShort && order.side == SHT){
                 let locatedShares = acc.locatedShares.get(order.symbol);
@@ -63,8 +76,8 @@ class Broker{
 
             //Not enough buying power.
             const newOpenEquity = acc.openEquity + order.size * order.price;
-            const newBalance = (Math.abs(acc.cashByingPower) + order.size * order.price) > acc.getBuyingPower();
-            if((order.side == SHT || order.side == BUY) && (newOpenEquity > acc.getBuyingPower()))
+            const newBalance = acc.getBuyingPower() - (order.size * order.price);
+            if((order.side == SHT || order.side == BUY) && (newOpenEquity > acc.getBuyingPower()) && newBalance >= 0)
                 return ERR_BUYINGPOWER;
             
             //Disallow orders out on opposite sides at the same time.
@@ -427,6 +440,12 @@ class Broker{
 
             case ERR_GREATER_THAN_CLOSE_LIMIT:
                 return "Trying to close more than available non-short offered shares!";
+
+            case ERR_SSR:
+                return "Cannot short below the ask when short sale restriction is on!";
+
+            case ERR_HALTED:
+                return "Cannot send orders while stock is halted!";
 
             default:
                 return("Unknown error. Code: " + errcode);

@@ -37,27 +37,147 @@ class Trader{
         }
     }
 
-    action(pos, currentPrice){
+    actionPos(pos, orderbook){
 
-        if(pos){
-            const priceIn = pos.avgPriceIn;
-            if(pos.side == BUY){
-                if(currentPrice >= priceIn + priceIn * this.profitTarget || currentPrice <= priceIn - priceIn * this.riskTolerance){
-                    return SEL
-                }
+        const ask = orderbook.bestAsk();
+        const bid = orderbook.bestBid();
+
+        let price = 1.0;
+        let size = 0;
+        let type = LMT;
+        let side = FLT;
+
+        const acc = BROKER.accounts.get(this.id);
+        let openOrders = acc.openOrderSize > 0;
+        const gain = pos.side == BUY ? ((bid.price - pos.avgPriceIn) / pos.avgPriceIn) * 100 : ((pos.avgPriceIn - ask.price) / pos.avgPriceIn) * 100;
+        
+        if(openOrders){
+            if(gain <= -this.riskTolerance){
+                EXCHANGE.cancel(this.id, SYMBOL);
+                BROKER.registerCancel(this.id);
             }
             else{
-                if(currentPrice >= priceIn + priceIn * this.riskTolerance || currentPrice <= priceIn - priceIn * this.profitTarget){
-                    return CVR;
+                return undefined;
+            }
+        }
+
+        if(pos.side == BUY){
+            if(gain <= -this.riskTolerance){
+                type = MKT;
+            }
+            else if(gain >= this.profitTarget){
+                price = bid.price;
+                //price = pos.avgPriceIn + MARKETMAKER.increment * 5;
+            }
+            else{
+                return undefined;
+            }
+            side = SEL;
+        }
+        else{
+            if(gain <= -this.riskTolerance){
+                type = MKT;
+            }
+            else if(gain >= this.profitTarget){
+                price = ask.price;
+                //price = pos.avgPriceIn - MARKETMAKER.increment * 5;
+            }
+            else{
+                return undefined;
+            }
+            side = CVR;
+        }
+
+        size = pos.totalSize; //This might cause a problem where the open position display shows negative size.
+
+        return new Order(this.id, SYMBOL, k_ename, price, size, side, type);
+    }
+
+    actionNoPos(orderbook){
+
+        const ask = orderbook.bestAsk();
+        const bid = orderbook.bestBid();
+        const acc = BROKER.accounts.get(this.id);
+
+        let price = 1.0;
+        let size = 0;
+        let type = LMT;
+        let side = FLT;
+
+        const previousCandle = orderbook.dataSeries[orderbook.dataSeries.length - 1];
+
+        switch(this.strategy){
+            case STRAT_DEFAULT:{
+                switch(this.bias){
+                    case BUY:{
+                        price = ask.price;
+                    }
+
+                    case SEL:{
+                        if(!orderbook.shortSaleRestriction){
+                            price = bid.price;
+                        }
+                        else{
+                            price =  ask.price;
+                        }
+                    }
+                }
+            }
+
+            case STRAT_DIP:{
+                switch(this.bias){
+                    case BUY:{
+                        if(this.previousSentiment == SEL){
+                            if(!orderbook.shortSaleRestriction)
+                                price =  previousCandle && previousCandle.low ? previousCandle.low : bid.price;
+                            else
+                                price =  previousCandle && previousCandle.high ? previousCandle.high : ask.price;
+                        }
+                        else if(this.previousSentiment == BUY){
+                            price = previousCandle && previousCandle.high ? previousCandle.high : ask.price;
+                        }
+                        else{
+                            price = ask.price;
+                        } 
+                    }
+
+                    case SEL:{
+                        if(this.previousSentiment == BUY){
+                            price = previousCandle && previousCandle.high ? previousCandle.high : ask.price;
+                        }
+                        else if(this.previousSentiment == SEL){
+                            if(!orderbook.shortSaleRestriction)
+                                price = previousCandle && previousCandle.low ? previousCandle.low : bid.price;
+                            else
+                               price = previousCandle && previousCandle.high ? previousCandle.high : ask.price;
+                        }
+                        else{
+                            if(!orderbook.shortSaleRestriction)
+                               price = bid.price;
+                            else{
+                                price = ask.price;
+                            }
+                        }
+                    }
                 }
             }
         }
-        else{
-            if(this.confidence >= this.threshold){
-                return this.bias;
-            }
+
+        switch(this.bias){
+            case BUY:
+                side = BUY;
+            break;
+
+            case SEL:
+                side = SHT;
+            break;
         }
-        
-        return FLT;
+
+        this.updateBias(orderbook);
+        const amount = (acc.getBuyingPower() * 0.6);
+        size = amount <= 100000 ? Math.floor(amount / price) : Math.floor(100000 / price); //Limit dollar amount.
+        this.lastOpenPrice = price; //Market orders are not put in the order book, but this should not be a problem.
+    
+        return new Order(this.id, SYMBOL, k_ename, price, size, side, type);
     }
 }

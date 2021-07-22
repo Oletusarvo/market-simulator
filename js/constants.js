@@ -11,3 +11,5 @@ const BIDPRICECELL  = 0;
 const BIDSIZECELL   = 1;
 const ASKPRICECELL  = 2;
 const ASKSIZECELL   = 3;
+
+const UPDATE_SPEED = 67; //~15 frames per second.

@@ -17,18 +17,60 @@ class OrderBook{
         this.numBuy         = 0;
         this.numSell        = 0;
         this.precision      = 2;
-        this.halted         = false;
 
+        this.halted         = false;
+        this.shortSaleRestriction = false;
+        this.haltReferencePrice = 0;
+        this.haltReferencePriceClock = 0;
+        this.haltClock = 0;
+        this.haltOpenTime = 10000;
 
         this.periodVolume = 0;
     }
 
-    halt(){
-        this.halted = true;
-    }
+    update(){
+        this.updatePrecision();
 
-    unhalt(){
-        this.halted = false;
+        const bid = this.bestBid();
+        if(bid && bid.price < 1.00){
+            this.shortSaleRestriction = true;
+        }
+        else{
+            this.shortSaleRestriction = false;
+        }
+
+        this.dataSeriesUpdate();
+
+        if(this.haltReferencePriceClock >= 10000){
+            if(this.last){
+                this.haltReferencePrice = this.last.price;
+            }
+
+            this.haltReferencePriceClock = 0;
+        }
+        else{
+            this.haltReferencePriceClock += UPDATE_SPEED;
+        }
+
+        const last = this.last;
+        const haltReferencePrice = this.haltReferencePrice;
+        const haltThreshold = 0.3;
+        //Halt the stock if it surges 10% within a certain period.
+        if(!this.halted && last && ((last.price >= haltReferencePrice + (haltReferencePrice * haltThreshold) || last.price <= haltReferencePrice - (haltReferencePrice * haltThreshold)))){
+            this.halted = true;
+            this.haltReferencePrice = last.price;
+            this.haltOpenTime = 10000;
+        }
+
+        if(this.halted){
+            if(this.haltClock < this.haltOpenTime){
+                this.haltClock += UPDATE_SPEED;
+            }
+            else{
+                this.haltClock = 0;
+                this.halted = false;
+            }
+        }
     }
 
     dataSeriesOpen(){
@@ -42,7 +84,7 @@ class OrderBook{
         const lastPriceHistory = this.priceHistory[this.priceHistory.length - 1];
 
         candle.close(lastPriceHistory.price);
-        console.log("Open: " + candle.open + " Low: " + candle.low + " High: " + candle.high + " Close: " + candle.closep + " Volume: " + candle.volume);
+        console.log(candle.open + ";" + candle.low + ";" + candle.high + ";" + candle.closep + ";" + candle.volume);
     }
 
     dataSeriesUpdate(){
@@ -139,7 +181,8 @@ class OrderBook{
         sortedAskKeys.sort((a, b) => b - a);
         //sortedAskKeys.reverse();
 
-        for(let rowNum = 1; rowNum <= 10; ++rowNum){
+        const drawRows = this.halted ? 1 : 10;
+        for(let rowNum = 1; rowNum <= drawRows; ++rowNum){
 
             let b = this.bid.get(sortedBidKeys.pop());
             let a = this.ask.get(sortedAskKeys.pop());

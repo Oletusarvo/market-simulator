@@ -283,7 +283,7 @@ update = function(){
     let outputHigh = document.getElementById("output-high");
     let outputLow  = document.getElementById("output-low");
     let outputOpen = document.getElementById("output-open");
-    let outputSpread = document.getElementById("output-spread");
+    //let outputSpread = document.getElementById("output-spread");
 	let outputSymbol = document.querySelector("#output-symbol");
 
     let ask = orderbook.bestAsk();
@@ -296,7 +296,18 @@ update = function(){
     outputHigh.value = orderbook.high.toFixed(orderbook.precision);
     outputLow.value = orderbook.low == Number.MAX_VALUE ? NaN : orderbook.low.toFixed(orderbook.precision);
     //outputSpread.value = (ask && bid) ? (ask.price - bid.price).toFixed(2) : NaN;
-	outputSymbol.value = SYMBOL;
+	if(orderbook.shortSaleRestriction && orderbook.halted){
+		outputSymbol.value = SYMBOL + "(SSR)(H)";
+	}
+	else if(orderbook.shortSaleRestriction){
+		outputSymbol.value = SYMBOL + "(SSR)";
+	}
+	else if(orderbook.halted){
+		outputSymbol.value = SYMBOL + "(H)";
+	}
+	else{
+		outputSymbol.value = SYMBOL;
+	}
 
     let prefix = last - orderbook.open >= 0 ? "+" : "-";
 
@@ -308,11 +319,10 @@ update = function(){
 		MARKETMAKER.increment = orderbook.precision == 3 ? 0.001 : orderbook.precision == 4 ? 0.0001 : orderbook.precision == 5 ? 0.00001 : 0.01;
 		MARKETMAKER.createMarket(SYMBOL);
 	}
-		
-	orderbook.updatePrecision();
+	
+	orderbook.update();
     orderbook.drawTable(table);
     orderbook.drawPriceHistory(ptable);
-	orderbook.dataSeriesUpdate();
 	BROKER.drawMessages(berrtable);
     updateBrokerInfo();
     updateBankInfo();

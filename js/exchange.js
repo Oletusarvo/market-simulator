@@ -144,6 +144,36 @@ class Exchange{
         this.orderbooks = new Map();
         this.transactions = [];
         this.marketmaker = null;
+        this.haltThreshold = 0.1;
+        this.ssrThreshold = 0.2;
+    }
+
+    halt(symbol){
+        let ob = this.orderbooks.get(symbol);
+        if(ob){
+            ob.halted = true;
+        }
+    }
+
+    unhalt(symbol){
+        let ob = this.orderbooks.get(symbol);
+        if(ob){
+            ob.halted = false;
+        }
+    }
+
+    restrict(symbol){
+        let ob = this.orderbooks.get(symbol);
+        if(ob){
+            ob.shortSaleRestriction = true;
+        }
+    }
+
+    unrestrict(symbol){
+        let ob = this.orderbooks.get(symbol);
+        if(ob){
+            ob.shortSaleRestriction = false;
+        }
     }
 
     addOrderBook(symbol){
