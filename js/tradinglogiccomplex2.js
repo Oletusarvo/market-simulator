@@ -27,7 +27,7 @@ function tradingLogicComplex2(){
 		if(orderbook.halted){
 			EXCHANGE.cancel(trader.id, SYMBOL);
 			BROKER.registerCancel(trader.id);
-			openOrder = acc.openOrderSize > 0;
+			//openOrder = acc.openOrderSize > 0;
 			return undefined;
 		}
 
@@ -88,7 +88,10 @@ function tradingLogicComplex2(){
 			if(trader.bias == BUY){
 				switch(strategy){
 					case STRAT_DEFAULT:
-						price = ask.price;
+						if(trader.previousSentiment == BUY)
+							price = ask.price;
+						else
+							price = bid.price;
 					break;
 
 					case STRAT_DIP:{
@@ -114,7 +117,10 @@ function tradingLogicComplex2(){
 			}else{
 				switch(strategy){
 					case STRAT_DEFAULT:
-						price = bid.price;
+						if(trader.previousSentiment == SEL)
+							price = bid.price;
+						else
+							price = ask.price;
 					break;
 
 					case STRAT_DIP:{

@@ -56,12 +56,12 @@ class OrderBook{
     
             const last = this.last;
             const haltReferencePrice = this.haltReferencePrice;
-            const haltThreshold = 0.3;
+            const haltThreshold = 0.1;
             //Halt the stock if it surges 10% within a certain period.
             if(!this.halted && last && ((last.price >= haltReferencePrice + (haltReferencePrice * haltThreshold) || last.price <= haltReferencePrice - (haltReferencePrice * haltThreshold)))){
                 this.halted = true;
                 this.haltReferencePrice = last.price;
-                this.haltOpenTime = 5000;
+                this.haltOpenTime = 20000;
             }
     
             if(this.halted){

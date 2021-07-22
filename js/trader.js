@@ -15,7 +15,7 @@ class Trader{
         this.numCancels         = 0;
         this.riskTolerance      = RANDOM_RANGE(0.02, 0.1) //How much in percentage (value * 100) a position must be down before we close it.
         this.profitTarget       = RANDOM_RANGE(0.05, 0.15) //How much in percentage a position must be up before we take profit.
-        this.previousSentiment  = FLT;
+        this.previousSentiment  = this.bias;
         this.strategy           = Math.trunc(RANDOM_RANGE(STRAT_DEFAULT, STRAT_DIP));
         this.mentality          = Math.trunc(RANDOM_RANGE(MENT_DEFAULT, MENT_NERVOUS));
     }
