@@ -55,7 +55,7 @@ class MarketMaker{
                 }
             }
             else{
-                price = 1.00
+                price = 5.00
                 
                 //Fill the ask side.
                 while(orderbook.ask.size < this.depth){

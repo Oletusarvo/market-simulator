@@ -24,6 +24,7 @@ class OrderBook{
         this.haltReferencePriceClock = 0;
         this.haltClock = 0;
         this.haltOpenTime = 10000;
+        this.haltingEnabled = true;
 
         this.periodVolume = 0;
     }
@@ -32,7 +33,7 @@ class OrderBook{
         this.updatePrecision();
 
         const bid = this.bestBid();
-        if(bid && bid.price < 1.00){
+        if(bid && bid.price < 0.1){
             this.shortSaleRestriction = true;
         }
         else{
@@ -41,36 +42,39 @@ class OrderBook{
 
         this.dataSeriesUpdate();
 
-        if(this.haltReferencePriceClock >= 10000){
-            if(this.last){
-                this.haltReferencePrice = this.last.price;
-            }
-
-            this.haltReferencePriceClock = 0;
-        }
-        else{
-            this.haltReferencePriceClock += UPDATE_SPEED;
-        }
-
-        const last = this.last;
-        const haltReferencePrice = this.haltReferencePrice;
-        const haltThreshold = 0.3;
-        //Halt the stock if it surges 10% within a certain period.
-        if(!this.halted && last && ((last.price >= haltReferencePrice + (haltReferencePrice * haltThreshold) || last.price <= haltReferencePrice - (haltReferencePrice * haltThreshold)))){
-            this.halted = true;
-            this.haltReferencePrice = last.price;
-            this.haltOpenTime = 10000;
-        }
-
-        if(this.halted){
-            if(this.haltClock < this.haltOpenTime){
-                this.haltClock += UPDATE_SPEED;
+        if(this.haltingEnabled){
+            if(this.haltReferencePriceClock >= 10000){
+                if(this.last){
+                    this.haltReferencePrice = this.last.price;
+                }
+    
+                this.haltReferencePriceClock = 0;
             }
             else{
-                this.haltClock = 0;
-                this.halted = false;
+                this.haltReferencePriceClock += UPDATE_SPEED;
+            }
+    
+            const last = this.last;
+            const haltReferencePrice = this.haltReferencePrice;
+            const haltThreshold = 0.3;
+            //Halt the stock if it surges 10% within a certain period.
+            if(!this.halted && last && ((last.price >= haltReferencePrice + (haltReferencePrice * haltThreshold) || last.price <= haltReferencePrice - (haltReferencePrice * haltThreshold)))){
+                this.halted = true;
+                this.haltReferencePrice = last.price;
+                this.haltOpenTime = 5000;
+            }
+    
+            if(this.halted){
+                if(this.haltClock < this.haltOpenTime){
+                    this.haltClock += UPDATE_SPEED;
+                }
+                else{
+                    this.haltClock = 0;
+                    this.halted = false;
+                }
             }
         }
+        
     }
 
     dataSeriesOpen(){
@@ -84,7 +88,7 @@ class OrderBook{
         const lastPriceHistory = this.priceHistory[this.priceHistory.length - 1];
 
         candle.close(lastPriceHistory.price);
-        console.log(candle.open + ";" + candle.low + ";" + candle.high + ";" + candle.closep + ";" + candle.volume);
+        console.log(Number(candle.open).toLocaleString() + ";" + Number(candle.low).toLocaleString() + ";" + Number(candle.high).toLocaleString() + ";" + Number(candle.closep).toLocaleString() + ";" + candle.volume);
     }
 
     dataSeriesUpdate(){
@@ -181,7 +185,7 @@ class OrderBook{
         sortedAskKeys.sort((a, b) => b - a);
         //sortedAskKeys.reverse();
 
-        const drawRows = this.halted ? 1 : 10;
+        const drawRows = 10;
         for(let rowNum = 1; rowNum <= drawRows; ++rowNum){
 
             let b = this.bid.get(sortedBidKeys.pop());
