@@ -24,7 +24,8 @@ class OrderBook{
         this.haltReferencePriceClock = 0;
         this.haltClock = 0;
         this.haltOpenTime = 10000;
-        this.haltingEnabled = true;
+        this.haltingEnabled = false;
+        this.haltThreshold = 0.1;
 
         this.periodVolume = 0;
     }
@@ -56,12 +57,12 @@ class OrderBook{
     
             const last = this.last;
             const haltReferencePrice = this.haltReferencePrice;
-            const haltThreshold = 0.1;
+            const haltThreshold = this.haltThreshold;
             //Halt the stock if it surges 10% within a certain period.
             if(!this.halted && last && ((last.price >= haltReferencePrice + (haltReferencePrice * haltThreshold) || last.price <= haltReferencePrice - (haltReferencePrice * haltThreshold)))){
                 this.halted = true;
                 this.haltReferencePrice = last.price;
-                this.haltOpenTime = 20000;
+                this.haltOpenTime = 5000;
             }
     
             if(this.halted){
@@ -191,23 +192,37 @@ class OrderBook{
             let b = this.bid.get(sortedBidKeys.pop());
             let a = this.ask.get(sortedAskKeys.pop());
 
+            let bidPriceCell = table.rows[rowNum].cells[BIDPRICECELL];
+            let bidSizeCell = table.rows[rowNum].cells[BIDSIZECELL];
+            let askPriceCell = table.rows[rowNum].cells[ASKPRICECELL];
+            let askSizeCell = table.rows[rowNum].cells[ASKSIZECELL];
+
+            
+
             if(b){
-                table.rows[rowNum].cells[BIDPRICECELL].innerHTML = b.price.toFixed(this.precision);
-                table.rows[rowNum].cells[BIDSIZECELL].innerHTML = Math.trunc(b.shareSize / 100);
+                bidPriceCell.innerHTML = b.price.toFixed(this.precision);
+                bidSizeCell.innerHTML = Math.trunc(b.shareSize / 100);
             }
             else{
-                table.rows[rowNum].cells[BIDPRICECELL].innerHTML = ""
-                table.rows[rowNum].cells[BIDSIZECELL].innerHTML = ""
+                bidPriceCell.innerHTML = ""
+                bidSizeCell.innerHTML = ""
             }
 
             if(a){
-                table.rows[rowNum].cells[ASKPRICECELL].innerHTML = a.price.toFixed(this.precision);
-                table.rows[rowNum].cells[ASKSIZECELL].innerHTML = Math.trunc(a.shareSize / 100);
+                askPriceCell.innerHTML = a.price.toFixed(this.precision);
+                askSizeCell.innerHTML = Math.trunc(a.shareSize / 100);
             }
             else{
-                table.rows[rowNum].cells[ASKPRICECELL].innerHTML = ""
-                table.rows[rowNum].cells[ASKSIZECELL].innerHTML = ""
+                askPriceCell.innerHTML = ""
+                askSizeCell.innerHTML = ""
             }
+
+            const bidHaltLevel = parseFloat((this.haltReferencePrice - this.haltReferencePrice * this.haltThreshold).toFixed(this.precision));
+            const askHaltLevel = parseFloat((this.haltReferencePrice + this.haltReferencePrice * this.haltThreshold).toFixed(this.precision));
+
+            //console.log("Bid halt at: " + bidHaltLevel + " Ask halt at: " + askHaltLevel);
+            bidPriceCell.style.background = bidSizeCell.style.background = b && b.price <= bidHaltLevel ? "red" : "white";
+            askPriceCell.style.background = askSizeCell.style.background = a && a.price >= askHaltLevel ? "red" : "white";
         }
     }
 

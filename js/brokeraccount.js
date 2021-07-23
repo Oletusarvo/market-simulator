@@ -10,7 +10,7 @@ class BrokerAccount{
         this.openOrderSize = 0;
         this.openOrderSentiment = -1;
         this.cashBuyingPower = bp;
-        this.bpMultiplier = 0;
+        this.bpMultiplier = 1;
         this.marginBuyingPower = this.cashBuyingPower * this.bpMultiplier;
 		
         this.openOrderSide = FLT;
@@ -18,6 +18,7 @@ class BrokerAccount{
         this.openOrderDifference = 0;
 		
         this.margin = 0;
+        this.marginEnabled = false;
         this.setBpMultiplier();
 
         this.willingToBorrow 	= false;
@@ -66,11 +67,15 @@ class BrokerAccount{
 
     //Returns the available buying power multiplied by current multiplier.
     getBuyingPower(){
-        return this.cashBuyingPower * this.bpMultiplier;
+        if(this.marginEnabled)
+            return this.marginBuyingPower;
+        else
+            return this.cashBuyingPower;
     }
 
     setBpMultiplier(){
        let cash = this.cashBuyingPower;
+       /*
        if(cash >= 500 && cash < 3000){
            this.bpMultiplier = 2;
        }
@@ -83,8 +88,9 @@ class BrokerAccount{
        else{
            this.bpMultiplier = 4;
        }
+       */
 
-       this.marginBuyingPower = this.cashBuyingPower * this.bpMultiplier;
+       this.marginBuyingPower = cash * this.bpMultiplier;
     }
 
 }

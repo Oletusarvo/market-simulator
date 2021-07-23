@@ -70,7 +70,7 @@ for(let r = 0; r < 10; ++r){
 
 let MARKETMAKER = new MarketMaker(EXCHANGE);
 MARKETMAKER.spread = 0.01;
-MARKETMAKER.depth = 10;
+MARKETMAKER.depth = 5;
 
 update();
 

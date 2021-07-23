@@ -76,8 +76,7 @@ class Broker{
 
             //Not enough buying power.
             const newOpenEquity = acc.openEquity + order.size * order.price;
-            const newBalance = acc.getBuyingPower() - (order.size * order.price);
-            if((order.side == SHT || order.side == BUY) && (newOpenEquity > acc.getBuyingPower()) && newBalance >= 0)
+            if((order.side == SHT || order.side == BUY) && (newOpenEquity > acc.getBuyingPower()))
                 return ERR_BUYINGPOWER;
             
             //Disallow orders out on opposite sides at the same time.
@@ -223,6 +222,7 @@ class Broker{
 
         if(buyer){
             let pos = buyer.positions.get(info.symbol);
+            const marginEnabled = buyer.marginEnabled;
             if(pos){    
                 //If adding to an existing long position, update average price and decrease buying power.
                if(pos.side == BUY){
@@ -237,16 +237,17 @@ class Broker{
                     their average closing price updated.
                */
                 if(pos.side == SHT){
-                    let equity = pos.sizeIn * pos.avgPriceIn;
+                    let equity = info.size * pos.avgPriceIn;
                     let price = info.size * info.price;
                     let gain = equity - price;
 
-                    buyer.cashBuyingPower += + -gain + equity;
+                    buyer.cashBuyingPower += equity + gain;
 
                     pos.avgPriceOut = (pos.avgPriceOut * pos.sizeOut + info.size * info.price) / (info.size + pos.sizeOut);
                     pos.sizeOut += info.size; 
 					pos.totalSize -= info.size;
                     pos.realized += (pos.avgPriceIn - info.price) * info.size;
+                    //buyer.setBpMultiplier();
                 }
 
                 pos.calcGain(info.price);
@@ -267,7 +268,7 @@ class Broker{
                     buyer.closePosition(rec);
 					buyer.pnl += rec.realized;
                     buyer.positions.delete(info.symbol);
-                    buyer.setBpMultiplier(); 
+                    //buyer.setBpMultiplier(); 
 
                }
             }
@@ -299,25 +300,29 @@ class Broker{
 
         if(seller){
             let pos = seller.positions.get(info.symbol);
+            const marginEnabled = seller.marginEnabled;
             if(pos){    
                  //If adding to an existing short position, update average price and decrese buying power.
                 if(pos.side == SHT){
                      pos.avgPriceIn = (pos.avgPriceIn * pos.sizeIn + info.price * info.size) / (info.size + pos.sizeIn);
                      seller.cashBuyingPower -= info.price * info.size;
-                     pos.totalSize += Math.abs(info.size);
-                     pos.sizeIn += Math.abs(info.size);
+                     pos.totalSize += info.size;
+                     pos.sizeIn += info.size;
                 }
 
                 //An account selling a long position should have their buying power increased.
                 if(pos.side == BUY){
-                    let equity = pos.sizeIn * pos.avgPriceIn;
+                    let equity = info.size * pos.avgPriceIn;
                     let price = info.size * info.price;
                     let gain = price - equity;
+
                     seller.cashBuyingPower += equity + gain;
+
                     pos.avgPriceOut = (pos.avgPriceOut * pos.sizeOut + info.size * info.price) / (info.size + pos.sizeOut);
                     pos.sizeOut += Math.abs(info.size);
 					pos.totalSize -= info.size;
                     pos.realized += (info.price - pos.avgPriceIn) * info.size;
+                    seller.setBpMultiplier();
                 }
 
                 
@@ -339,7 +344,7 @@ class Broker{
                     seller.closePosition(rec);
 					seller.pnl += rec.realized;
                     seller.positions.delete(info.symbol);
-                    seller.setBpMultiplier(); 
+                    //seller.setBpMultiplier(); 
                 }
              }
              else{

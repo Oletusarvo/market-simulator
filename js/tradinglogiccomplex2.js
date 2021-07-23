@@ -105,6 +105,7 @@ function tradingLogicComplex2(){
 							price = ask.price;
 						}
 					}
+					break;
 
 					default:
 						console.log("Unidentified strategy! \'" + startegy + "\'");
@@ -134,6 +135,7 @@ function tradingLogicComplex2(){
 							price = bid.price;
 						}
 					}
+					break;
 
 					default:
 						console.log("Unidentified strategy! \'" + startegy + "\'");
