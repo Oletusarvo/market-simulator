@@ -33,10 +33,12 @@ function tradingLogicComplex2(){
 
 		const pos = acc.positions.get(SYMBOL);
 		if(pos){
-			const gain = pos.side == BUY ? ((bid.price - pos.avgPriceIn) / pos.avgPriceIn) * 100 : ((pos.avgPriceIn - ask.price) / pos.avgPriceIn) * 100;
+			const gain = pos.side == BUY ? ((bid.price - pos.avgPriceIn) / pos.avgPriceIn) : ((pos.avgPriceIn - ask.price) / pos.avgPriceIn);
         
 			if(openOrders){
-				if(gain <= -trader.riskTolerance){
+				trader.giveUpTimer -= 1;
+
+				if(gain <= -trader.riskTolerance || trader.giveUpTimer <= 0){
 					EXCHANGE.cancel(id, SYMBOL);
 					BROKER.registerCancel(id);
 					openOrder = acc.openOrderSize > 0;
@@ -46,30 +48,84 @@ function tradingLogicComplex2(){
 				}
 			}
 
+			const strategy = trader.strategy;
+			
 			if(pos.side == BUY){
-				if(gain <= -trader.riskTolerance){
-					type = MKT;
+				switch(strategy){
+
+					case STRAT_DIP:{
+						if(trader.giveUpTimer > 0){
+							const dataLen = orderbook.dataSeries.length;
+							const dataSeries = orderbook.dataSeries;
+							const nextToLastCandle = dataSeries[dataLen - 2]
+							const lastCandle = dataSeries[dataLen - 1];
+
+							if(trader.previousSentiment == BUY){
+								price = nextToLastCandle && nextToLastCandle.high ? nextToLastCandle.high : ask.price;
+							}
+							else{
+								price = lastCandle && lastCandle.high ? lastCandle.high : bid.price;
+							}
+						}
+						else{
+							type = MKT;
+						}
+					}
+					break;
+
+					default:{
+						if(gain <= -trader.riskTolerance || trader.giveUpTimer <= 0){
+							type = MKT;
+						}
+						else if(gain >= trader.profitTarget){
+							price = bid.price;
+							//price = pos.avgPriceIn + MARKETMAKER.increment * 5;
+						}
+						else{
+							return undefined;
+						}
+					}
+
 				}
-				else if(gain >= trader.profitTarget){
-					price = bid.price;
-					//price = pos.avgPriceIn + MARKETMAKER.increment * 5;
-				}
-				else{
-					return undefined;
-				}
+				
 				side = SEL;
 			}
 			else{
-				if(gain <= -trader.riskTolerance){
-					type = MKT;
+
+				switch(strategy){
+					case STRAT_DIP:{
+						if(trader.giveUpTimer > 0){
+							const dataLen = orderbook.dataSeries.length;
+							const dataSeries = orderbook.dataSeries;
+							const nextToLastCandle = dataSeries[dataLen - 2]
+							const lastCandle = dataSeries[dataLen - 1];
+
+							if(trader.previousSentiment == SEL){
+								price = nextToLastCandle && nextToLastCandle.low ? nextToLastCandle.low : bid.price;
+							}
+							else{
+								price = lastCandle && lastCandle.low ? lastCandle.low : ask.price;
+							}
+						}
+						else{
+							type = MKT;
+						}
+					}
+					break;
+
+					default:
+						if(gain <= -trader.riskTolerance || trader.giveUpTimer <= 0){
+							type = MKT;
+						}
+						else if(gain >= trader.profitTarget){
+							price = ask.price;
+							//price = pos.avgPriceIn - MARKETMAKER.increment * 5;
+						}
+						else{
+							return undefined;
+						}
 				}
-				else if(gain >= trader.profitTarget){
-					price = ask.price;
-					//price = pos.avgPriceIn - MARKETMAKER.increment * 5;
-				}
-				else{
-					return undefined;
-				}
+				
 				side = CVR;
 			}
 
@@ -87,35 +143,60 @@ function tradingLogicComplex2(){
 
 			if(trader.bias == BUY){
 				switch(strategy){
-					case STRAT_DEFAULT:
-						if(trader.previousSentiment == BUY)
-							price = ask.price;
-						else
-							price = bid.price;
-					break;
 
 					case STRAT_DIP:{
-						if(trader.previousSentiment == SEL){
-							price = previousCandle && previousCandle.low ? previousCandle.low : bid.price;
-						}
-						else if(trader.previousSentiment == BUY){
-							price = previousCandle && previousCandle.high ? previousCandle.high : ask.price;
+						if(trader.previousSentiment == BUY){
+							if(previousCandle && previousCandle.low){
+								if(orderbook.last && orderbook.last.price <= previousCandle.low){
+									price = ask.price;
+								}
+								else{
+									return undefined;
+								}
+							}
+							else{
+								return undefined;
+							}
 						}
 						else{
-							price = ask.price;
+							return undefined;
+						}
+					}
+					break;
+
+					case STRAT_BREAKOUT:{
+						if(trader.previousSentiment == BUY){
+							if(previousCandle && previousCandle.high){
+								if(orderbook.last && orderbook.last.price >= previousCandle.high){
+									price = ask.price;
+								}
+								else{
+									return undefined;
+								}
+							}
+							else{
+								return undefined;
+							}
+						}
+						else{
+							return undefined;
 						}
 					}
 					break;
 
 					default:
-						console.log("Unidentified strategy! \'" + startegy + "\'");
-						return undefined;
+						if(trader.previousSentiment == BUY)
+							price = ask.price;
+						else
+							price = bid.price;
 
 				}
 				
 				
 				side = BUY;
 			}else{
+
+				//Short biased trader
 				switch(strategy){
 					case STRAT_DEFAULT:
 						if(trader.previousSentiment == SEL)
@@ -125,14 +206,41 @@ function tradingLogicComplex2(){
 					break;
 
 					case STRAT_DIP:{
-						if(trader.previousSentiment == BUY){
-							price = previousCandle && previousCandle.high ? previousCandle.high : ask.price;
-						}
-						else if(trader.previousSentiment == SEL){
-							price = previousCandle && previousCandle.low ? previousCandle.low : bid.price;
+						if(trader.previousSentiment == SEL){
+							if(previousCandle && previousCandle.high){
+								if(orderbook.last && orderbook.last.price >= previousCandle.high){
+									price = bid.price;
+								}
+								else{
+									return undefined;
+								}
+							}
+							else{
+								return undefined;
+							}
 						}
 						else{
-							price = bid.price;
+							return undefined;
+						}
+					}
+					break;
+
+					case STRAT_BREAKOUT:{
+						if(trader.previousSentiment == SHT){
+							if(previousCandle && previousCandle.low){
+								if(orderbook.last && orderbook.last.price <= previousCandle.low){
+									price = bid.price;
+								}
+								else{
+									return undefined;
+								}
+							}
+							else{
+								return undefined;
+							}
+						}
+						else{
+							return undefined;
 						}
 					}
 					break;
@@ -151,6 +259,7 @@ function tradingLogicComplex2(){
         	const sizes = [100, 250, 500, 1000];
         	size = /*sizes[Math.trunc(RANDOM_RANGE(0, 3))];//*/ amount <= 100000 ? Math.floor(amount / price) : Math.floor(100000 / price); //Limit dollar amount.
         	trader.lastOpenPrice = price; //Market orders are not put in the order book, but this should not be a problem.
+			trader.giveUpTimer = 3;
 		}
 
 		

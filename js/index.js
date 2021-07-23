@@ -31,11 +31,11 @@ EXCHANGE.addOrderBook(SYMBOL);
 var orderbook = EXCHANGE.getOrderBook(SYMBOL);
 orderbook.dataSeriesOpen();
 
-const numTraders = 100;
+const numTraders = 60;
 let traders = [];
 
 for(let i = 0; i < numTraders; ++i){
-    let equity = 3151.51;
+    let equity = 10000;
     BROKER.addAccount(i, equity);
     BANK.addAccount(i, equity);
     traders.push(new Trader(i));
@@ -86,6 +86,7 @@ setInterval(function(){
         //generator.frequency = Math.abs(sentimentFrequencyModulator.val);
         
         autoTrade(tradingLogicComplex2); 
+        //NEXT_ID = NEXT_ID + 1 < numTraders - 1 ? NEXT_ID + 1 : 1;
         update(); 
 
         if(orderbookUpdateClock >= 15000){

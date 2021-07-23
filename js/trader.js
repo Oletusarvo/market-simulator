@@ -13,11 +13,13 @@ class Trader{
         this.confidence         = 1; //Value between 0 and 1
         this.threshold          = Math.random(); //How confident the trader must be before taking a position.
         this.numCancels         = 0;
-        this.riskTolerance      = RANDOM_RANGE(0.02, 0.1) //How much in percentage (value * 100) a position must be down before we close it.
-        this.profitTarget       = RANDOM_RANGE(0.05, 0.15) //How much in percentage a position must be up before we take profit.
+        this.riskTolerance      = 0.02 //How much in percentage (value * 100) a position must be down before we close it.
+        this.profitTarget       = 0.05 //How much in percentage a position must be up before we take profit.
         this.previousSentiment  = this.bias;
-        this.strategy           = Math.trunc(RANDOM_RANGE(STRAT_DEFAULT, STRAT_DIP));
+        this.strategy           = STRAT_DEFAULT;
         this.mentality          = Math.trunc(RANDOM_RANGE(MENT_DEFAULT, MENT_NERVOUS));
+
+        this.giveUpTimer        = 10000;
     }
 
     updateBias(orderbook){
@@ -34,6 +36,14 @@ class Trader{
             else{
                 this.previousSentiment = SEL;
             }
+        }
+    }
+
+    updateStrategy(orderbook){
+        const dataSeries = orderbook.dataSeries;
+
+        if(orderbook.dataSeries.length >= 2){
+            const latestCandle = dataSeries[dataSeries.length - 1];
         }
     }
 }

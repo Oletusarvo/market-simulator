@@ -53,8 +53,4 @@ function autoTrade(logic){
 
 		}
 	}
-    
-    generator.update();
-    sentimentFrequencyModulator.update();
-    //document.getElementById("output-sine").value = generator.val.toFixed(2);
 }

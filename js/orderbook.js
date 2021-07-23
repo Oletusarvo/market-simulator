@@ -221,8 +221,8 @@ class OrderBook{
             const askHaltLevel = parseFloat((this.haltReferencePrice + this.haltReferencePrice * this.haltThreshold).toFixed(this.precision));
 
             //console.log("Bid halt at: " + bidHaltLevel + " Ask halt at: " + askHaltLevel);
-            bidPriceCell.style.background = bidSizeCell.style.background = b && b.price <= bidHaltLevel ? "red" : "white";
-            askPriceCell.style.background = askSizeCell.style.background = a && a.price >= askHaltLevel ? "red" : "white";
+            //bidPriceCell.style.background = bidSizeCell.style.background = b && b.price <= bidHaltLevel ? "red" : "none";
+            //askPriceCell.style.background = askSizeCell.style.background = a && a.price >= askHaltLevel ? "red" : "none";
         }
     }
 
