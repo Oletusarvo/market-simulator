@@ -24,7 +24,7 @@ class OrderBook{
         this.haltReferencePriceClock = 0;
         this.haltClock = 0;
         this.haltOpenTime = 10000;
-        this.haltingEnabled = false;
+        this.haltingEnabled = true;
         this.haltThreshold = 0.1;
 
         this.periodVolume = 0;
@@ -44,7 +44,7 @@ class OrderBook{
         this.dataSeriesUpdate();
 
         if(this.haltingEnabled){
-            if(this.haltReferencePriceClock >= 10000){
+            if(this.haltReferencePriceClock >= 5000){
                 if(this.last){
                     this.haltReferencePrice = this.last.price;
                 }

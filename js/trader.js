@@ -16,10 +16,11 @@ class Trader{
         this.riskTolerance      = 0.02 //How much in percentage (value * 100) a position must be down before we close it.
         this.profitTarget       = 0.05 //How much in percentage a position must be up before we take profit.
         this.previousSentiment  = this.bias;
-        this.strategy           = STRAT_DEFAULT;
+        this.strategy           = Math.trunc(RANDOM_RANGE(STRAT_DEFAULT, STRAT_DIP));
         this.mentality          = Math.trunc(RANDOM_RANGE(MENT_DEFAULT, MENT_NERVOUS));
+        this.recentBailout      = false;
 
-        this.giveUpTimer        = 10000;
+        this.giveUpTimer        = Math.trunc(RANDOM_RANGE(1000, 2000));
     }
 
     updateBias(orderbook){

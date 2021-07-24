@@ -1,7 +1,5 @@
-function tradingLogicComplex2(){
-
-	const id = Math.trunc(RANDOM_RANGE(1, numTraders - 1));
-	
+function tradingLogicComplex2(traderId){
+	const id = traderId;
 	const bid = orderbook.bestBid();
 	const ask = orderbook.bestAsk();
 	const acc = BROKER.accounts.get(id);
@@ -14,47 +12,22 @@ function tradingLogicComplex2(){
 	let side = FLT;
 
 	if(acc){
-		//Cancel open orders if the current price is too far from a placed order.
-		if(openOrders){
-			const difference = acc.openOrderSide == SHT ? ((acc.openOrderPrice - ask.price) / acc.openOrderPrice) : ((acc.openOrderPrice - bid.price) / acc.openOrderPrice);
-			if(Math.abs(difference) >= 0.05){
-				EXCHANGE.cancel(id, SYMBOL);
-				BROKER.registerCancel(id);
-				openOrder = acc.openOrderSize > 0;
-			}
-		}
+		const pos = acc.positions.get(SYMBOL);
+		const openOrders = acc.openOrderSize > 0;
 
-		if(orderbook.halted){
-			EXCHANGE.cancel(trader.id, SYMBOL);
-			BROKER.registerCancel(trader.id);
-			//openOrder = acc.openOrderSize > 0;
+		if(openOrders){
 			return undefined;
 		}
 
-		const pos = acc.positions.get(SYMBOL);
 		if(pos){
 			const gain = pos.side == BUY ? ((bid.price - pos.avgPriceIn) / pos.avgPriceIn) : ((pos.avgPriceIn - ask.price) / pos.avgPriceIn);
-        
-			if(openOrders){
-				trader.giveUpTimer -= 1;
-
-				if(gain <= -trader.riskTolerance || trader.giveUpTimer <= 0){
-					EXCHANGE.cancel(id, SYMBOL);
-					BROKER.registerCancel(id);
-					openOrder = acc.openOrderSize > 0;
-				}
-				else{
-					return undefined;
-				}
-			}
-
 			const strategy = trader.strategy;
 			
 			if(pos.side == BUY){
 				switch(strategy){
 
 					case STRAT_DIP:{
-						if(trader.giveUpTimer > 0){
+						if(!trader.recentBailout){
 							const dataLen = orderbook.dataSeries.length;
 							const dataSeries = orderbook.dataSeries;
 							const nextToLastCandle = dataSeries[dataLen - 2]
@@ -74,8 +47,9 @@ function tradingLogicComplex2(){
 					break;
 
 					default:{
-						if(gain <= -trader.riskTolerance || trader.giveUpTimer <= 0){
+						if(gain <= -trader.riskTolerance || trader.recentBailout){
 							type = MKT;
+							trader.recentBailout = false;
 						}
 						else if(gain >= trader.profitTarget){
 							price = bid.price;
@@ -94,7 +68,7 @@ function tradingLogicComplex2(){
 
 				switch(strategy){
 					case STRAT_DIP:{
-						if(trader.giveUpTimer > 0){
+						if(trader.recentBailout){
 							const dataLen = orderbook.dataSeries.length;
 							const dataSeries = orderbook.dataSeries;
 							const nextToLastCandle = dataSeries[dataLen - 2]
@@ -114,7 +88,7 @@ function tradingLogicComplex2(){
 					break;
 
 					default:
-						if(gain <= -trader.riskTolerance || trader.giveUpTimer <= 0){
+						if(gain <= -trader.riskTolerance || trader.recentBailout){
 							type = MKT;
 						}
 						else if(gain >= trader.profitTarget){
@@ -132,11 +106,6 @@ function tradingLogicComplex2(){
 			size = pos.totalSize; //This might cause a problem where the open position display shows negative size.
 		}
 		else{
-
-			if(openOrders){
-				return undefined;
-			}
-
 			type = LMT;
 			const previousCandle = orderbook.dataSeries[orderbook.dataSeries.length - 1];
 			const strategy = trader.strategy;
@@ -145,26 +114,49 @@ function tradingLogicComplex2(){
 				switch(strategy){
 
 					case STRAT_DIP:{
-						if(trader.previousSentiment == BUY){
-							if(previousCandle && previousCandle.low){
-								if(orderbook.last && orderbook.last.price <= previousCandle.low){
-									price = ask.price;
-								}
-								else{
-									return undefined;
-								}
-							}
-							else{
-								return undefined;
-							}
+						/*
+							Dip buyers may buy at whole dollars, half dollars or quarter dollars, as well as the low of the previous candle.
+							Figure out which one is closest and buy there.
+						*/
+
+						const currentBid 		= bid.price;
+						const halfDollar 		= Math.floor(currentBid) + 0.5;
+						const wholeDollar 		= Math.floor(currentBid);
+						const quarterDollar 	= Math.floor(currentBid) + 0.25;
+						const threeFourDollar 	= Math.floor(currentBid) + 0.75;
+
+						//If the value is negative, it will cause the trader to buy on the ask once the minimum of the bunch is returned later.
+						//Set all negative numbers to MAX_VALUE.
+						const MAX_VALUE = Number.MAX_VALUE;
+						maxIfNeg = (val) => {return val < 0 ? MAX_VALUE : val;}
+						
+						const distanceToHalf = maxIfNeg(currentBid - halfDollar);
+						const distanceToQuart = maxIfNeg(currentBid - quarterDollar);
+						const distanceToWhole = maxIfNeg(currentBid - wholeDollar);
+						const distanceToThreeFour = maxIfNeg(currentBid - threeFourDollar);
+						const previousCandleValid = previousCandle && previousCandle.low;
+						const distanceToCandleLow = previousCandleValid ? maxIfNeg(currentBid - previousCandle.low) : MAX_VALUE;
+						const lowIsValid = orderbook.low != NaN;
+						const distanceToLow = lowIsValid ? maxIfNeg(currentBid - orderbook.low) : MAX_VALUE;
+
+						const buyOffset = Math.min(distanceToLow, distanceToHalf, distanceToCandleLow, distanceToQuart, distanceToThreeFour, distanceToWhole);
+					
+						if(trader.previousSentiment == SEL){
+							price = currentBid - buyOffset;
 						}
 						else{
-							return undefined;
+							return undefined
 						}
 					}
 					break;
 
 					case STRAT_BREAKOUT:{
+
+						/*
+							Breakout buyers will hit the ask if the price gets close enough to resistance levels (half, whole quarter and threefourths dollars or the high of the previous candle).
+						
+						*/
+
 						if(trader.previousSentiment == BUY){
 							if(previousCandle && previousCandle.high){
 								if(orderbook.last && orderbook.last.price >= previousCandle.high){
@@ -206,21 +198,38 @@ function tradingLogicComplex2(){
 					break;
 
 					case STRAT_DIP:{
+						/*
+							Pop shorters may short at whole dollars, half dollars or quarter dollars, as well as the high of the previous candle.
+							Figure out which one is closest and short there.
+						*/
+
+						const currentAsk 		= ask.price;
+						const halfDollar 		= Math.floor(currentAsk) + 0.5;
+						const wholeDollar 		= Math.floor(currentAsk) + 1;
+						const quarterDollar 	= Math.floor(currentAsk) + 0.25;
+						const threeFourDollar 	= Math.floor(currentAsk) + 0.75;
+
+						//If the value is negative, it will cause the trader to buy on the ask once the minimum of the bunch is returned later.
+						//Set all negative numbers to MAX_VALUE.
+						const MAX_VALUE = Number.MAX_VALUE;
+						maxIfNeg = (val) => {return val < 0 ? MAX_VALUE : val;}
+						
+						const distanceToHalf = maxIfNeg(halfDollar - currentAsk);
+						const distanceToQuart = maxIfNeg(quarterDollar - currentAsk);
+						const distanceToWhole = maxIfNeg(wholeDollar - currentAsk);
+						const distanceToThreeFour = maxIfNeg(threeFourDollar - currentAsk);
+						const previousCandleValid = previousCandle && previousCandle.high;
+						const distanceToCandleHigh = previousCandleValid ? maxIfNeg(previousCandle.high - currentAsk) : MAX_VALUE;
+						const highIsValid = orderbook.high != NaN;
+						const distanceToHigh = highIsValid ? maxIfNeg(orderbook.high - currentAsk) : MAX_VALUE;
+
+						const shortOffset = Math.min(distanceToHigh, distanceToHalf, distanceToCandleHigh, distanceToQuart, distanceToThreeFour, distanceToWhole);
+					
 						if(trader.previousSentiment == SEL){
-							if(previousCandle && previousCandle.high){
-								if(orderbook.last && orderbook.last.price >= previousCandle.high){
-									price = bid.price;
-								}
-								else{
-									return undefined;
-								}
-							}
-							else{
-								return undefined;
-							}
+							price = currentAsk + shortOffset;
 						}
 						else{
-							return undefined;
+							return undefined
 						}
 					}
 					break;
@@ -259,11 +268,76 @@ function tradingLogicComplex2(){
         	const sizes = [100, 250, 500, 1000];
         	size = /*sizes[Math.trunc(RANDOM_RANGE(0, 3))];//*/ amount <= 100000 ? Math.floor(amount / price) : Math.floor(100000 / price); //Limit dollar amount.
         	trader.lastOpenPrice = price; //Market orders are not put in the order book, but this should not be a problem.
-			trader.giveUpTimer = 3;
+			trader.giveUpTimer = Math.trunc(RANDOM_RANGE(5000, 20000));
+			trader.recentBailout = false;
 		}
 
 		
 	}
 	
 	return new Order(id, SYMBOL, k_ename, price, size, side, type);
+}
+
+function checkCancelOrders(){
+	//Go through all traders accounts and cancel their orders if certain condition are met.
+
+	for(let i = 1; i < numTraders; ++i){
+		const id = i;
+		const acc = BROKER.accounts.get(id);
+
+		if(acc){
+			const trader = traders[id];
+			const openOrders = acc.openOrderSize > 0;
+
+			if(openOrders){
+				const ask = orderbook.bestAsk();
+				const bid = orderbook.bestBid();
+
+				if(orderbook.halted){
+					EXCHANGE.cancel(id, SYMBOL);
+					BROKER.registerCancel(id);
+					trader.recentBailout = true;
+					//openOrder = acc.openOrderSize > 0;
+					return;
+				}
+
+				//Cancel open orders if the current price is too far from a placed order.
+				const difference = acc.openOrderSide == SHT ? ((acc.openOrderPrice - ask.price) / acc.openOrderPrice) : ((acc.openOrderPrice - bid.price) / acc.openOrderPrice);
+				if(Math.abs(difference) >= 0.05){
+					EXCHANGE.cancel(id, SYMBOL);
+					BROKER.registerCancel(id);
+					return;
+				}
+
+				const pos = acc.positions.get(SYMBOL);
+
+				if(pos){
+					//Cancel orders if risk tolerance is hit
+
+					if(trader.giveUpTimer <= 0){
+						EXCHANGE.cancel(id, SYMBOL);
+						BROKER.registerCancel(id);
+						trader.recentBailout = true;
+						return;
+					}
+
+					const gain = pos.side == BUY ? ((bid.price - pos.avgPriceIn) / pos.avgPriceIn) : ((pos.avgPriceIn - ask.price) / pos.avgPriceIn);
+					if(gain <= -trader.riskTolerance){
+						EXCHANGE.cancel(id, SYMBOL);
+						BROKER.registerCancel(id);
+						trader.recentBailout = true;
+						return;
+					}
+				}
+				
+			}
+		}
+	}
+}
+
+function updateGiveUp(){
+	for(let i = 1; i < numTraders; ++i){
+		let trader = traders[i];
+		trader.giveUpTimer -= UPDATE_SPEED;
+	}
 }

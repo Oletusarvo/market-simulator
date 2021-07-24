@@ -31,7 +31,7 @@ EXCHANGE.addOrderBook(SYMBOL);
 var orderbook = EXCHANGE.getOrderBook(SYMBOL);
 orderbook.dataSeriesOpen();
 
-const numTraders = 60;
+const numTraders = 100;
 let traders = [];
 
 for(let i = 0; i < numTraders; ++i){
@@ -81,10 +81,16 @@ let running = false;
 let orderbookUpdateClock = 0;
 var cancelTimer = 0; //Timer until an unfilled open order is canceled.
 
+function getOrders(){
+
+}
+
 setInterval(function(){
     if(running){
         //generator.frequency = Math.abs(sentimentFrequencyModulator.val);
-        
+        //Get orders from all traders
+
+        //Execute the returned orders in at a set speed
         autoTrade(tradingLogicComplex2); 
         //NEXT_ID = NEXT_ID + 1 < numTraders - 1 ? NEXT_ID + 1 : 1;
         update(); 
