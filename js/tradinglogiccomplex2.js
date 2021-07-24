@@ -269,7 +269,7 @@ function tradingLogicComplex2(traderId){
         	const sizes = [100, 250, 500, 1000];
         	size = /*sizes[Math.trunc(RANDOM_RANGE(0, 3))];//*/ amount <= 100000 ? Math.floor(amount / price) : Math.floor(100000 / price); //Limit dollar amount.
         	trader.lastOpenPrice = price; //Market orders are not put in the order book, but this should not be a problem.
-			trader.giveUpTimer = Math.trunc(RANDOM_RANGE(5000, 20000));
+			trader.giveUpTimer = trader.giveUpTime;
 			trader.recentBailout = false;
 		}
 
@@ -327,15 +327,14 @@ function checkCancelOrders(){
 						return;
 					}
 
-					if(trader.giveUpTimer <= 0){
+					if(trader.giveUpTimer <= 0 && trader.recentBailout == false){
 						EXCHANGE.cancel(id, SYMBOL);
 						BROKER.registerCancel(id);
 						trader.recentBailout = true;
 						return;
 					}
-					
+
 				}
-				
 			}
 		}
 	}

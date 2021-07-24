@@ -37,7 +37,9 @@ class BrokerAccount{
             this.closedPositions.splice(0, 1);
         }
 
-        this.closedPositions.push(rec);
+        //Limit position saving only to non-bot accounts.
+        if(this.id == 0)
+            this.closedPositions.push(rec);
       
     }
 

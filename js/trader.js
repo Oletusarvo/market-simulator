@@ -20,7 +20,8 @@ class Trader{
         this.mentality          = Math.trunc(RANDOM_RANGE(MENT_DEFAULT, MENT_NERVOUS));
         this.recentBailout      = false;
 
-        this.giveUpTimer        = Math.trunc(RANDOM_RANGE(1000, 2000));
+        this.giveUpTime         = this.strategy == STRAT_DIP ? Math.trunc(RANDOM_RANGE(10000, 20000)) : RANDOM_RANGE(1000, 2000);
+        this.giveUpTimer        = this.giveUpTime;
     }
 
     updateBias(orderbook){
