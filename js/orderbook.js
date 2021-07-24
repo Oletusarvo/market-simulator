@@ -24,7 +24,7 @@ class OrderBook{
         this.haltReferencePriceClock = 0;
         this.haltClock = 0;
         this.haltOpenTime = 10000;
-        this.haltingEnabled = true;
+        this.haltingEnabled = false;
         this.haltThreshold = 0.1;
 
         this.periodVolume = 0;

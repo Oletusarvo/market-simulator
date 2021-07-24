@@ -68,7 +68,7 @@ function tradingLogicComplex2(traderId){
 
 				switch(strategy){
 					case STRAT_DIP:{
-						if(trader.recentBailout){
+						if(!trader.recentBailout){
 							const dataLen = orderbook.dataSeries.length;
 							const dataSeries = orderbook.dataSeries;
 							const nextToLastCandle = dataSeries[dataLen - 2]
@@ -107,7 +107,8 @@ function tradingLogicComplex2(traderId){
 		}
 		else{
 			type = LMT;
-			const previousCandle = orderbook.dataSeries[orderbook.dataSeries.length - 1];
+			const dataSeries = orderbook.dataSeries;
+			const previousCandle = dataSeries[dataSeries.length - 2];
 			const strategy = trader.strategy;
 
 			if(trader.bias == BUY){
@@ -287,7 +288,7 @@ function checkCancelOrders(){
 
 		if(acc){
 			const trader = traders[id];
-			const openOrders = acc.openOrderSize > 0;
+			const openOrders = Math.abs(acc.openOrderSize) > 0;
 
 			if(openOrders){
 				const ask = orderbook.bestAsk();
@@ -302,7 +303,11 @@ function checkCancelOrders(){
 				}
 
 				//Cancel open orders if the current price is too far from a placed order.
-				const difference = acc.openOrderSide == SHT ? ((acc.openOrderPrice - ask.price) / acc.openOrderPrice) : ((acc.openOrderPrice - bid.price) / acc.openOrderPrice);
+				const lastPriceValid = orderbook.last;
+				const lastPrice = orderbook.last.price;
+				const openPrice = acc.openOrderPrice;
+
+				const difference = lastPriceValid ? acc.openOrderSide == SHT ? ((lastPrice - openPrice) / openPrice) : ((openPrice - lastPrice) / openPrice) : 0;
 				if(Math.abs(difference) >= 0.05){
 					EXCHANGE.cancel(id, SYMBOL);
 					BROKER.registerCancel(id);
@@ -312,15 +317,8 @@ function checkCancelOrders(){
 				const pos = acc.positions.get(SYMBOL);
 
 				if(pos){
+
 					//Cancel orders if risk tolerance is hit
-
-					if(trader.giveUpTimer <= 0){
-						EXCHANGE.cancel(id, SYMBOL);
-						BROKER.registerCancel(id);
-						trader.recentBailout = true;
-						return;
-					}
-
 					const gain = pos.side == BUY ? ((bid.price - pos.avgPriceIn) / pos.avgPriceIn) : ((pos.avgPriceIn - ask.price) / pos.avgPriceIn);
 					if(gain <= -trader.riskTolerance){
 						EXCHANGE.cancel(id, SYMBOL);
@@ -328,6 +326,14 @@ function checkCancelOrders(){
 						trader.recentBailout = true;
 						return;
 					}
+
+					if(trader.giveUpTimer <= 0){
+						EXCHANGE.cancel(id, SYMBOL);
+						BROKER.registerCancel(id);
+						trader.recentBailout = true;
+						return;
+					}
+					
 				}
 				
 			}
