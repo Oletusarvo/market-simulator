@@ -20,16 +20,20 @@ const ERR_ACCOUNT 				= 18;
 const ERR_SIZE 					= 19;
 const ERR_HALTED                = 20;
 const ERR_SSR                   = 21;
+const ERR_NO_SHARES             = 22;
+const ERR_VOLATILITY            = 23;
 
 class Broker{
     constructor(name){
         this.name = name;
         this.accounts = new Map();
         this.shortStatus = new Map();
+        this.sharesAvailable = new Map();
         //Used to reference possible error messages and display them.
         this.messages = [];
         this.nextOrderId = 0;
-        this.allowNakedShort = true;
+        this.allowNakedShort = false;
+        this.easyToBorrow = true;
 		this.infiniteShortSupply = false;
     }
 
@@ -43,13 +47,46 @@ class Broker{
         return true;
     }
 
+    addMarketMaker(){
+        let acc = this.accounts.get(MARKETMAKER_ID);
+        if(acc){
+            return false;
+        }
+
+        this.accounts.set(MARKETMAKER_ID, new MarketMaker(EXCHANGE));
+        return this.accounts.get(MARKETMAKER_ID);
+    }
+
     getAccount(id){
         return this.accounts.get(id);
+    }
+
+    addSharesToShortSupply(symbol, amount){
+        let sym = this.sharesAvailable.get(symbol);
+        if(!sym){
+            this.sharesAvailable.set(symbol, amount);
+        }
     }
 
     checkOrder(order){
         let acc = this.accounts.get(order.id);
         let pos = acc.positions.get(order.symbol);
+
+        if(order.type == LMT){
+            if(order.side == SEL || order.side == SHT){
+                const highestAsk = orderbook.highestAsk();
+                if(order.price > highestAsk.price){
+                    return ERR_VOLATILITY;
+                }
+            }
+            else{
+                const lowestBid = orderbook.lowestBid();
+                if(order.price < lowestBid.price){
+                    return ERR_VOLATILITY;
+                }
+            }
+        }
+        
 
         if(acc){
             if(orderbook.halted){
@@ -63,8 +100,13 @@ class Broker{
                 }
             }
 
+            const sharesAvailable = this.sharesAvailable.get(order.symbol);
+            if(this.easyToBorrow && (!sharesAvailable && sharesAvailable < order.size)){
+                return ERR_NO_SHARES;
+            }
+
             //Disalow shorting unless there are located shares available.
-            if(!this.allowNakedShort && order.side == SHT){
+            if(!this.easyToBorrow && order.side == SHT){
                 let locatedShares = acc.locatedShares.get(order.symbol);
                 if(locatedShares == undefined){
                     return ERR_LOCATED_SHARES;
@@ -164,6 +206,7 @@ class Broker{
                     acc.openOrderSide = order.side;
                 }
 
+
                 //Store the price and size of open orders.
                 let orderMap = acc.openOrders.get(order.symbol);
                 if(!orderMap){
@@ -227,7 +270,9 @@ class Broker{
                 //If adding to an existing long position, update average price and decrease buying power.
                if(pos.side == BUY){
                     pos.avgPriceIn = (pos.avgPriceIn * pos.sizeIn + info.price * info.size) / (info.size + pos.sizeIn);  
-                    buyer.cashBuyingPower -= info.price * info.size;
+
+                    if(buyer.id != MARKETMAKER_ID)
+                        buyer.cashBuyingPower -= info.price * info.size;
                     pos.totalSize += info.size;
                     pos.sizeIn += info.size;
                }
@@ -241,7 +286,8 @@ class Broker{
                     let price = info.size * info.price;
                     let gain = equity - price;
 
-                    buyer.cashBuyingPower += equity + gain;
+                    if(buyer.id != MARKETMAKER_ID)
+                        buyer.cashBuyingPower += equity + gain;
 
                     pos.avgPriceOut = (pos.avgPriceOut * pos.sizeOut + info.size * info.price) / (info.size + pos.sizeOut);
                     pos.sizeOut += info.size; 
@@ -274,7 +320,8 @@ class Broker{
             }
             else{
                 buyer.addPosition(info.symbol, info.price, info.size, BUY);
-                buyer.cashBuyingPower -= info.price * info.size;
+                if(buyer.id != MARKETMAKER_ID)
+                    buyer.cashBuyingPower -= info.price * info.size;
             }
 
             buyer.openEquity -= buyer.openEquity > 0 ? info.size * info.price : 0;
@@ -305,7 +352,8 @@ class Broker{
                  //If adding to an existing short position, update average price and decrese buying power.
                 if(pos.side == SHT){
                      pos.avgPriceIn = (pos.avgPriceIn * pos.sizeIn + info.price * info.size) / (info.size + pos.sizeIn);
-                     seller.cashBuyingPower -= info.price * info.size;
+                     if(seller.id != MARKETMAKER_ID)
+                        seller.cashBuyingPower -= info.price * info.size;
                      pos.totalSize += info.size;
                      pos.sizeIn += info.size;
                 }
@@ -316,7 +364,8 @@ class Broker{
                     let price = info.size * info.price;
                     let gain = price - equity;
 
-                    seller.cashBuyingPower += equity + gain;
+                    if(seller.id != MARKETMAKER_ID)
+                        seller.cashBuyingPower += equity + gain;
 
                     pos.avgPriceOut = (pos.avgPriceOut * pos.sizeOut + info.size * info.price) / (info.size + pos.sizeOut);
                     pos.sizeOut += Math.abs(info.size);
@@ -349,7 +398,8 @@ class Broker{
              }
              else{
                 seller.addPosition(info.symbol, info.price, info.size, SHT);
-                seller.cashBuyingPower -= info.price * info.size;
+                if(seller.id != MARKETMAKER_ID)
+                    seller.cashBuyingPower -= info.price * info.size;
              }
 
             seller.openEquity -= seller.openEquity > 0 ? info.price * info.size : 0;
@@ -451,6 +501,12 @@ class Broker{
 
             case ERR_HALTED:
                 return "Cannot send orders while stock is halted!";
+
+            case ERR_NO_SHARES:
+                return "No shares available to borrow!";
+
+            case ERR_VOLATILITY:
+                return "Order price exceeds allowed volatility!";
 
             default:
                 return("Unknown error. Code: " + errcode);

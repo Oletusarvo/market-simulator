@@ -1,9 +1,11 @@
 function tradingLogicComplex2(traderId){
 	const id = traderId;
+	const trader = traders[id];
+
 	const bid = orderbook.bestBid();
 	const ask = orderbook.bestAsk();
 	const acc = BROKER.accounts.get(id);
-	const trader = traders[id];
+	
 	let openOrders = acc.openOrderSize > 0;
 
 	let price = 1.0;
@@ -14,6 +16,7 @@ function tradingLogicComplex2(traderId){
 	if(acc){
 		const pos = acc.positions.get(SYMBOL);
 		const openOrders = acc.openOrderSize > 0;
+		const strategy = trader.strategy;
 
 		if(openOrders){
 			return undefined;
@@ -21,8 +24,12 @@ function tradingLogicComplex2(traderId){
 
 		if(pos){
 			const gain = pos.side == BUY ? ((bid.price - pos.avgPriceIn) / pos.avgPriceIn) : ((pos.avgPriceIn - ask.price) / pos.avgPriceIn);
-			const strategy = trader.strategy;
 			
+			
+			if(gain < 0){
+				trader.coolDownTimer = trader.coolDownTime;
+			}
+
 			if(pos.side == BUY){
 				switch(strategy){
 
@@ -52,7 +59,10 @@ function tradingLogicComplex2(traderId){
 							trader.recentBailout = false;
 						}
 						else if(gain >= trader.profitTarget){
-							price = bid.price;
+							if(trader.previousSentiment == SEL)
+								price = bid.price;
+							else
+								price = ask.price;
 							//price = pos.avgPriceIn + MARKETMAKER.increment * 5;
 						}
 						else{
@@ -92,7 +102,10 @@ function tradingLogicComplex2(traderId){
 							type = MKT;
 						}
 						else if(gain >= trader.profitTarget){
-							price = ask.price;
+							if(trader.previousSentiment == BUY)
+								price = ask.price;
+							else
+								price = bid.price;
 							//price = pos.avgPriceIn - MARKETMAKER.increment * 5;
 						}
 						else{
@@ -106,10 +119,14 @@ function tradingLogicComplex2(traderId){
 			size = pos.totalSize; //This might cause a problem where the open position display shows negative size.
 		}
 		else{
+			//Trader will not participate after a recent loss.
+			if(trader.coolDownTimer > 0){
+				return undefined;
+			}
+
 			type = LMT;
 			const dataSeries = orderbook.dataSeries;
 			const previousCandle = dataSeries[dataSeries.length - 2];
-			const strategy = trader.strategy;
 
 			if(trader.bias == BUY){
 				switch(strategy){
@@ -141,39 +158,11 @@ function tradingLogicComplex2(traderId){
 						const distanceToLow = lowIsValid ? maxIfNeg(currentBid - orderbook.low) : MAX_VALUE;
 
 						const buyOffset = Math.min(distanceToLow, distanceToHalf, distanceToCandleLow, distanceToQuart, distanceToThreeFour, distanceToWhole);
-					
-						if(trader.previousSentiment == SEL){
-							price = currentBid - buyOffset;
-						}
-						else{
-							return undefined
-						}
-					}
-					break;
-
-					case STRAT_BREAKOUT:{
-
-						/*
-							Breakout buyers will hit the ask if the price gets close enough to resistance levels (half, whole quarter and threefourths dollars or the high of the previous candle).
 						
-						*/
-
-						if(trader.previousSentiment == BUY){
-							if(previousCandle && previousCandle.high){
-								if(orderbook.last && orderbook.last.price >= previousCandle.high){
-									price = ask.price;
-								}
-								else{
-									return undefined;
-								}
-							}
-							else{
-								return undefined;
-							}
-						}
-						else{
+						if(trader.previousSentiment == BUY)
+							price = currentBid - buyOffset;
+						else
 							return undefined;
-						}
 					}
 					break;
 
@@ -225,35 +214,13 @@ function tradingLogicComplex2(traderId){
 						const distanceToHigh = highIsValid ? maxIfNeg(orderbook.high - currentAsk) : MAX_VALUE;
 
 						const shortOffset = Math.min(distanceToHigh, distanceToHalf, distanceToCandleHigh, distanceToQuart, distanceToThreeFour, distanceToWhole);
-					
-						if(trader.previousSentiment == SEL){
+						if(trader.previousSentiment == SEL)
 							price = currentAsk + shortOffset;
-						}
-						else{
-							return undefined
-						}
+						else
+							return undefined;
 					}
 					break;
 
-					case STRAT_BREAKOUT:{
-						if(trader.previousSentiment == SHT){
-							if(previousCandle && previousCandle.low){
-								if(orderbook.last && orderbook.last.price <= previousCandle.low){
-									price = bid.price;
-								}
-								else{
-									return undefined;
-								}
-							}
-							else{
-								return undefined;
-							}
-						}
-						else{
-							return undefined;
-						}
-					}
-					break;
 
 					default:
 						console.log("Unidentified strategy! \'" + startegy + "\'");
@@ -264,12 +231,12 @@ function tradingLogicComplex2(traderId){
 			}
 
 			//trader.previousSentiment = sentiment;
-			trader.updateBias(orderbook);
         	const amount = (acc.getBuyingPower() * 0.6);
         	const sizes = [100, 250, 500, 1000];
         	size = /*sizes[Math.trunc(RANDOM_RANGE(0, 3))];//*/ amount <= 100000 ? Math.floor(amount / price) : Math.floor(100000 / price); //Limit dollar amount.
         	trader.lastOpenPrice = price; //Market orders are not put in the order book, but this should not be a problem.
 			trader.giveUpTimer = trader.giveUpTime;
+			trader.coolDownTimer = 0;
 			trader.recentBailout = false;
 		}
 
@@ -279,15 +246,22 @@ function tradingLogicComplex2(traderId){
 	return new Order(id, SYMBOL, k_ename, price, size, side, type);
 }
 
-function checkCancelOrders(){
-	//Go through all traders accounts and cancel their orders if certain condition are met.
-
+function updateTraders(){
 	for(let i = 1; i < numTraders; ++i){
-		const id = i;
+		const trader = traders[i];
+		updateGiveUp(trader);
+		updateCoolDown(trader);
+		checkCancelOrders(trader);
+		updateSentiment(trader);
+	}
+}
+
+function checkCancelOrders(trader){
+	//Go through all traders accounts and cancel their orders if certain condition are met.
+		const id = trader.id;
 		const acc = BROKER.accounts.get(id);
 
 		if(acc){
-			const trader = traders[id];
 			const openOrders = Math.abs(acc.openOrderSize) > 0;
 
 			if(openOrders){
@@ -336,13 +310,30 @@ function checkCancelOrders(){
 
 				}
 			}
+		
+		}
+}
+
+function orderDipStrategy(){
+	for(let i = 1; i < numTraders; ++i){
+		const id = i;
+		const trader = traders[id];
+		const acc = BROKER.accounts.get(id);
+
+		if(acc.openOrderSize == 0){
+			
 		}
 	}
 }
 
-function updateGiveUp(){
-	for(let i = 1; i < numTraders; ++i){
-		let trader = traders[i];
-		trader.giveUpTimer -= UPDATE_SPEED;
-	}
+function updateGiveUp(trader){
+	trader.giveUpTimer -= UPDATE_SPEED;
+}
+
+function updateCoolDown(trader){
+	trader.coolDownTimer -= UPDATE_SPEED;
+}
+
+function updateSentiment(trader){
+	trader.updateBias(orderbook);
 }

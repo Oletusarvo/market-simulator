@@ -11,11 +11,11 @@ class Bank{
         let buyer = this.accounts.get(info.buyer);
         let seller = this.accounts.get(info.seller);
 
-        if(buyer){
+        if(buyer && buyer.id != -1){
             buyer.balance -= info.price * info.size;
         }
 
-        if(seller){
+        if(seller && seller.id != -1){
             seller.balance += info.price * info.size;
         }
     }

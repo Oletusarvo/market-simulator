@@ -22,8 +22,9 @@ let BROKER      = new Broker("Brokkoli");
 let BANK        = new Bank();
 var mmEnabled   = document.querySelector("#input-enable-mm").value != "False";
 
-BROKER.allowNakedShort = true;
+BROKER.allowNakedShort = false;
 BROKER.infiniteShortSupply = false;
+BROKER.addSharesToShortSupply(SYMBOL, 10000);
 
 //exchange.marketmaker = marketmaker;
 
@@ -33,12 +34,18 @@ orderbook.dataSeriesOpen();
 
 const numTraders = 100;
 let traders = [];
+let undecidedTraders = [];
+let dipStrategists = [];
+let breakoutStrategists = [];
 
 for(let i = 0; i < numTraders; ++i){
-    let equity = 10000;
+    const dice = Math.random();
+    let equity = dice < 0.2 ? 50000 : 5000;
     BROKER.addAccount(i, equity);
     BANK.addAccount(i, equity);
-    traders.push(new Trader(i));
+    const trader = new Trader(i);
+    //trader.undecided = Math.random() < 0.6 ? true : false;
+    traders.push(trader);
 }
 
 for(let r = 0; r < 10; ++r){
@@ -68,9 +75,11 @@ for(let r = 0; r < 10; ++r){
     }
 }
 
-let MARKETMAKER = new MarketMaker(EXCHANGE);
+let MARKETMAKER = BROKER.addMarketMaker();
 MARKETMAKER.spread = 0.01;
 MARKETMAKER.depth = 5;
+MARKETMAKER.addPosition(SYMBOL, 5.00, 1000, BUY);
+
 
 update();
 
@@ -87,15 +96,11 @@ function getOrders(){
 
 setInterval(function(){
     if(running){
-        //generator.frequency = Math.abs(sentimentFrequencyModulator.val);
-        //Get orders from all traders
-
-        //Execute the returned orders in at a set speed
         autoTrade(tradingLogicComplex2); 
         //NEXT_ID = NEXT_ID + 1 < numTraders - 1 ? NEXT_ID + 1 : 1;
         update(); 
-
-        if(orderbookUpdateClock >= 15000){
+        
+        if(orderbookUpdateClock >= DATA_INTERVAL){
             orderbookUpdateClock = 0;
             orderbook.dataSeriesClose();
             orderbook.dataSeriesOpen();

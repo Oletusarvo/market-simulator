@@ -4,7 +4,7 @@ generator = new SineGenerator(0.007, 0.3);
 sentimentFrequencyModulator = new SineGenerator(0.01, 0.007, COS, 0.007 / 2);
 
 execute = function(order){
-    order.price = parseFloat(order.price.toFixed(2));
+    order.price = parseFloat(order.price.toFixed(orderbook.precision));
     const errcode = BROKER.registerOrder(order);
     if(!errcode){
         EXCHANGE.execute(order);
@@ -23,8 +23,7 @@ execute = function(order){
 
 function autoTrade(logic){
     //Figure out what order to send.
-    updateGiveUp();
-    checkCancelOrders();
+    updateTraders();
     const order = logic(Math.trunc(RANDOM_RANGE(1, numTraders - 1)));
     
     if(order){

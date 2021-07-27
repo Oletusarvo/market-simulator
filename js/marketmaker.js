@@ -5,12 +5,14 @@
     by being ready to sell and buy at any time.
 */
 
-class MarketMaker{
+class MarketMaker extends BrokerAccount{
     constructor(exchange){
+        super(MARKETMAKER_ID, 100000);
         this.exchange = exchange;
         this.spread = 0; 
         this.depth = 2;
         this.increment = 0.01;
+        this.size = /*orderbook.last.price ? Math.floor((this.cashBuyingPower * 0.01) / orderbook.last.price) : 100;*/ 100;
     }
 
     createMarket(symbol){
@@ -37,7 +39,7 @@ class MarketMaker{
 
             if(last){
                 price = last.price + 0.01;
-                let order = new Order(-1, symbol, this.exchange.name, price, 100, SHT, LMT);
+                let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, SHT, LMT);
 
                 //Fill the ask side.
                 while(orderbook.ask.size < this.depth){
@@ -59,7 +61,7 @@ class MarketMaker{
                 
                 //Fill the ask side.
                 while(orderbook.ask.size < this.depth){
-                    let order = new Order(-1, symbol, this.exchange.name, price, 100, SHT, LMT);
+                    let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, SHT, LMT);
                     this.exchange.execute(order);
                     price += this.increment;
                 }
@@ -67,7 +69,7 @@ class MarketMaker{
                 //Fill the bid side.
                 price = orderbook.bestAsk().price - this.spread;
                 while(orderbook.bid.size < this.depth){
-                    let order = new Order(-1, symbol, this.exchange.name, price, 100, BUY, LMT);
+                    let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, BUY, LMT);
                     this.exchange.execute(order);
                     price -= this.increment;
                 }
@@ -88,7 +90,7 @@ class MarketMaker{
                 if(orderbook.priceHistory.length == 0){
                     let price = bid.price + this.spread;
                     while(orderbook.ask.size < this.depth){
-                        let order = new Order(-1, symbol, this.exchange.name, price, 100, SHT, LMT);
+                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, SHT, LMT);
                         this.exchange.execute(order);
                         price += this.increment;
                     }
@@ -97,7 +99,7 @@ class MarketMaker{
                     //Price just moved up. Refill the ask.
                     let price = lastBuy.price + 0.01;
                     while(orderbook.ask.size < this.depth){
-                        let order = new Order(-1, symbol, this.exchange.name, price, 100, SHT, LMT);
+                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, SHT, LMT);
                         this.exchange.execute(order);
                         price += this.increment;
                     }
@@ -107,7 +109,7 @@ class MarketMaker{
                     ask = orderbook.bestAsk();
                     price = ask.price - this.spread;
                     while(orderbook.bid.size < this.depth){
-                        let order = new Order(-1, symbol, this.exchange.name, price, 100, BUY, LMT);
+                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, BUY, LMT);
                         this.exchange.execute(order);
                         price -= this.increment;
                     }
@@ -122,9 +124,9 @@ class MarketMaker{
 
                 if(orderbook.priceHistory.length == 0){
                     //This block is propably never reached.
-                    let price = parseFloat((ask.price - this.spread).toFixed(2));
+                    let price = parseFloat((ask.price - this.spread).toFixed(orderbook.precision));
                     while(orderbook.bid.size < this.depth){
-                        let order = new Order(-1, symbol, this.exchange.name, price, 100, BUY, LMT);
+                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, BUY, LMT);
                         this.exchange.execute(order);
                         price -= this.increment;
                     }
@@ -133,7 +135,7 @@ class MarketMaker{
                     //Price just moved down. Refill the bid.
                     let price = lastSell.price - 0.01;
                     while(orderbook.bid.size < this.depth){
-                        let order = new Order(-1, symbol, this.exchange.name, price, 100, BUY, LMT);
+                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, BUY, LMT);
                         this.exchange.execute(order);
                         price -= this.increment;
                     }
@@ -144,7 +146,7 @@ class MarketMaker{
                     price = bid.price + this.spread;
 
                     while(orderbook.ask.size < this.depth){
-                        let order = new Order(-1, symbol, this.exchange.name, price, 100, SHT, LMT);
+                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, SHT, LMT);
                         this.exchange.execute(order);
                         price += this.increment;
                     }
@@ -161,10 +163,11 @@ class MarketMaker{
 
                 if(direction == BUY){
                     //Last transaction was a buy order. Fill the bid side to approach the ask side.
-                    orderbook.cancelBuy(-1);
+                    orderbook.cancelBuy(MARKETMAKER_ID);
+                    //BROKER.registerCancel(MARKETMAKER_ID);
                     let price = ask.price - this.spread;
                     while(orderbook.bid.size < this.depth){
-                        let order = new Order(-1, symbol, this.exchange.name, price, 100, BUY, LMT);
+                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, BUY, LMT);
                         this.exchange.execute(order);
                         price -= this.increment;
                     }
@@ -172,17 +175,18 @@ class MarketMaker{
                     //Add new orders to the end of the ask side.
                     price = Array.from(orderbook.ask.values()).pop().price + 0.01;
                     while(orderbook.ask.size < this.depth){
-                        let order = new Order(-1, symbol, this.exchange.name, price, 100, SHT, LMT);
+                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, SHT, LMT);
                         this.exchange.execute(order);
                         price += this.increment;
                     }
                 }
                 else if(direction == SEL){
                     //Last transaction was a sell order. Fill the ask side to approach the bid side.
-                    orderbook.cancelSell(-1);
+                    orderbook.cancelSell(MARKETMAKER_ID);
+                    //BROKER.registerCancel(MARKETMAKER_ID);
                     let price = bid.price + this.spread;
                     while(orderbook.ask.size < this.depth){
-                        let order = new Order(-1, symbol, this.exchange.name, price, 100, SHT, LMT);
+                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, SHT, LMT);
                         this.exchange.execute(order);
                         price += this.increment;
                     }
@@ -190,7 +194,7 @@ class MarketMaker{
                     //Add new orders to the end of the bid side.
                     price = Array.from(orderbook.bid.values()).pop().price - 0.01;
                     while(orderbook.bid.size < this.depth){
-                        let order = new Order(-1, symbol, this.exchange.name, price, 100, BUY, LMT);
+                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, BUY, LMT);
                         this.exchange.execute(order);
                         price -= this.increment;
                     }

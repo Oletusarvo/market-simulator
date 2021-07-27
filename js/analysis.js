@@ -1,3 +1,6 @@
+const COLOR_RED = 0;
+const COLOR_GREEN = 1;
+
 function isHammer(candle){
     //A hammer candle has a long lower wick and short upper wick.
     const color = candle.open > candle.close ? 1 : 0;
@@ -24,7 +27,7 @@ function isHammer(candle){
 
 function isInvertedHammer(candle){
     //An inverted hammer candle has a long upper wick and short lower wick.
-    const color = candle.open > candle.close ? 1 : 0;
+    const color = candle.open > candle.close ? COLOR_GREEN : COLOR_RED;
 
     let result = false;
 
@@ -48,7 +51,7 @@ function isInvertedHammer(candle){
 
 function isDoji(candle){
     //A doji candle shall be interpreted as a candle with long wicks and the body is smaller than the length of the individual wicks.
-    const color = candle.close >= candle.open ? 1 : 0; //1 is green and zero is red.
+    const color = candle.close >= candle.open ? COLOR_GREEN : COLOR_RED;
 
     let result = false;
 
@@ -71,5 +74,35 @@ function isDoji(candle){
 }
 
 function isBullish(candle){
-    return candle.close > candle.open;
+    const color = candle.close > candle.open ? COLOR_GREEN : COLOR_RED;
+    const bodyLen = color == COLOR_GREEN ? candle.close - candle.open : candle.open - candle.close;
+    const upperWickLen = color == COLOR_GREEN ? candle.high - candle.close : candle.high - candle.open;
+    //const lowerWickLen = color == COLOR_GREEN ? candle.open - candle.low : candle.close - candle.low;
+
+    return (color == COLOR_GREEN && upperWickLen < bodyLen) || isHammer(candle);
+}
+
+function isBearish(candle){
+    const color = candle.close > candle.open ? COLOR_GREEN : COLOR_RED;
+    const bodyLen = color == COLOR_GREEN ? candle.close - candle.open : candle.open - candle.close;
+    //const upperWickLen = color == COLOR_GREEN ? candle.high - candle.close : candle.high - candle.open;
+    const lowerWickLen = color == COLOR_GREEN ? candle.open - candle.low : candle.close - candle.low;
+
+    return (color == COLOR_RED && lowerWickLen < bodyLen) || isInvertedHammer(candle);
+}
+
+function patternIsBullish(dataSeries, lookback){
+    const dataLen = dataSeries.length;
+    const beginCandle = dataSeries[dataLen - lookback];
+    const endCandle = dataSeries[dataLen - 2];
+
+    return beginCandle && endCandle ? (endCandle.close > beginCandle.open) : false;
+}
+
+function patternIsBearish(dataSeries, lookback){
+    const dataLen = dataSeries.length;
+    const beginCandle = dataSeries[dataLen - lookback];
+    const endCandle = dataSeries[dataLen - 2];
+
+    return beginCandle && endCandle ? (endCandle.close < beginCandle.open) : false;
 }

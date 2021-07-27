@@ -24,7 +24,7 @@ class OrderBook{
         this.haltReferencePriceClock = 0;
         this.haltClock = 0;
         this.haltOpenTime = 10000;
-        this.haltingEnabled = false;
+        this.haltingEnabled = true;
         this.haltThreshold = 0.1;
 
         this.periodVolume = 0;
@@ -34,7 +34,7 @@ class OrderBook{
         this.updatePrecision();
 
         const bid = this.bestBid();
-        if(bid && bid.price < 0.1){
+        if(bid && bid.price < 1){
             this.shortSaleRestriction = true;
         }
         else{
@@ -58,6 +58,7 @@ class OrderBook{
             const last = this.last;
             const haltReferencePrice = this.haltReferencePrice;
             const haltThreshold = this.haltThreshold;
+            
             //Halt the stock if it surges 10% within a certain period.
             if(!this.halted && last && ((last.price >= haltReferencePrice + (haltReferencePrice * haltThreshold) || last.price <= haltReferencePrice - (haltReferencePrice * haltThreshold)))){
                 this.halted = true;
@@ -319,6 +320,19 @@ class OrderBook{
         return this.ask.get(best);
     }
 
+    highestAsk(){
+        let best = 0;
+        let aq = this.ask.keys();
+        const askSize = this.ask.size;
+
+        for(let i = 0; i < askSize; ++i){
+            let val = aq.next().value;
+            best = val > best ? val : best;
+        }
+
+        return this.ask.get(best);
+    }
+
     bestBid(){
         let best = 0;
         let bq = this.bid.keys();
@@ -327,6 +341,19 @@ class OrderBook{
         for(let i = 0; i < bidSize; ++i){
             let val = bq.next().value;
             best = val > best ? val : best;
+        }
+
+        return this.bid.get(best);
+    }
+
+    lowestBid(){
+        let best = Number.MAX_VALUE;
+        let bq = this.bid.keys();
+        const bidSize = this.bid.size;
+
+        for(let i = 0; i < bidSize; ++i){
+            let val = bq.next().value;
+            best = val < best ? val : best;
         }
 
         return this.bid.get(best);
