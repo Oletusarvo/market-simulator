@@ -32,7 +32,7 @@ EXCHANGE.addOrderBook(SYMBOL);
 var orderbook = EXCHANGE.getOrderBook(SYMBOL);
 orderbook.dataSeriesOpen();
 
-const numTraders = 100;
+const numTraders = 150;
 let traders = [];
 let undecidedTraders = [];
 let dipStrategists = [];
@@ -43,7 +43,9 @@ for(let i = 0; i < numTraders; ++i){
     let equity = dice < 0.2 ? 50000 : 5000;
     BROKER.addAccount(i, equity);
     BANK.addAccount(i, equity);
-    const trader = new Trader(i);
+    let trader = new Trader(i);
+    trader.strategy = Math.random() <= 0.3 ? STRAT_DIP : STRAT_DEFAULT;
+    //trader.bias = trader.bias == SEL && BROKER.easyToBorrow == false ? BUY : trader.bias;
     //trader.undecided = Math.random() < 0.6 ? true : false;
     traders.push(trader);
 }
@@ -75,10 +77,10 @@ for(let r = 0; r < 10; ++r){
     }
 }
 
-let MARKETMAKER = BROKER.addMarketMaker();
+let MARKETMAKER = new MarketMaker(EXCHANGE);
 MARKETMAKER.spread = 0.01;
 MARKETMAKER.depth = 5;
-MARKETMAKER.addPosition(SYMBOL, 5.00, 1000, BUY);
+//MARKETMAKER.addPosition(SYMBOL, 5.00, 1000, BUY);
 
 
 update();

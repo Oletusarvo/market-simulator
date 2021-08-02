@@ -3,15 +3,19 @@
 
     The purpose of a market maker is to ensure liquidity in the market
     by being ready to sell and buy at any time.
+
+    TODO:
+    Change this so that the market maker never shorts stocks, rather it can only buy and sell from an existing position.
 */
 
-class MarketMaker extends BrokerAccount{
+class MarketMaker{
     constructor(exchange){
-        super(MARKETMAKER_ID, 100000);
+        //super(MARKETMAKER_ID, 100000);
         this.exchange = exchange;
         this.spread = 0; 
         this.depth = 2;
         this.increment = 0.01;
+        this.sellAction = SHT;
         this.size = /*orderbook.last.price ? Math.floor((this.cashBuyingPower * 0.01) / orderbook.last.price) : 100;*/ 100;
     }
 
@@ -39,7 +43,7 @@ class MarketMaker extends BrokerAccount{
 
             if(last){
                 price = last.price + 0.01;
-                let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, SHT, LMT);
+                let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, this.sellAction, LMT);
 
                 //Fill the ask side.
                 while(orderbook.ask.size < this.depth){
@@ -57,11 +61,12 @@ class MarketMaker extends BrokerAccount{
                 }
             }
             else{
-                price = 5.00
+                //Arbitrary price
+                price = 5.00;
                 
                 //Fill the ask side.
                 while(orderbook.ask.size < this.depth){
-                    let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, SHT, LMT);
+                    let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, this.sellAction, LMT);
                     this.exchange.execute(order);
                     price += this.increment;
                 }
@@ -90,7 +95,7 @@ class MarketMaker extends BrokerAccount{
                 if(orderbook.priceHistory.length == 0){
                     let price = bid.price + this.spread;
                     while(orderbook.ask.size < this.depth){
-                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, SHT, LMT);
+                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, this.sellAction, LMT);
                         this.exchange.execute(order);
                         price += this.increment;
                     }
@@ -99,7 +104,7 @@ class MarketMaker extends BrokerAccount{
                     //Price just moved up. Refill the ask.
                     let price = lastBuy.price + 0.01;
                     while(orderbook.ask.size < this.depth){
-                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, SHT, LMT);
+                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, this.sellAction, LMT);
                         this.exchange.execute(order);
                         price += this.increment;
                     }
@@ -146,7 +151,7 @@ class MarketMaker extends BrokerAccount{
                     price = bid.price + this.spread;
 
                     while(orderbook.ask.size < this.depth){
-                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, SHT, LMT);
+                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, this.sellAction, LMT);
                         this.exchange.execute(order);
                         price += this.increment;
                     }
@@ -175,7 +180,7 @@ class MarketMaker extends BrokerAccount{
                     //Add new orders to the end of the ask side.
                     price = Array.from(orderbook.ask.values()).pop().price + 0.01;
                     while(orderbook.ask.size < this.depth){
-                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, SHT, LMT);
+                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, this.sellAction, LMT);
                         this.exchange.execute(order);
                         price += this.increment;
                     }
@@ -186,7 +191,7 @@ class MarketMaker extends BrokerAccount{
                     //BROKER.registerCancel(MARKETMAKER_ID);
                     let price = bid.price + this.spread;
                     while(orderbook.ask.size < this.depth){
-                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, SHT, LMT);
+                        let order = new Order(MARKETMAKER_ID, symbol, this.exchange.name, price, this.size, this.sellAction, LMT);
                         this.exchange.execute(order);
                         price += this.increment;
                     }

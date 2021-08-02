@@ -29,6 +29,11 @@ class BrokerAccount{
         this.loanInfo           = new Map(); //Contains completed share loan info.
         this.openOrders         = new Map();
         this.positions          = new Map();
+
+        this.updateCashBuyingPower = function(amount){
+            if(this.id != MARKETMAKER_ID)
+                this.cashBuyingPower += amount;
+        }
     }
 
     closePosition(rec){
@@ -66,6 +71,8 @@ class BrokerAccount{
     getPosition(symbol){
         return this.positions.get(symbol);
     } 
+
+    
 
     //Returns the available buying power multiplied by current multiplier.
     getBuyingPower(){

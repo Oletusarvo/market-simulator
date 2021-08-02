@@ -5,8 +5,6 @@ function tradingLogicComplex2(traderId){
 	const bid = orderbook.bestBid();
 	const ask = orderbook.bestAsk();
 	const acc = BROKER.accounts.get(id);
-	
-	let openOrders = acc.openOrderSize > 0;
 
 	let price = 1.0;
 	let size = 0;
@@ -24,7 +22,6 @@ function tradingLogicComplex2(traderId){
 
 		if(pos){
 			const gain = pos.side == BUY ? ((bid.price - pos.avgPriceIn) / pos.avgPriceIn) : ((pos.avgPriceIn - ask.price) / pos.avgPriceIn);
-			
 			
 			if(gain < 0){
 				trader.coolDownTimer = trader.coolDownTime;
@@ -59,10 +56,7 @@ function tradingLogicComplex2(traderId){
 							trader.recentBailout = false;
 						}
 						else if(gain >= trader.profitTarget){
-							if(trader.previousSentiment == SEL)
-								price = bid.price;
-							else
-								price = ask.price;
+							price = bid.price;
 							//price = pos.avgPriceIn + MARKETMAKER.increment * 5;
 						}
 						else{
@@ -102,10 +96,7 @@ function tradingLogicComplex2(traderId){
 							type = MKT;
 						}
 						else if(gain >= trader.profitTarget){
-							if(trader.previousSentiment == BUY)
-								price = ask.price;
-							else
-								price = bid.price;
+							price = ask.price;
 							//price = pos.avgPriceIn - MARKETMAKER.increment * 5;
 						}
 						else{
@@ -180,13 +171,6 @@ function tradingLogicComplex2(traderId){
 
 				//Short biased trader
 				switch(strategy){
-					case STRAT_DEFAULT:
-						if(trader.previousSentiment == SEL)
-							price = bid.price;
-						else
-							price = ask.price;
-					break;
-
 					case STRAT_DIP:{
 						/*
 							Pop shorters may short at whole dollars, half dollars or quarter dollars, as well as the high of the previous candle.
@@ -223,8 +207,10 @@ function tradingLogicComplex2(traderId){
 
 
 					default:
-						console.log("Unidentified strategy! \'" + startegy + "\'");
-						return undefined;
+						if(trader.previousSentiment == BUY)
+							price = ask.price;
+						else
+							price = bid.price;
 
 				}
 				side = SHT;

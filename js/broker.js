@@ -271,8 +271,10 @@ class Broker{
                if(pos.side == BUY){
                     pos.avgPriceIn = (pos.avgPriceIn * pos.sizeIn + info.price * info.size) / (info.size + pos.sizeIn);  
 
-                    if(buyer.id != MARKETMAKER_ID)
-                        buyer.cashBuyingPower -= info.price * info.size;
+            
+                    const amount = info.price * info.size;
+                    buyer.updateCashBuyingPower(-amount);
+
                     pos.totalSize += info.size;
                     pos.sizeIn += info.size;
                }
@@ -286,8 +288,8 @@ class Broker{
                     let price = info.size * info.price;
                     let gain = equity - price;
 
-                    if(buyer.id != MARKETMAKER_ID)
-                        buyer.cashBuyingPower += equity + gain;
+                    const amount = equity + gain;
+                    buyer.updateCashBuyingPower(amount);
 
                     pos.avgPriceOut = (pos.avgPriceOut * pos.sizeOut + info.size * info.price) / (info.size + pos.sizeOut);
                     pos.sizeOut += info.size; 
@@ -320,8 +322,8 @@ class Broker{
             }
             else{
                 buyer.addPosition(info.symbol, info.price, info.size, BUY);
-                if(buyer.id != MARKETMAKER_ID)
-                    buyer.cashBuyingPower -= info.price * info.size;
+                const amount = info.price * info.size;
+                buyer.updateCashBuyingPower(-amount);
             }
 
             buyer.openEquity -= buyer.openEquity > 0 ? info.size * info.price : 0;
@@ -352,8 +354,8 @@ class Broker{
                  //If adding to an existing short position, update average price and decrese buying power.
                 if(pos.side == SHT){
                      pos.avgPriceIn = (pos.avgPriceIn * pos.sizeIn + info.price * info.size) / (info.size + pos.sizeIn);
-                     if(seller.id != MARKETMAKER_ID)
-                        seller.cashBuyingPower -= info.price * info.size;
+                     const amount = info.size * info.price;
+                     seller.updateCashBuyingPower(-amount);
                      pos.totalSize += info.size;
                      pos.sizeIn += info.size;
                 }
@@ -364,8 +366,8 @@ class Broker{
                     let price = info.size * info.price;
                     let gain = price - equity;
 
-                    if(seller.id != MARKETMAKER_ID)
-                        seller.cashBuyingPower += equity + gain;
+                    const amount = equity + gain;
+                    seller.updateCashBuyingPower(amount);
 
                     pos.avgPriceOut = (pos.avgPriceOut * pos.sizeOut + info.size * info.price) / (info.size + pos.sizeOut);
                     pos.sizeOut += Math.abs(info.size);
@@ -398,8 +400,8 @@ class Broker{
              }
              else{
                 seller.addPosition(info.symbol, info.price, info.size, SHT);
-                if(seller.id != MARKETMAKER_ID)
-                    seller.cashBuyingPower -= info.price * info.size;
+                const amount = info.size * info.price;
+                seller.updateCashBuyingPower(-amount);
              }
 
             seller.openEquity -= seller.openEquity > 0 ? info.price * info.size : 0;

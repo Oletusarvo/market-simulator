@@ -5,6 +5,7 @@ class OrderBook{
         this.bid            = new Map();
         this.priceHistory   = [];
         this.dataSeries     = [];
+        this.subscribers    = []; //Traders who will receive event updates.
         this.open           = 0;
         this.close          = 0;
         this.high           = 0;
@@ -24,7 +25,7 @@ class OrderBook{
         this.haltReferencePriceClock = 0;
         this.haltClock = 0;
         this.haltOpenTime = 10000;
-        this.haltingEnabled = true;
+        this.haltingEnabled = false;
         this.haltThreshold = 0.1;
 
         this.periodVolume = 0;
@@ -434,6 +435,12 @@ class OrderBook{
 
         if(this.priceHistory.length > 20){
             this.priceHistory.splice(0, 10);
+        }
+    }
+
+    sendEvent(event){
+        for(const trader of this.subscribers){
+            trader.handleEvent(event);
         }
     }
 

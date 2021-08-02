@@ -14,10 +14,10 @@ class Trader{
         this.threshold          = Math.random(); //How confident the trader must be before taking a position.
         this.breakoutThreshold  = 0.1;
         this.numCancels         = 0;
-        this.riskTolerance      = 0.02 //How much in percentage (value * 100) a position must be down before we close it.
-        this.profitTarget       = 0.05 //How much in percentage a position must be up before we take profit.
+        this.riskTolerance      = 0.025 //How much in percentage (value * 100) a position must be down before we close it.
+        this.profitTarget       = 0.025 //How much in percentage a position must be up before we take profit.
         this.previousSentiment  = this.bias;
-        this.strategy           = Math.trunc(RANDOM_RANGE(STRAT_DEFAULT, STRAT_DIP));
+        this.strategy           = STRAT_DEFAULT;
         this.mentality          = Math.trunc(RANDOM_RANGE(MENT_DEFAULT, MENT_NERVOUS));
         this.recentBailout      = false;
         this.undecided          = false; //Trader will not participate if undecided.
@@ -36,10 +36,10 @@ class Trader{
             const candle1 = dataSeries[len - 2];
             //const candle2 = dataSeries[len - 1];
 
-            if(patternIsBearish(dataSeries, 4)){
+            if(isBearish(candle1)){
                 this.previousSentiment = SEL;
             }
-            else if(patternIsBullish(dataSeries, 4)){
+            else{
                 this.previousSentiment = BUY;
             }
         }

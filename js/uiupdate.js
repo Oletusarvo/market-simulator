@@ -276,13 +276,14 @@ updateBankInfo = function(){
 }
 
 update = function(){  
+
 	if(mmEnabled){
 		//const last = orderbook.last.price;
 		//MARKETMAKER.size = last != undefined ? Math.floor((MARKETMAKER.cashBuyingPower * 0.01) / last) : 100;
 		MARKETMAKER.increment = orderbook.precision == 3 ? 0.001 : orderbook.precision == 4 ? 0.0001 : orderbook.precision == 5 ? 0.00001 : 0.01;
 		MARKETMAKER.createMarket(SYMBOL);
 	}
-
+	
     let outputAsk  = document.getElementById("output-ask");
     let outputBid  = document.getElementById("output-bid");
     let outputLast = document.getElementById("output-last");
@@ -322,6 +323,8 @@ update = function(){
     outputOpen.value = orderbook.open.toFixed(orderbook.precision);
     outputGain.style.color = prefix == "+" ? "yellowgreen" : "red";
 
+	
+	
 	orderbook.update();
     orderbook.drawTable(table);
     orderbook.drawPriceHistory(ptable);
