@@ -80,7 +80,7 @@ for(let r = 0; r < 10; ++r){
 let MARKETMAKER = new MarketMaker(EXCHANGE);
 MARKETMAKER.spread = 0.01;
 MARKETMAKER.depth = 5;
-//MARKETMAKER.addPosition(SYMBOL, 5.00, 1000, BUY);
+MARKETMAKER.addPosition(SYMBOL, 5.00, 1000000, BUY);
 
 
 update();
@@ -106,6 +106,12 @@ setInterval(function(){
             orderbookUpdateClock = 0;
             orderbook.dataSeriesClose();
             orderbook.dataSeriesOpen();
+            for(let t of traders){
+                t.updateSentiment();
+                //t.updateStrategy();
+            }
+
+            updateBias();
         }
         else{
             orderbookUpdateClock += UPDATE_SPEED;

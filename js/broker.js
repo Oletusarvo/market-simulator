@@ -73,15 +73,16 @@ class Broker{
         let pos = acc.positions.get(order.symbol);
 
         if(order.type == LMT){
+            
             if(order.side == SEL || order.side == SHT){
-                const highestAsk = orderbook.highestAsk();
-                if(order.price > highestAsk.price){
+                const ask = orderbook.bestAsk();
+                if(order.price > (ask.price * 1.05)){
                     return ERR_VOLATILITY;
                 }
             }
             else{
-                const lowestBid = orderbook.lowestBid();
-                if(order.price < lowestBid.price){
+                const bid = orderbook.bestBid();
+                if(order.price < (bid.price * 0.95)){
                     return ERR_VOLATILITY;
                 }
             }

@@ -281,6 +281,7 @@ update = function(){
 		//const last = orderbook.last.price;
 		//MARKETMAKER.size = last != undefined ? Math.floor((MARKETMAKER.cashBuyingPower * 0.01) / last) : 100;
 		MARKETMAKER.increment = orderbook.precision == 3 ? 0.001 : orderbook.precision == 4 ? 0.0001 : orderbook.precision == 5 ? 0.00001 : 0.01;
+		MARKETMAKER.updateSize();
 		MARKETMAKER.createMarket(SYMBOL);
 	}
 	

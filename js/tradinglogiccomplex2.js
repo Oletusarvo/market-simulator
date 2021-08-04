@@ -29,7 +29,8 @@ function tradingLogicComplex2(traderId){
 
 			if(pos.side == BUY){
 				switch(strategy){
-
+					
+					
 					case STRAT_DIP:{
 						if(!trader.recentBailout){
 							const dataLen = orderbook.dataSeries.length;
@@ -46,14 +47,16 @@ function tradingLogicComplex2(traderId){
 						}
 						else{
 							type = MKT;
+							price = bid.price;
 						}
 					}
 					break;
-
+					
 					default:{
 						if(gain <= -trader.riskTolerance || trader.recentBailout){
 							type = MKT;
 							trader.recentBailout = false;
+							price = bid.price;
 						}
 						else if(gain >= trader.profitTarget){
 							price = bid.price;
@@ -71,6 +74,7 @@ function tradingLogicComplex2(traderId){
 			else{
 
 				switch(strategy){
+					
 					case STRAT_DIP:{
 						if(!trader.recentBailout){
 							const dataLen = orderbook.dataSeries.length;
@@ -87,13 +91,17 @@ function tradingLogicComplex2(traderId){
 						}
 						else{
 							type = MKT;
+							price = ask.price;
 						}
 					}
 					break;
+					
 
 					default:
 						if(gain <= -trader.riskTolerance || trader.recentBailout){
 							type = MKT;
+							price = ask.price;
+							trader.recentBailout = false;
 						}
 						else if(gain >= trader.profitTarget){
 							price = ask.price;
@@ -145,15 +153,17 @@ function tradingLogicComplex2(traderId){
 						const distanceToThreeFour = maxIfNeg(currentBid - threeFourDollar);
 						const previousCandleValid = previousCandle && previousCandle.low;
 						const distanceToCandleLow = previousCandleValid ? maxIfNeg(currentBid - previousCandle.low) : MAX_VALUE;
+						const distanceToCandleHigh = previousCandleValid ? maxIfNeg(currentBid - previousCandle.high) : MAX_VALUE;
 						const lowIsValid = orderbook.low != NaN;
 						const distanceToLow = lowIsValid ? maxIfNeg(currentBid - orderbook.low) : MAX_VALUE;
 
-						const buyOffset = Math.min(distanceToLow, distanceToHalf, distanceToCandleLow, distanceToQuart, distanceToThreeFour, distanceToWhole);
+						const buyOffset = Math.min(distanceToLow, distanceToCandleHigh, distanceToHalf, distanceToCandleLow, distanceToQuart, distanceToThreeFour, distanceToWhole);
 						
-						if(trader.previousSentiment == BUY)
+						if(trader.previousSentiment == SEL)
 							price = currentBid - buyOffset;
 						else
 							return undefined;
+					
 					}
 					break;
 
@@ -194,14 +204,17 @@ function tradingLogicComplex2(traderId){
 						const distanceToThreeFour = maxIfNeg(threeFourDollar - currentAsk);
 						const previousCandleValid = previousCandle && previousCandle.high;
 						const distanceToCandleHigh = previousCandleValid ? maxIfNeg(previousCandle.high - currentAsk) : MAX_VALUE;
+						const distanceToCandleLow = previousCandleValid ? maxIfNeg(previousCandle.low) - currentAsk  : MAX_VALUE;
 						const highIsValid = orderbook.high != NaN;
 						const distanceToHigh = highIsValid ? maxIfNeg(orderbook.high - currentAsk) : MAX_VALUE;
 
-						const shortOffset = Math.min(distanceToHigh, distanceToHalf, distanceToCandleHigh, distanceToQuart, distanceToThreeFour, distanceToWhole);
-						if(trader.previousSentiment == SEL)
+						const shortOffset = Math.min(distanceToHigh, distanceToCandleLow, distanceToHalf, distanceToCandleHigh, distanceToQuart, distanceToThreeFour, distanceToWhole);
+						
+						if(trader.previousSentiment == BUY)
 							price = currentAsk + shortOffset;
 						else
 							return undefined;
+						
 					}
 					break;
 
@@ -238,7 +251,6 @@ function updateTraders(){
 		updateGiveUp(trader);
 		updateCoolDown(trader);
 		checkCancelOrders(trader);
-		updateSentiment(trader);
 	}
 }
 
@@ -321,5 +333,36 @@ function updateCoolDown(trader){
 }
 
 function updateSentiment(trader){
-	trader.updateBias(orderbook);
+	trader.updateSentiment(orderbook);
+}
+
+function updateBias(){
+	const dataSeries = orderbook.dataSeries;
+	const dataLen = dataSeries.length;
+	const sampleRange = 4;
+
+	if(dataLen >= sampleRange){
+		let greenCandles = 1; //Initialize as one to stop all traders from being biased to the short side.
+		
+		for(let c = dataLen - sampleRange; c < dataLen - 1; ++c){
+			const candle = dataSeries[c];
+			
+			if(candle && candle.open && candle.closep){
+				const green = candle.closep > candle.open;
+				if(green){
+					greenCandles++;
+				}
+			}
+		}
+
+		const modifier = 0.5;
+		const ratio = greenCandles / sampleRange;
+		const param = ratio * Math.PI / 2 * modifier;
+		const buyChance = Math.sin(param);
+
+		for(let i = 1; i < numTraders; ++i){
+			const trader = traders[i];
+			trader.updateBias(buyChance);
+		}
+	}
 }

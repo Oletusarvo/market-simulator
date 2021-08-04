@@ -8,15 +8,21 @@
     Change this so that the market maker never shorts stocks, rather it can only buy and sell from an existing position.
 */
 
-class MarketMaker{
+class MarketMaker extends BrokerAccount{
     constructor(exchange){
-        //super(MARKETMAKER_ID, 100000);
+        super(MARKETMAKER_ID, 1000);
         this.exchange = exchange;
         this.spread = 0; 
         this.depth = 2;
         this.increment = 0.01;
-        this.sellAction = SHT;
-        this.size = /*orderbook.last.price ? Math.floor((this.cashBuyingPower * 0.01) / orderbook.last.price) : 100;*/ 100;
+        this.sellAction = SEL;
+
+        this.updateSize();
+        
+    }
+
+    updateSize(){
+        this.size = orderbook.last.price ? Math.floor(this.cashBuyingPower / orderbook.last.price) : 100;
     }
 
     createMarket(symbol){
@@ -62,7 +68,8 @@ class MarketMaker{
             }
             else{
                 //Arbitrary price
-                price = 5.00;
+                const pos = this.positions.get(SYMBOL);
+                price = pos.avgPriceIn;
                 
                 //Fill the ask side.
                 while(orderbook.ask.size < this.depth){

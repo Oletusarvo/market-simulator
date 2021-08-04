@@ -95,8 +95,11 @@ class OrderBook{
     }
 
     dataSeriesUpdate(){
-        let candle = this.dataSeries[this.dataSeries.length - 1];
-        const lastPriceHistory = this.priceHistory[this.priceHistory.length - 1];
+        const dataLen = this.dataSeries.length;
+        const candle = this.dataSeries[dataLen - 1];
+
+        const len = this.priceHistory.length;
+        const lastPriceHistory = this.priceHistory[len - 1];
 
         if(lastPriceHistory)
             candle.update(lastPriceHistory.price, this.periodVolume);
@@ -203,7 +206,8 @@ class OrderBook{
 
             if(b){
                 bidPriceCell.innerHTML = b.price.toFixed(this.precision);
-                bidSizeCell.innerHTML = Math.trunc(b.shareSize / 100);
+                const shareSize = b.shareSize <= 100 ? 1 : b.shareSize / 100;
+                bidSizeCell.innerHTML = Math.trunc(shareSize);
             }
             else{
                 bidPriceCell.innerHTML = ""
@@ -212,7 +216,8 @@ class OrderBook{
 
             if(a){
                 askPriceCell.innerHTML = a.price.toFixed(this.precision);
-                askSizeCell.innerHTML = Math.trunc(a.shareSize / 100);
+                const shareSize = a.shareSize <= 100 ? 1 : a.shareSize / 100;
+                askSizeCell.innerHTML = Math.trunc(shareSize);
             }
             else{
                 askPriceCell.innerHTML = ""
