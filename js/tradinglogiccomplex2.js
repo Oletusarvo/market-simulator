@@ -342,27 +342,44 @@ function updateBias(){
 	const sampleRange = 4;
 
 	if(dataLen >= sampleRange){
-		let greenCandles = 1; //Initialize as one to stop all traders from being biased to the short side.
-		
+		let greenCandles = 0; 
+		let redCandles = 0;
+		let flatCandles = 0;
 		for(let c = dataLen - sampleRange; c < dataLen - 1; ++c){
 			const candle = dataSeries[c];
 			
 			if(candle && candle.open && candle.closep){
-				const green = candle.closep > candle.open;
+				const green = isBullish(candle);
+				const red = isBearish(candle);
+
 				if(green){
 					greenCandles++;
+				}
+				else if(red){
+					redCandles++;
+				}
+				else{
+					flatCandles++;
 				}
 			}
 		}
 
 		const modifier = 0.5;
-		const ratio = greenCandles / sampleRange;
-		const param = ratio * Math.PI / 2 * modifier;
-		const buyChance = Math.sin(param);
+		const greenRatio = greenCandles / sampleRange;
+		const redRatio = redCandles / sampleRange;
+		const flatRatio = flatCandles / sampleRange;
+
+		const greenParam = greenRatio * Math.PI / 2;
+		const redParam = redRatio * Math.PI / 2;
+		const flatParam = flatRatio * Math.PI / 2;
+
+		const buyChance = Math.sin(greenParam);
+		const sellChance = Math.sin(redParam);
+		const flatChance = Math.sin(flatParam);
 
 		for(let i = 1; i < numTraders; ++i){
 			const trader = traders[i];
-			trader.updateBias(buyChance);
+			trader.updateBias(buyChance, sellChance, flatChance);
 		}
 	}
 }

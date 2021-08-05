@@ -106,3 +106,119 @@ function patternIsBearish(dataSeries, lookback){
 
     return beginCandle && endCandle ? (endCandle.close < beginCandle.open) : false;
 }
+
+function patternIsDoubleTop(dataSeries, lookback){
+    const dataLen = dataSeries.length;
+
+    //Find the top to compare to
+    const rangeHigh = 0;
+    const end = dataLen - 1; //Ignore the last candle in the range, as it is the one currently forming.
+    for(let i = dataLen - lookback; i < end; ++i){
+        const candle = dataSeries[i];
+        const high = candle.high;
+        if(candle && high){
+            rangeHigh = high > rangeHigh ? high : rangeHigh;
+        }
+    }
+
+    //Find instances of the same high
+    let num = 0;
+    for(let i = dataLen - lookback; i < end; ++i){
+        const candle = dataSeries[i];
+        const high = candle.high;
+        if(candle && high){
+            if(high == rangeHigh){
+                num++;
+            }
+        }
+    }
+
+    return num == 2;
+}
+
+function patternIsDoubleBottom(dataSeries, lookback){
+    const dataLen = dataSeries.length;
+
+    //Find the top to compare to
+    const rangeLow = Number.MAX_VALUE;
+    const end = dataLen - 1; //Ignore the last candle in the range, as it is the one currently forming.
+    for(let i = dataLen - lookback; i < end; ++i){
+        const candle = dataSeries[i];
+        const low = candle.low;
+        if(candle && low){
+            rangeHigh = low > rangeLow ? low : rangeLow;
+        }
+    }
+
+    //Find instances of the same high
+    let num = 0;
+    for(let i = dataLen - lookback; i < end; ++i){
+        const candle = dataSeries[i];
+        const low = candle.low;
+        if(candle && low){
+            if(low == rangeLow){
+                num++;
+            }
+        }
+    }
+
+    return num == 2;
+}
+
+function patternIsTripleTop(dataSeries, lookback){
+    const dataLen = dataSeries.length;
+
+    //Find the top to compare to
+    const rangeHigh = 0;
+    const end = dataLen - 1; //Ignore the last candle in the range, as it is the one currently forming.
+    for(let i = dataLen - lookback; i < end; ++i){
+        const candle = dataSeries[i];
+        const high = candle.high;
+        if(candle && high){
+            rangeHigh = high > rangeHigh ? high : rangeHigh;
+        }
+    }
+
+    //Find instances of the same high
+    let num = 0;
+    for(let i = dataLen - lookback; i < end; ++i){
+        const candle = dataSeries[i];
+        const high = candle.high;
+        if(candle && high){
+            if(high == rangeHigh){
+                num++;
+            }
+        }
+    }
+
+    return num == 3;
+}
+
+function patternIsTripleBottom(dataSeries, lookback){
+    const dataLen = dataSeries.length;
+
+    //Find the top to compare to
+    const rangeLow = Number.MAX_VALUE;
+    const end = dataLen - 1; //Ignore the last candle in the range, as it is the one currently forming.
+    for(let i = dataLen - lookback; i < end; ++i){
+        const candle = dataSeries[i];
+        const low = candle.low;
+        if(candle && low){
+            rangeHigh = low > rangeLow ? low : rangeLow;
+        }
+    }
+
+    //Find instances of the same high
+    let num = 0;
+    for(let i = dataLen - lookback; i < end; ++i){
+        const candle = dataSeries[i];
+        const low = candle.low;
+        if(candle && low){
+            if(low == rangeLow){
+                num++;
+            }
+        }
+    }
+
+    return num == 3;
+}

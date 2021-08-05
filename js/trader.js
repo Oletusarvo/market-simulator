@@ -28,9 +28,21 @@ class Trader{
         this.coolDownTime       = 10000;
     }
 
-    updateBias(buyChance){
+    updateBias(buyChance, sellChance, flatChance){
         const dice = Math.random();
-		this.bias = dice <= buyChance ? BUY : SEL;
+
+        const max = Math.max(buyChance, sellChance, flatChance);
+        
+        if(max == buyChance){
+            this.bias = dice <= buyChance ? BUY : SEL;
+        }   
+        else if(max == sellChance){
+            this.bias = dice <= sellChance ? SEL : BUY;
+        }
+        else{
+            this.bias = dice <= 0.5 ? BUY : SEL;
+        }
+		
     }
 
     updateSentiment(){
