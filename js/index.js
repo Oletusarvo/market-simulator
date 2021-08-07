@@ -96,16 +96,24 @@ function getOrders(){
 
 }
 
+const visualizer = document.querySelector("#candle-canvas");
 setInterval(function(){
     if(running){
         autoTrade(tradingLogicComplex2); 
         //NEXT_ID = NEXT_ID + 1 < numTraders - 1 ? NEXT_ID + 1 : 1;
         update(); 
+      
+        const candle = orderbook.dataSeries[orderbook.dataSeries.length - 1];
+        drawCandleSingle(candle, visualizer);
         
         if(orderbookUpdateClock >= DATA_INTERVAL){
             orderbookUpdateClock = 0;
             orderbook.dataSeriesClose();
             orderbook.dataSeriesOpen();
+
+            if(orderbook.dataSeries.length >= 2)
+                drawDataRange(orderbook.dataSeries, 2, visualizer);
+                
             for(let t of traders){
                 t.updateSentiment();
                 //t.updateStrategy();

@@ -11,6 +11,7 @@ class Candle{
         this.low = price < this.low ? price : this.low;
         this.high = price > this.high ? price : this.high;
         this.volume = volume;
+        this.closep = price;
     }
 
     close(price){
