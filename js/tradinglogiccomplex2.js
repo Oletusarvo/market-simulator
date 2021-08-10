@@ -325,7 +325,15 @@ function orderDipStrategy(){
 }
 
 function updateGiveUp(trader){
-	trader.giveUpTimer -= UPDATE_SPEED;
+	const acc = BROKER.accounts.get(trader.id);
+	const pos = acc.positions.get(SYMBOL);
+
+	if(pos && pos.calcGain() < 0)
+		//TODO: If bias has not changed, do not give up.
+		if(trader.bias != trader.previousBias)
+			trader.giveUpTimer -= UPDATE_SPEED;
+	else
+		trader.giveUpTimer -= UPDATE_SPEED / 2;
 }
 
 function updateCoolDown(trader){
@@ -341,11 +349,11 @@ function updateBias(){
 	const dataLen = dataSeries.length;
 	const sampleRange = 4;
 
-	if(dataLen >= sampleRange){
+	if(dataLen >= sampleRange + 1){
 		let greenCandles = 0; 
 		let redCandles = 0;
 		let flatCandles = 0;
-		for(let c = dataLen - sampleRange; c < dataLen - 1; ++c){
+		for(let c = dataLen - sampleRange - 1; c < dataLen - 1; ++c){
 			const candle = dataSeries[c];
 			
 			if(candle && candle.open && candle.closep){
@@ -364,7 +372,7 @@ function updateBias(){
 			}
 		}
 
-		const modifier = 0.5;
+		const modifier = 1;
 		const greenRatio = greenCandles / sampleRange;
 		const redRatio = redCandles / sampleRange;
 		const flatRatio = flatCandles / sampleRange;
@@ -373,9 +381,9 @@ function updateBias(){
 		const redParam = redRatio * Math.PI / 2;
 		const flatParam = flatRatio * Math.PI / 2;
 
-		const buyChance = Math.sin(greenParam);
-		const sellChance = Math.sin(redParam);
-		const flatChance = Math.sin(flatParam);
+		const buyChance = Math.sin(greenParam * modifier);
+		const sellChance = Math.sin(redParam * modifier);
+		const flatChance = Math.sin(flatParam * modifier);
 
 		for(let i = 1; i < numTraders; ++i){
 			const trader = traders[i];

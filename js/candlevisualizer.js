@@ -8,14 +8,15 @@ function drawCandleSingle(candle, visualizer){
 
         const ctx = visualizer.getContext("2d");
         const linex = visualizer.width / 2;
-        const y = visualizer.height / 2;
+        const heightMultiplier = 0.25;
+        const y = visualizer.height * 0.5;
 
         //Length of the line representing the wicks
-        const lineLowPos = y + ((open - low) * visualizer.height / 2);
-        const lineHighPos = y - ((high - open) * visualizer.height / 2);
+        const lineLowPos = y + ((open - low) * visualizer.height * heightMultiplier);
+        const lineHighPos = y - ((high - open) * visualizer.height * heightMultiplier);
 
         //Candle dimensions
-        const candleHeight = (open - close) * visualizer.height / 2;
+        const candleHeight = (open - close) * visualizer.height * heightMultiplier;
         const candleWidth = 20;
         ctx.clearRect(0,0, visualizer.width, visualizer.height);
 

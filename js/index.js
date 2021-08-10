@@ -112,7 +112,7 @@ setInterval(function(){
             orderbook.dataSeriesOpen();
 
             if(orderbook.dataSeries.length >= 2)
-                drawDataRange(orderbook.dataSeries, 2, visualizer);
+                //drawDataRange(orderbook.dataSeries, 2, visualizer);
                 
             for(let t of traders){
                 t.updateSentiment();

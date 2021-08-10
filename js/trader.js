@@ -17,6 +17,7 @@ class Trader{
         this.riskTolerance      = 0.025 //How much in percentage (value * 100) a position must be down before we close it.
         this.profitTarget       = 0.03 //How much in percentage a position must be up before we take profit.
         this.previousSentiment  = this.bias;
+        this.previousBias       = this.bias;
         this.strategy           = STRAT_DEFAULT;
         this.mentality          = Math.trunc(RANDOM_RANGE(MENT_DEFAULT, MENT_NERVOUS));
         this.recentBailout      = false;
@@ -25,13 +26,14 @@ class Trader{
         this.giveUpTime         = this.strategy == STRAT_DIP ? Math.trunc(RANDOM_RANGE(10000, 20000)) : RANDOM_RANGE(1000, 2000);
         this.giveUpTimer        = this.giveUpTime;
         this.coolDownTimer      = 0; //How long we wait after a loss until taking another trade.
-        this.coolDownTime       = 10000;
+        this.coolDownTime       = 20000;
     }
 
     updateBias(buyChance, sellChance, flatChance){
         const dice = Math.random();
 
         const max = Math.max(buyChance, sellChance, flatChance);
+        this.previousBias = this.bias;
         
         if(max == buyChance){
             this.bias = dice <= buyChance ? BUY : SEL;
