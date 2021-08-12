@@ -22,25 +22,14 @@
 }
 
 @media screen and (max-width: 500px){
-
-	body{
-		width: 480px;
-	}
 	main{
 		overflow: scroll;
 	}
 
 	body{
-		padding:0;
+		padding:5px;
 		margin: 0;
-	}
-
-	#menu-button{
-		visibility: hidden !important;
-	}
-
-	#main-grid{
-		grid-template-columns: repeat(1, 1fr) !important;
+		width: 500px;
 	}
 
 	#settings{
@@ -51,34 +40,44 @@
 		width: 70px;
 	}
 
-	#broker-interface2{
-		display: grid;
-		grid-template-areas: 
-		'account-info'
-		'short-locate'
-		'short-offer';
-		grid-template-columns: repeat(2, 1fr);
-	}
-
-	#broker-interface2 #account-info{
+	#account-info{
 		grid-area: account-info;
 	}
 
-	#broker-interface2 #menu-short-locate{
-		grid-area: short-locate;
-	}
-
-	#broker-interface2 #menu-offer-shares{
-		grid-area: short-offer;
-	}
 	.level2-container{
 		grid-template-areas:
-		"level2"
+		"level1"
 		"price-history" 
 		"control"
 		"broker-interface2" !important;
-		width: 100% !important;
+		width: 100vw !important;
 	}
+
+	#broker-interface1, 
+	#level2, 
+	#broker-messages, 
+	#field-closed-positions, 
+	#field-position-info, 
+	#field-open-orders, 
+	#candle-visualizer, 
+	#field-short-locate, 
+	#field-offer-shares,
+	#menu-button{
+		visibility: hidden !important;
+	}
+
+	#broker-interface2{
+		display: grid;
+		grid-template-areas: 
+		'account-info' !important;
+		height: 100px;
+	}
+
+	#field-account-info{
+		width: 100%;
+	}
+
+	
 
 	#control{
 		grid-template-areas: 
@@ -89,10 +88,8 @@
 
 	#level1{
 		flex-flow: row wrap !important;
+		font-size: 10px;
 	}
 
-	#level1, #level2{
-		width: 450px;
-		font-size: 14px;
-	}
+
 }
