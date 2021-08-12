@@ -35,7 +35,7 @@ class OrderBook{
         this.updatePrecision();
 
         const bid = this.bestBid();
-        if(bid && bid.price < 1){
+        if(bid && bid.price < 0.1){
             this.shortSaleRestriction = true;
         }
         else{
@@ -87,8 +87,14 @@ class OrderBook{
     }
 
     dataSeriesClose(){
-        const candle = this.dataSeries[this.dataSeries.length - 1];
+        let candle = this.dataSeries[this.dataSeries.length - 1];
         const lastPriceHistory = this.priceHistory[this.priceHistory.length - 1];
+
+        if(this.dataSeries.length == 1){
+            candle.open = this.open;
+            candle.high = this.high;
+            candle.low = this.low;
+        }
 
         candle.close(lastPriceHistory.price);
         console.log(Number(candle.open).toLocaleString() + ";" + Number(candle.low).toLocaleString() + ";" + Number(candle.high).toLocaleString() + ";" + Number(candle.closep).toLocaleString() + ";" + candle.volume);

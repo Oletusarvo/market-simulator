@@ -1,4 +1,4 @@
-function drawCandleSingle(candle, visualizer){
+function drawCandleSingle(canvas, candle, pos, cw, hm = 1){
     if(candle && candle.low && candle.high && candle.open && candle.closep){
         
         const open = candle.open;
@@ -6,19 +6,20 @@ function drawCandleSingle(candle, visualizer){
         const high = candle.high;
         const low = candle.low;
 
-        const ctx = visualizer.getContext("2d");
-        const linex = visualizer.width / 2;
-        const heightMultiplier = 0.25;
-        const y = visualizer.height * 0.5;
+        const ctx = canvas.getContext("2d");
+        const linex = pos.xpos;
+        const y = pos.ypos;
 
         //Length of the line representing the wicks
-        const lineLowPos = y + ((open - low) * visualizer.height * heightMultiplier);
-        const lineHighPos = y - ((high - open) * visualizer.height * heightMultiplier);
+        const lineLowPos = y + ((open - low) * canvas.height * hm);
+        const lineHighPos = y - ((high - open) * canvas.height * hm);
 
         //Candle dimensions
-        const candleHeight = (open - close) * visualizer.height * heightMultiplier;
-        const candleWidth = 20;
-        ctx.clearRect(0,0, visualizer.width, visualizer.height);
+        const candleHeight = (open - close) * canvas.height * hm;
+        const candleWidth = cw;
+
+        //While updating, only erase the part where the live candle is forming.
+        ctx.clearRect(pos.xpos - (cw / 2), 0, pos.xpos + (cw / 2), canvas.height);
 
         ctx.fillStyle = close >= open ? "green" : "red";
 
@@ -30,57 +31,46 @@ function drawCandleSingle(candle, visualizer){
         //Draw candle body
         
 
-        ctx.fillRect(visualizer.width / 2 - candleWidth / 2, y, candleWidth, candleHeight);
+        ctx.fillRect(pos.xpos - candleWidth / 2, y, candleWidth, candleHeight);
     }
     
 }
 
-function drawCandlePos(candle, xpos, ypos, candlew, visualizer){
-    const open = candle.open;
-    const close = candle.closep;
-    const high = candle.high;
-    const low = candle.low;
+function drawDataRange(dataSeries, lookback, canvas){
+    const len = dataSeries.length; // Ignore the candle currently forming.
+    const offset = 25; //How far appart individual candles are on the x-axis.
+    const centery = canvas.height / 2;
 
-    if(candle && high && low && close && open){
-        const ctx = visualizer.getContext("2d");
-        const linex = xpos;
-        const y = ypos;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        //Length of the line representing the wicks
-        const lineLowPos = y + ((open - low) * visualizer.height / 2);
-        const lineHighPos = y - ((high - open) * visualizer.height / 2);
+    let nextXpos = offset;
+    let nextYpos = centery;
 
-        //Candle dimensions
-        const candleHeight = (open - close) * visualizer.height / 2;
-        const candleWidth = candlew;
+    let pos = new CandlePos(nextXpos, nextYpos);
 
-        ctx.fillStyle = close >= open ? "green" : "red";
+    const end = len; //Ignore the candle currently forming. We'll draw that elsewhere.
+    const start = len - lookback;
+    
 
-        ctx.beginPath();
-        ctx.moveTo(linex, lineLowPos);
-        ctx.lineTo(linex, lineHighPos);
-        ctx.stroke();
-
-        //Draw candle body
-        
-
-        ctx.fillRect(xpos - candleWidth / 2, y, candleWidth, candleHeight);
-    }
-}
-
-function drawDataRange(dataSeries, lookback, visualizer){
-    const len = dataSeries.length - 1; // Ignore the candle currently forming.
-    const offset = 15; //How far appart individual candles are on the x-axis.
-    const candleWidth = 20;
-    let currentXpos = offset;
-
-    for(let c = len - lookback; c < len; ++c){
-        const previousCandle = dataSeries[c - 1];
+    for(let c = start; c < end; ++c){
         const candle = dataSeries[c];
-        let currentYpos = previousCandle && previousCandle.close ? (candle.close - previousCandle.close) * visualizer.height / 2 : visualizer.height / 2;
 
-        drawCandlePos(candle, currentXpos, currentYpos, candleWidth, visualizer);
+        const open = candle.open;
+        const close = candle.closep;
 
-        currentXpos += 2 * offset + candleWidth;
+        const cw = 20;
+        const hm = 0.25;
+
+
+        drawCandleSingle(canvas, candle, pos, cw, hm);
+        
+        nextXpos += offset;
+        nextYpos += (open - close) * canvas.height * hm;
+
+        pos.xpos = nextXpos;
+        pos.ypos = nextYpos;
     }
+
+    return pos;
 }

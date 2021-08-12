@@ -1,9 +1,16 @@
 class Candle{
-    constructor(price){
-        this.open = price;
-        this.low = price;
-        this.high = price;
-        this.closep = price;
+    constructor(open, low = null, high = null, close = null){
+
+        if(low == null && high == null && close == null){
+            this.open = this.low = this.high = this.closep = open;
+        }
+        else{
+            this.open = open;
+            this.low = low;
+            this.high = high;
+            this.closep = close;
+        }
+        
         this.volume = 0;
     }
 
@@ -16,5 +23,12 @@ class Candle{
 
     close(price){
         this.closep = price;
+    }
+}
+
+class CandlePos{
+    constructor(xpos, ypos){
+        this.xpos = xpos;
+        this.ypos = ypos;
     }
 }

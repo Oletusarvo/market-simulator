@@ -13,5 +13,5 @@ const ASKPRICECELL  = 2;
 const ASKSIZECELL   = 3;
 
 const UPDATE_SPEED = 67; //~15 frames per second.
-const DATA_INTERVAL = 30000;
+const DATA_INTERVAL = 7500;
 const MARKETMAKER_ID = -1;

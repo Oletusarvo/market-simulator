@@ -44,7 +44,16 @@ for(let i = 0; i < numTraders; ++i){
     BROKER.addAccount(i, equity);
     BANK.addAccount(i, equity);
     let trader = new Trader(i);
-    trader.strategy = Math.random() <= 0.3 ? STRAT_DIP : STRAT_DEFAULT;
+
+    const rand = Math.random();
+
+    if(rand <= 0.3){
+        trader.strategy = STRAT_DIP;
+    }
+    else{
+        trader.strategy = STRAT_DEFAULT;
+    }
+    
     //trader.bias = trader.bias == SEL && BROKER.easyToBorrow == false ? BUY : trader.bias;
     //trader.undecided = Math.random() < 0.6 ? true : false;
     traders.push(trader);
@@ -97,6 +106,8 @@ function getOrders(){
 }
 
 const visualizer = document.querySelector("#candle-canvas");
+let nextPos = new CandlePos(visualizer.width / 2, visualizer.height / 2);
+
 setInterval(function(){
     if(running){
         autoTrade(tradingLogicComplex2); 
@@ -104,16 +115,18 @@ setInterval(function(){
         update(); 
       
         const candle = orderbook.dataSeries[orderbook.dataSeries.length - 1];
-        drawCandleSingle(candle, visualizer);
+        
+        drawCandleSingle(visualizer, candle, nextPos, 20, 0.25);
         
         if(orderbookUpdateClock >= DATA_INTERVAL){
             orderbookUpdateClock = 0;
             orderbook.dataSeriesClose();
+            if(orderbook.dataSeries.length >= 10)
+                nextPos = drawDataRange(orderbook.dataSeries, 10, visualizer);
+                
             orderbook.dataSeriesOpen();
 
-            if(orderbook.dataSeries.length >= 2)
-                //drawDataRange(orderbook.dataSeries, 2, visualizer);
-                
+            
             for(let t of traders){
                 t.updateSentiment();
                 //t.updateStrategy();
