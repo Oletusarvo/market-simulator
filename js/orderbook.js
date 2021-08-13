@@ -12,7 +12,7 @@ class OrderBook{
         this.low            = Number.MAX_VALUE;
         this.lastSell       = 0;
         this.lastBuy        = 0;
-        this.last           = 0;
+        this.last           = NaN;
         this.lastDirection  = FLT;
         this.direction      = FLT;
         this.numBuy         = 0;
@@ -21,11 +21,11 @@ class OrderBook{
 
         this.halted         = false;
         this.shortSaleRestriction = false;
-        this.haltReferencePrice = 0;
+        this.haltReferencePrice = NaN;
         this.haltReferencePriceClock = 0;
         this.haltClock = 0;
-        this.haltOpenTime = 10000;
-        this.haltingEnabled = false;
+        this.haltOpenTime = 10000; //Time until a halted stock reopens.
+        this.haltingEnabled = true;
         this.haltThreshold = 0.1;
 
         this.periodVolume = 0;
@@ -46,7 +46,7 @@ class OrderBook{
 
         if(this.haltingEnabled){
             if(this.haltReferencePriceClock >= 5000){
-                if(this.last){
+                if(this.last != NaN){
                     this.haltReferencePrice = this.last.price;
                 }
     
@@ -61,10 +61,10 @@ class OrderBook{
             const haltThreshold = this.haltThreshold;
             
             //Halt the stock if it surges 10% within a certain period.
-            if(!this.halted && last && ((last.price >= haltReferencePrice + (haltReferencePrice * haltThreshold) || last.price <= haltReferencePrice - (haltReferencePrice * haltThreshold)))){
+            if(!this.halted && last != NaN && ((last.price >= haltReferencePrice + (haltReferencePrice * haltThreshold) || last.price <= haltReferencePrice - (haltReferencePrice * haltThreshold)))){
                 this.halted = true;
                 this.haltReferencePrice = last.price;
-                this.haltOpenTime = 5000;
+                this.haltOpenTime = 30000;
             }
     
             if(this.halted){
