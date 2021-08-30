@@ -1,248 +1,5 @@
 function tradingLogicComplex2(traderId){
-	const id = traderId;
-	const trader = traders[id];
-
-	const bid = orderbook.bestBid();
-	const ask = orderbook.bestAsk();
-	const acc = BROKER.accounts.get(id);
-
-	let price = 1.0;
-	let size = 0;
-	let type = LMT;
-	let side = FLT;
-
-	if(acc){
-		const pos = acc.positions.get(SYMBOL);
-		const openOrders = acc.openOrderSize > 0;
-		const strategy = trader.strategy;
-
-		if(openOrders){
-			return undefined;
-		}
-
-		if(pos){
-			const gain = pos.side == BUY ? ((bid.price - pos.avgPriceIn) / pos.avgPriceIn) : ((pos.avgPriceIn - ask.price) / pos.avgPriceIn);
-			
-			if(gain < 0){
-				trader.coolDownTimer = trader.coolDownTime;
-			}
-
-			if(pos.side == BUY){
-				switch(strategy){
-					
-					
-					case STRAT_DIP:{
-						if(!trader.recentBailout){
-							const dataLen = orderbook.dataSeries.length;
-							const dataSeries = orderbook.dataSeries;
-							const nextToLastCandle = dataSeries[dataLen - 2]
-							const lastCandle = dataSeries[dataLen - 1];
-
-							if(trader.previousSentiment == BUY){
-								price = nextToLastCandle && nextToLastCandle.high ? nextToLastCandle.high : ask.price;
-							}
-							else{
-								price = lastCandle && lastCandle.high ? lastCandle.high : bid.price;
-							}
-						}
-						else{
-							type = MKT;
-							price = bid.price;
-						}
-					}
-					break;
-					
-					default:{
-						if(gain <= -trader.riskTolerance || trader.recentBailout){
-							type = MKT;
-							trader.recentBailout = false;
-							price = bid.price;
-						}
-						else if(gain >= trader.profitTarget){
-							price = bid.price;
-							//price = pos.avgPriceIn + MARKETMAKER.increment * 5;
-						}
-						else{
-							return undefined;
-						}
-					}
-
-				}
-				
-				side = SEL;
-			}
-			else{
-
-				switch(strategy){
-					
-					case STRAT_DIP:{
-						if(!trader.recentBailout){
-							const dataLen = orderbook.dataSeries.length;
-							const dataSeries = orderbook.dataSeries;
-							const nextToLastCandle = dataSeries[dataLen - 2]
-							const lastCandle = dataSeries[dataLen - 1];
-
-							if(trader.previousSentiment == SEL){
-								price = nextToLastCandle && nextToLastCandle.low ? nextToLastCandle.low : bid.price;
-							}
-							else{
-								price = lastCandle && lastCandle.low ? lastCandle.low : ask.price;
-							}
-						}
-						else{
-							type = MKT;
-							price = ask.price;
-						}
-					}
-					break;
-					
-
-					default:
-						if(gain <= -trader.riskTolerance || trader.recentBailout){
-							type = MKT;
-							price = ask.price;
-							trader.recentBailout = false;
-						}
-						else if(gain >= trader.profitTarget){
-							price = ask.price;
-							//price = pos.avgPriceIn - MARKETMAKER.increment * 5;
-						}
-						else{
-							return undefined;
-						}
-				}
-				
-				side = CVR;
-			}
-
-			size = pos.totalSize; //This might cause a problem where the open position display shows negative size.
-		}
-		else{
-			//Trader will not participate after a recent loss.
-			if(trader.coolDownTimer > 0){
-				return undefined;
-			}
-
-			type = LMT;
-			const dataSeries = orderbook.dataSeries;
-			const previousCandle = dataSeries[dataSeries.length - 2];
-
-			if(trader.bias == BUY){
-				switch(strategy){
-
-					case STRAT_DIP:{
-						/*
-							Dip buyers may buy at whole dollars, half dollars or quarter dollars, as well as the low of the previous candle.
-							Figure out which one is closest and buy there.
-						*/
-
-						const currentBid 		= bid.price;
-						const halfDollar 		= Math.floor(currentBid) + 0.5;
-						const wholeDollar 		= Math.floor(currentBid);
-						const quarterDollar 	= Math.floor(currentBid) + 0.25;
-						const threeFourDollar 	= Math.floor(currentBid) + 0.75;
-
-						//If the value is negative, it will cause the trader to buy on the ask once the minimum of the bunch is returned later.
-						//Set all negative numbers to MAX_VALUE.
-						const MAX_VALUE = Number.MAX_VALUE;
-						maxIfNeg = (val) => {return val < 0 ? MAX_VALUE : val;}
-						
-						const distanceToHalf = maxIfNeg(currentBid - halfDollar);
-						const distanceToQuart = maxIfNeg(currentBid - quarterDollar);
-						const distanceToWhole = maxIfNeg(currentBid - wholeDollar);
-						const distanceToThreeFour = maxIfNeg(currentBid - threeFourDollar);
-						const previousCandleValid = previousCandle && previousCandle.low;
-						const distanceToCandleLow = previousCandleValid ? maxIfNeg(currentBid - previousCandle.low) : MAX_VALUE;
-						const distanceToCandleHigh = previousCandleValid ? maxIfNeg(currentBid - previousCandle.high) : MAX_VALUE;
-						const lowIsValid = orderbook.low != NaN;
-						const distanceToLow = lowIsValid ? maxIfNeg(currentBid - orderbook.low) : MAX_VALUE;
-
-						const buyOffset = Math.min(distanceToLow, distanceToCandleHigh, distanceToHalf, distanceToCandleLow, distanceToQuart, distanceToThreeFour, distanceToWhole);
-						
-						if(trader.previousSentiment == SEL)
-							price = currentBid - buyOffset;
-						else
-							return undefined;
-					
-					}
-					break;
-
-					default:
-						if(trader.previousSentiment == BUY)
-							price = ask.price;
-						else
-							price = bid.price;
-
-				}
-				
-				
-				side = BUY;
-			}else{
-
-				//Short biased trader
-				switch(strategy){
-					case STRAT_DIP:{
-						/*
-							Pop shorters may short at whole dollars, half dollars or quarter dollars, as well as the high of the previous candle.
-							Figure out which one is closest and short there.
-						*/
-
-						const currentAsk 		= ask.price;
-						const halfDollar 		= Math.floor(currentAsk) + 0.5;
-						const wholeDollar 		= Math.floor(currentAsk) + 1;
-						const quarterDollar 	= Math.floor(currentAsk) + 0.25;
-						const threeFourDollar 	= Math.floor(currentAsk) + 0.75;
-
-						//If the value is negative, it will cause the trader to buy on the ask once the minimum of the bunch is returned later.
-						//Set all negative numbers to MAX_VALUE.
-						const MAX_VALUE = Number.MAX_VALUE;
-						maxIfNeg = (val) => {return val < 0 ? MAX_VALUE : val;}
-						
-						const distanceToHalf = maxIfNeg(halfDollar - currentAsk);
-						const distanceToQuart = maxIfNeg(quarterDollar - currentAsk);
-						const distanceToWhole = maxIfNeg(wholeDollar - currentAsk);
-						const distanceToThreeFour = maxIfNeg(threeFourDollar - currentAsk);
-						const previousCandleValid = previousCandle && previousCandle.high;
-						const distanceToCandleHigh = previousCandleValid ? maxIfNeg(previousCandle.high - currentAsk) : MAX_VALUE;
-						const distanceToCandleLow = previousCandleValid ? maxIfNeg(previousCandle.low) - currentAsk  : MAX_VALUE;
-						const highIsValid = orderbook.high != NaN;
-						const distanceToHigh = highIsValid ? maxIfNeg(orderbook.high - currentAsk) : MAX_VALUE;
-
-						const shortOffset = Math.min(distanceToHigh, distanceToCandleLow, distanceToHalf, distanceToCandleHigh, distanceToQuart, distanceToThreeFour, distanceToWhole);
-						
-						if(trader.previousSentiment == BUY)
-							price = currentAsk + shortOffset;
-						else
-							return undefined;
-						
-					}
-					break;
-
-
-					default:
-						if(trader.previousSentiment == BUY)
-							price = ask.price;
-						else
-							price = bid.price;
-
-				}
-				side = SHT;
-			}
-
-			//trader.previousSentiment = sentiment;
-        	const amount = (acc.getBuyingPower() * 0.6);
-        	const sizes = [100, 250, 500, 1000];
-        	size = /*sizes[Math.trunc(RANDOM_RANGE(0, 3))];//*/ amount <= 100000 ? Math.floor(amount / price) : Math.floor(100000 / price); //Limit dollar amount.
-        	trader.lastOpenPrice = price; //Market orders are not put in the order book, but this should not be a problem.
-			trader.giveUpTimer = trader.giveUpTime;
-			trader.coolDownTimer = 0;
-			trader.recentBailout = false;
-		}
-
-		
-	}
-	
-	return new Order(id, SYMBOL, k_ename, price, size, side, type);
+	return traders[traderId].generateOrder();
 }
 
 function updateTraders(){
@@ -251,6 +8,8 @@ function updateTraders(){
 		updateGiveUp(trader);
 		updateCoolDown(trader);
 		checkCancelOrders(trader);
+
+		trader.updateStrategy();
 	}
 }
 
@@ -328,26 +87,100 @@ function updateGiveUp(trader){
 	const acc = BROKER.accounts.get(trader.id);
 	const pos = acc.positions.get(SYMBOL);
 
-	if(pos && pos.calcGain() < 0)
-		//TODO: If bias has not changed, do not give up.
-		if(trader.bias != trader.previousBias)
-			trader.giveUpTimer -= UPDATE_SPEED;
-	else
-		trader.giveUpTimer -= UPDATE_SPEED / 2;
+	const bid = orderbook.bestBid();
+	const ask = orderbook.bestAsk();
+
+	
+
+	if(pos){	
+		const previousCandle = orderbook.dataSeries[orderbook.dataSeries.length - 2];
+
+		const gain = pos.side == BUY ? pos.calcGain(bid.price) : pos.calcGain(ask.price);
+
+		if(previousCandle && ((pos.side == SEL && previousCandle.bearish()) || (pos.side == BUY && previousCandle.bullish()))){
+			return;
+		}
+
+		trader.giveUpTimer -= gain < 0 ? UPDATE_SPEED : UPDATE_SPEED / 3;
+	}
+	
+
+	
+}
+
+function updateResetBalance(trader){
+	const acc = BROKER.accounts.get(trader.id);
+
+	if(acc.getBuyingPower() <= 0){
+		const bacc = BANK.accounts.get(trader.id);
+		if(bacc){
+			bacc.balance = 5000;
+		}
+	}
+		
 }
 
 function updateCoolDown(trader){
 	trader.coolDownTimer -= UPDATE_SPEED;
 }
 
-function updateSentiment(trader){
-	trader.updateSentiment(orderbook);
+function updateSentiment(){
+	const dataSeries = orderbook.dataSeries;
+	const len = dataSeries.length;
+	const previousCandle = dataSeries[len - 1];
+
+	if(previousCandle){
+		if(previousCandle.bullish()){
+			SENTIMENT = BUY;
+		}
+		else if(previousCandle.bearish()){
+			SENTIMENT = SEL;
+		}
+	}
+}
+
+function updateSentiment2(){
+	/*
+		Update sentiment based on biggest candle in a range.
+	*/
+
+	const dataSeries = orderbook.dataSeries;
+	const len = dataSeries.length;
+	const lookback = 10;
+
+	if(lookback <= len){
+
+		//Find the biggest candle.
+		const begin = len - lookback;
+		let biggest = dataSeries[len - lookback];
+
+		for(let i = begin + 1; i < len; ++i){
+			const currentCandle = dataSeries[i];
+			if(currentCandle.getMagnitude() > biggest.getMagnitude()){
+				biggest = currentCandle;
+			}
+		}
+
+		if(biggest.bullish()){
+			SENTIMENT = BUY;
+		}
+		else if(biggest.bearish()){
+			SENTIMENT = SEL;
+		}
+	}
+}
+
+function updateSentiment3(){
+	const lookback = 6;
+
+	const len = orderbook.dataSeries.length;
+	const arr = orderbook.dataSeries.slice(len - lookback - 1, len - 2);
 }
 
 function updateBias(){
 	const dataSeries = orderbook.dataSeries;
 	const dataLen = dataSeries.length;
-	const sampleRange = 4;
+	const sampleRange = 10;
 
 	if(dataLen >= sampleRange + 1){
 		let greenCandles = 0; 
@@ -357,8 +190,8 @@ function updateBias(){
 			const candle = dataSeries[c];
 			
 			if(candle && candle.open && candle.closep){
-				const green = isBullish(candle);
-				const red = isBearish(candle);
+				const green = candle.bullish();
+				const red = candle.bearish();
 
 				if(green){
 					greenCandles++;
@@ -371,6 +204,8 @@ function updateBias(){
 				}
 			}
 		}
+		const patternBullish = dataSeries[0].closep < dataSeries[dataLen - 1].closep ? 1 : 0;
+		const patternBearish = patternBullish != 1 ? 1 : 0;
 
 		const modifier = 1;
 		const greenRatio = greenCandles / sampleRange;
@@ -381,6 +216,7 @@ function updateBias(){
 		const redParam = redRatio * Math.PI / 2;
 		const flatParam = flatRatio * Math.PI / 2;
 
+		//Sine: Trader bias goes with the apparent trend. Cosine: Trader bias goes against the apparent trend.
 		const buyChance = Math.sin(greenParam * modifier);
 		const sellChance = Math.sin(redParam * modifier);
 		const flatChance = Math.sin(flatParam * modifier);
@@ -388,6 +224,75 @@ function updateBias(){
 		for(let i = 1; i < numTraders; ++i){
 			const trader = traders[i];
 			trader.updateBias(buyChance, sellChance, flatChance);
+		}
+	}
+}
+
+function updateBias2(){
+	const dataSeries = orderbook.dataSeries;
+	const len = dataSeries.length;
+	const sampleRange = 10;
+
+	if(len >= sampleRange){
+		const pat = new CandlePattern();
+		pat.candles = dataSeries.slice(len - sampleRange, len);
+		const gain = pat.gain();
+
+		const threshold = 0.3;
+
+		for(trader of traders){
+			if(gain >= threshold){
+				trader.updateBias(0.8, 0.25, 0);
+			}
+			else if(gain <= -threshold){
+				trader.updateBias(0.25, 0.8, 0);
+				
+			}
+			else{
+				trader.updateBias(0, 0, 1);
+			}
+		}
+		
+	}
+
+}
+
+function updateBias3(){
+	/*
+		Update bias based on biggest candle in a range.
+	*/
+
+	const dataSeries = orderbook.dataSeries;
+	const len = dataSeries.length;
+	const lookback = 10;
+
+	if(lookback <= len){
+
+		//Find the biggest candle.
+		const begin = len - lookback;
+		let biggest = dataSeries[len - lookback];
+
+		for(let i = begin + 1; i < len; ++i){
+			const currentCandle = dataSeries[i];
+			if(currentCandle.getRange() > biggest.getRange()){
+				biggest = currentCandle;
+			}
+		}
+
+		let bias = FLT;
+		if(biggest.bullish()){
+			bias = BUY;
+		}
+		else if(biggest.bearish()){
+			bias = SEL;
+		}
+
+		for(trader of traders){
+			if(bias == BUY)
+				trader.updateBias(0.8, 0.2, 0);
+			else if(bias == SEL){
+				trader.updateBias(0.2, 0.8, 0);
+			}
 		}
 	}
 }

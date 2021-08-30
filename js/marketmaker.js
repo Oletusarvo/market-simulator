@@ -10,7 +10,7 @@
 
 class MarketMaker extends BrokerAccount{
     constructor(exchange){
-        super(MARKETMAKER_ID, 1000);
+        super(MARKETMAKER_ID, 2000);
         this.exchange = exchange;
         this.spread = 0; 
         this.depth = 2;

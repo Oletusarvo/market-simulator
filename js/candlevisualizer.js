@@ -7,12 +7,12 @@ function drawCandleSingle(canvas, candle, pos, cw, hm = 1){
         const low = candle.low;
 
         const ctx = canvas.getContext("2d");
-        const linex = pos.xpos;
-        const y = pos.ypos;
+        const linex = Math.ceil(pos.xpos);
+        const y = Math.ceil(pos.ypos);
 
         //Length of the line representing the wicks
-        const lineLowPos = y + ((open - low) * canvas.height * hm);
-        const lineHighPos = y - ((high - open) * canvas.height * hm);
+        const lineLowPos = Math.ceil(y + ((open - low) * canvas.height * hm));
+        const lineHighPos = Math.ceil(y - ((high - open) * canvas.height * hm));
 
         //Candle dimensions
         const candleHeight = (open - close) * canvas.height * hm;
@@ -22,21 +22,26 @@ function drawCandleSingle(canvas, candle, pos, cw, hm = 1){
         ctx.clearRect(pos.xpos - (cw / 2), 0, pos.xpos + (cw / 2), canvas.height);
 
         ctx.fillStyle = close >= open ? "green" : "red";
-
+        ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(linex, lineLowPos);
-        ctx.lineTo(linex, lineHighPos);
+        ctx.moveTo(linex + 0.5, lineLowPos);
+        ctx.lineTo(linex + 0.5, lineHighPos);
         ctx.stroke();
 
         //Draw candle body
         
-
-        ctx.fillRect(pos.xpos - candleWidth / 2, y, candleWidth, candleHeight);
+        const candleXpos = Math.ceil(pos.xpos - candleWidth / 2);
+        ctx.fillRect(candleXpos + 0.5, y, candleWidth, candleHeight);
     }
     
 }
 
-function drawDataRange(dataSeries, lookback, canvas){
+function drawVolume(canvas, candle, pos, vw, hm = 1){
+    const volume = candle.volume;
+    
+}
+
+function drawDataRange(dataSeries, lookback, hm, canvas){
     const len = dataSeries.length; // Ignore the candle currently forming.
     const offset = 25; //How far appart individual candles are on the x-axis.
     const centery = canvas.height / 2;
@@ -49,8 +54,9 @@ function drawDataRange(dataSeries, lookback, canvas){
 
     let pos = new CandlePos(nextXpos, nextYpos);
 
+    //Draw the candles from the current one 
     const end = len; //Ignore the candle currently forming. We'll draw that elsewhere.
-    const start = len - lookback;
+    const start = len >= lookback ? len - lookback : 0;
     
 
     for(let c = start; c < end; ++c){
@@ -60,8 +66,6 @@ function drawDataRange(dataSeries, lookback, canvas){
         const close = candle.closep;
 
         const cw = 20;
-        const hm = 0.25;
-
 
         drawCandleSingle(canvas, candle, pos, cw, hm);
         

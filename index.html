@@ -93,7 +93,7 @@
 		</header>
 		
 			<!--Main Grid-->
-			
+			<div class="main-grid">
 				<!--Level2 Window-->
 				<div class="level2-container">
 					<div class="container-item" id="level1">
@@ -151,10 +151,15 @@
 						<div id="send-buttons">
 							<fieldset>
 								<legend>Send</legend>
-								<button class="send-button" id="buy-button" type="button">Buy</button>
-								<button class="send-button" id="sell-button" type="button">Sell</button>
-								<button class="send-button" id="short-button" type="button">Short</button>
-								<button class="send-button" id="cover-button" type="button">Cover</button>
+								<button class="send-button" id="buy-button" type="button">Buy Ask</button>
+								<button class="send-button" id="sell-button" type="button">Sell Bid</button>
+								<button class="send-button" id="short-button" type="button">Short Bid</button>
+								<button class="send-button" id="cover-button" type="button">Cover Ask</button>
+
+								<button class="send-button" id="buy-bid-button" type="button">Buy Bid</button>
+								<button class="send-button" id="sell-ask-button" type="button">Sell Ask</button>
+								<button class="send-button" id="short-ask-button" type="button">Short Ask</button>
+								<button class="send-button" id="cover-bid-button" type="button">Cover Bid</button>
 							</fieldset>
 							
 						</div>
@@ -288,11 +293,14 @@
 						</fieldset>
 
 					</div>
-
-					<div class="container-item" id="candle-visualizer">
-						<canvas id="candle-canvas"></canvas>
-					</div>
 				</div>
+				
+				<div class="container-item" id="candle-visualizer">
+					<canvas id="candle-canvas"></canvas>
+				</div>
+				
+
+			</div>
     </body>
 
     <script src="js\constants.js"></script>

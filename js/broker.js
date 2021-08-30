@@ -76,13 +76,15 @@ class Broker{
             
             if(order.side == SEL || order.side == SHT){
                 const ask = orderbook.bestAsk();
-                if(order.price > (ask.price * 1.05)){
+                const refPrice = ask ? ask.price : orderbook.last.price;
+                if(order.price > (refPrice * 1.05)){
                     return ERR_VOLATILITY;
                 }
             }
             else{
                 const bid = orderbook.bestBid();
-                if(order.price < (bid.price * 0.95)){
+                const refPrice = bid ? bid.price : orderbook.last.price;
+                if(order.price < (refPrice * 0.95)){
                     return ERR_VOLATILITY;
                 }
             }
@@ -96,7 +98,8 @@ class Broker{
 
             if(orderbook.shortSaleRestriction){
                 const ask = orderbook.bestAsk();
-                if(order.side == SHT && (order.type == MKT || order.price < ask.price)){
+                const refPrice = ask ? ask.price : orderbook.last.price;
+                if(order.side == SHT && (order.type == MKT || order.price < refPrice)){
                     return ERR_SSR;
                 }
             }

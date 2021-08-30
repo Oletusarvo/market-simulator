@@ -25,7 +25,7 @@ class OrderBook{
         this.haltReferencePriceClock = 0;
         this.haltClock = 0;
         this.haltOpenTime = 10000; //Time until a halted stock reopens.
-        this.haltingEnabled = true;
+        this.haltingEnabled = false;
         this.haltThreshold = 0.1;
 
         this.periodVolume = 0;
@@ -83,6 +83,15 @@ class OrderBook{
     dataSeriesOpen(){
         let candle = new Candle(this.last.price);
         this.periodVolume = 0;
+        const previous = this.dataSeries.length - 1;
+
+        const previousCandle = this.dataSeries[previous];
+        
+        if(previousCandle){
+            previousCandle.next = candle;
+            candle.previous = previousCandle;
+        }
+        
         this.dataSeries.push(candle);
     }
 
