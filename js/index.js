@@ -48,6 +48,9 @@ for(let i = 0; i < numTraders; ++i){
     let trader = new Trader(i);
     //trader.bias = trader.bias == SEL && BROKER.easyToBorrow == false ? BUY : trader.bias;
     //trader.undecided = Math.random() < 0.6 ? true : false;
+
+    const rand = Math.random();
+    trader.inverted = rand <= 0.1 ? true : false;
     traders.push(trader);
 }
 
@@ -98,7 +101,9 @@ function getOrders(){
 }
 
 const visualizer = document.querySelector("#candle-canvas");
-let nextPos = new CandlePos(visualizer.width / 2, visualizer.height / 2);
+var CANDLE_ORIGIN = visualizer.height / 2;
+
+let nextPos = new CandlePos(visualizer.width / 2, CANDLE_ORIGIN);
 let SENTIMENT = BUY;
 let HM = 0.15;
 

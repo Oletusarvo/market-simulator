@@ -1,3 +1,19 @@
+class Chart{
+    constructor(canvas, dataSeries){
+        this.canvas = canvas;
+        this.dataSeries = dataSeries;
+        this.currentCandlePos = undefined;
+    }
+
+    height(){
+        return this.canvas.height;
+    }
+
+    width(){
+        return this.canvas.width;
+    }
+}
+
 function drawCandleSingle(canvas, candle, pos, cw, hm = 1){
     if(candle && candle.low && candle.high && candle.open && candle.closep){
         
@@ -6,13 +22,15 @@ function drawCandleSingle(canvas, candle, pos, cw, hm = 1){
         const high = candle.high;
         const low = candle.low;
 
+
         const ctx = canvas.getContext("2d");
         const linex = Math.ceil(pos.xpos);
+        
         const y = Math.ceil(pos.ypos);
 
         //Length of the line representing the wicks
-        const lineLowPos = Math.ceil(y + ((open - low) * canvas.height * hm));
-        const lineHighPos = Math.ceil(y - ((high - open) * canvas.height * hm));
+        let lineLowPos = Math.ceil(y + ((open - low) * canvas.height * hm));
+        let lineHighPos = Math.ceil(y - ((high - open) * canvas.height * hm));
 
         //Candle dimensions
         const candleHeight = (open - close) * canvas.height * hm;

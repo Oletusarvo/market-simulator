@@ -1,5 +1,3 @@
-
-
 class CandlePos{
     constructor(xpos, ypos){
         this.xpos = xpos;

@@ -183,10 +183,10 @@ class Trader{
                         
                         case STRAT_DIP_UNI:{
                             if(SENTIMENT == BUY){
-                                price  = ask.price;
+                                price  = !this.inverted ? ask.price : bid.price;
                             }
                             else{
-                                price = bid.price;
+                                price = !this.inverted ? bid.price : ask.price;
                             }
                         }
                         break;
@@ -199,7 +199,6 @@ class Trader{
                             }
                             else if(gain >= trader.profitTarget){
                                 price = bid.price;
-                                
                                 //price = pos.avgPriceIn + MARKETMAKER.increment * 5;
                             }
                             else{
@@ -315,11 +314,16 @@ class Trader{
                         }
                         break;
 
-                        default:
-                            if(SENTIMENT == BUY)
-                                price = ask.price + RANDOM_RANGE(0, 0.1);
+                        default:{
+                            const offset = RANDOM_RANGE(0,0.1);
+
+                            if(SENTIMENT == BUY){
+                                price = !this.inverted ? (ask.price + offset) : (bid.price - offset);
+                            }  
                             else
-                                price = bid.price - RANDOM_RANGE(0, 0.1);
+                                price = !this.inverted ? (bid.price - offset) : (ask.price + offset);
+                        }
+                            
 
                     }
                     
@@ -377,13 +381,17 @@ class Trader{
                         break;
 
 
-                        default:
+                        default:{
+                            const offset = RANDOM_RANGE(0,0.1);
+
                             if(SENTIMENT == BUY)
-                                price = ask.price + RANDOM_RANGE(0, 0.1);
+                                price = !this.inverted ? ask.price + offset : bid.price - offset;
                             else{
                                 const ssr = orderbook.shortSaleRestriction;
-                                price = !ssr ? bid.price - RANDOM_RANGE(0, 0.1) : ask.price;
+                                price = !ssr ? bid.price - offset : ask.price + offset;
                             }
+                        }
+                            
                     }
                     side = SHT;
                 }

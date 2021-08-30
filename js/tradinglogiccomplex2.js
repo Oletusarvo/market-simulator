@@ -92,7 +92,7 @@ function updateGiveUp(trader){
 
 	
 
-	if(pos){	
+	if(pos && bid && ask){	
 		const previousCandle = orderbook.dataSeries[orderbook.dataSeries.length - 2];
 
 		const gain = pos.side == BUY ? pos.calcGain(bid.price) : pos.calcGain(ask.price);
@@ -115,6 +115,7 @@ function updateResetBalance(trader){
 		const bacc = BANK.accounts.get(trader.id);
 		if(bacc){
 			bacc.balance = 5000;
+			acc.cashBuyingPower = bacc.balance;
 		}
 	}
 		
