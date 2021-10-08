@@ -245,9 +245,9 @@ class CandlePattern{
     }
 
     isBearflag(){
-        //Has at least one big green candle at the beggining.
+        //Has at least one big red candle at the beggining.
 
-        //Pullback starts at first red candle. The combined drop in value of the pullback can be no more than half of the gain before it.
+        //Pullback starts at first green candle. The combined gain in value of the pullback can be no more than half of the loss before it.
 
         
         const candles = this.candles;
