@@ -8,6 +8,7 @@ updateBrokerInfo = function(){
 	let outputPnl				= document.querySelector("#output-pnl");
 	let outputMargin            = document.querySelector("#output-margin");
 	let outputShortStatus		= document.querySelector("#output-short-status");
+	let outputSharesAvailable	= document.querySelector("#output-shares-available");
 	let outputSharesLocated		= document.querySelector("#output-shares-located");
 	let outputOfferedShares		= document.querySelector("#output-offered-shares");
 
@@ -16,7 +17,9 @@ updateBrokerInfo = function(){
 
 	const acc					= BROKER.accounts.get(id);
 	const locatedShares			= acc.locatedShares.get(SYMBOL);
-	outputShortStatus.value		= locatedShares != undefined || BROKER.easyToBorrow ? "S" : "NS";
+	const sharesAvailable		= BROKER.sharesAvailable.get(SYMBOL);
+	outputSharesAvailable.value	= sharesAvailable;
+	outputShortStatus.value		= (locatedShares != undefined) ? "S" : "NS";
 	outputSharesLocated.value	= locatedShares != undefined ? locatedShares : 0;
 	outputShortStatus.style.color = outputShortStatus.value == "NS" ? "red" : "green";
 
@@ -98,7 +101,7 @@ updateBrokerInfo = function(){
 			//Realized
 			row.cells[4].innerHTML = pos.realized.toFixed(pricePrecision);
 			//Unrealized
-			row.cells[5].innerHTML = pos.side == BUY ? ((currentBid - pos.avgPriceIn) * Math.abs(pos.sizeIn)).toFixed(pricePrecision) : ((pos.avgPriceIn - currentAsk) * Math.abs(pos.sizeIn)).toFixed(pricePrecision);
+			row.cells[5].innerHTML = pos.side == BUY ? ((currentBid - pos.avgPriceIn) * Math.abs(pos.totalSize)).toFixed(pricePrecision) : ((pos.avgPriceIn - currentAsk) * Math.abs(pos.totalSize)).toFixed(pricePrecision);
 			//Gain
 			row.cells[6].innerHTML = gain >= 0 ? "+" : "";
 			row.cells[6].innerHTML += gain.toFixed(2) + "%";

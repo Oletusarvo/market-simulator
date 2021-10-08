@@ -1,5 +1,6 @@
 function tradingLogicComplex2(traderId){
-	return traders[traderId].generateOrder();
+	const trader = traders[traderId];
+	return trader.generateOrder();
 }
 
 function updateTraders(){
@@ -9,7 +10,7 @@ function updateTraders(){
 		updateCoolDown(trader);
 		checkCancelOrders(trader);
 
-		trader.updateStrategy();
+		//trader.updateStrategy();
 	}
 }
 
@@ -20,11 +21,10 @@ function checkCancelOrders(trader){
 
 		if(acc){
 			const openOrders = Math.abs(acc.openOrderSize) > 0;
+			const ask = orderbook.bestAsk();
+			const bid = orderbook.bestBid();
 
 			if(openOrders){
-				const ask = orderbook.bestAsk();
-				const bid = orderbook.bestBid();
-
 				if(orderbook.halted){
 					EXCHANGE.cancel(id, SYMBOL);
 					BROKER.registerCancel(id);
@@ -39,8 +39,9 @@ function checkCancelOrders(trader){
 				const openPrice = acc.openOrderPrice;
 
 				const difference = lastPriceValid ? acc.openOrderSide == SHT ? ((lastPrice - openPrice) / openPrice) : ((openPrice - lastPrice) / openPrice) : 0;
-				if(Math.abs(difference) >= 0.05){
+				if(Math.abs(difference) >= 0.11){
 					EXCHANGE.cancel(id, SYMBOL);
+					trader.numCancels++;
 					BROKER.registerCancel(id);
 					return;
 				}
@@ -51,21 +52,47 @@ function checkCancelOrders(trader){
 
 					//Cancel orders if risk tolerance is hit
 					const gain = pos.side == BUY ? ((bid.price - pos.avgPriceIn) / pos.avgPriceIn) : ((pos.avgPriceIn - ask.price) / pos.avgPriceIn);
-					if(gain <= -trader.riskTolerance){
+					if((gain <= -trader.riskTolerance || gain >= trader.profitTarget) && trader.recentBailout == false){
 						EXCHANGE.cancel(id, SYMBOL);
 						BROKER.registerCancel(id);
+						trader.numCancels++;
 						trader.recentBailout = true;
+						BAILOUTS.push(trader.id);
+
+						//BAILOUTS.set(trader.id, trader);
+						//PARTICIPANTS.delete(trader.id);
 						return;
 					}
 
 					if(trader.giveUpTimer <= 0 && trader.recentBailout == false){
 						EXCHANGE.cancel(id, SYMBOL);
 						BROKER.registerCancel(id);
+						trader.numCancels++;
 						trader.recentBailout = true;
+						BAILOUTS.push(trader.id);
+
+						//BAILOUTS.set(trader.id, trader);
+						//PARTICIPANTS.delete(trader.id);
 						return;
 					}
 
 				}
+			}
+			else{
+				const pos = acc.positions.get(SYMBOL);
+
+				if(pos){
+					const gain = pos.side == BUY ? ((bid.price - pos.avgPriceIn) / pos.avgPriceIn) : ((pos.avgPriceIn - ask.price) / pos.avgPriceIn);
+					if((gain <= -trader.riskTolerance || gain >= trader.profitTarget) && trader.recentBailout == false){
+						trader.recentBailout = true;
+						BAILOUTS.push(trader.id);
+
+						//BAILOUTS.set(trader.id, trader);
+						//PARTICIPANTS.delete(trader.id);
+						return;
+					}
+				}
+				
 			}
 		
 		}
@@ -101,7 +128,7 @@ function updateGiveUp(trader){
 			return;
 		}
 
-		trader.giveUpTimer -= gain < 0 ? UPDATE_SPEED : UPDATE_SPEED / 3;
+		trader.giveUpTimer -= gain < 0 ? UPDATE_SPEED : UPDATE_SPEED / 10;
 	}
 	
 

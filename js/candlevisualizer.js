@@ -62,13 +62,27 @@ function drawVolume(canvas, candle, pos, vw, hm = 1){
 function drawDataRange(dataSeries, lookback, hm, canvas){
     const len = dataSeries.length; // Ignore the candle currently forming.
     const offset = 25; //How far appart individual candles are on the x-axis.
-    const centery = canvas.height / 2;
+
+    let calcOrigin = function(){
+        const lastCandle = dataSeries[len - 2];
+        const firstCandle = len < lookback ? dataSeries[0] : dataSeries[len - lookback - 1];
+        
+        if(lastCandle && firstCandle){
+            return (canvas.height / 2) + ((lastCandle.open - firstCandle.open) * hm * canvas.height);
+        }
+        else{
+            return canvas.height / 2;
+        }
+    }
+
+    //const fullHeight = calcFullSeriesHeight(dataSeries, hm);
+    const origin = canvas.height / 2;
 
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     let nextXpos = offset;
-    let nextYpos = centery;
+    let nextYpos = origin;
 
     let pos = new CandlePos(nextXpos, nextYpos);
 

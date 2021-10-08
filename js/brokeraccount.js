@@ -102,4 +102,26 @@ class BrokerAccount{
        this.marginBuyingPower = cash * this.bpMultiplier;
     }
 
+    updateLocatedShares(symbol, size){
+        const previousShares = this.locatedShares.get(symbol);
+        if(previousShares != NaN){
+            this.locatedShares.set(symbol, size + previousShares);
+        }
+    }
+
+    hasOpenShortPosition(symbol){
+        const pos = this.positions.get(symbol);
+        return pos ? pos.side == SHT : false;
+    }
+
+    hasOpenLongPosition(symbol){
+        const pos = this.positions.get(symbol);
+        return pos ? pos.side == BUY : false;
+    }
+
+    hasOpenOrders(symbol){
+        const openOrders = this.openOrders.get(symbol);
+        return openOrders != undefined;
+    }
+
 }

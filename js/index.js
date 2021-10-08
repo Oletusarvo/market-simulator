@@ -24,7 +24,8 @@ var mmEnabled   = document.querySelector("#input-enable-mm").value != "False";
 
 BROKER.allowNakedShort = false;
 BROKER.infiniteShortSupply = false;
-BROKER.addSharesToShortSupply(SYMBOL, 10000);
+BROKER.easyToBorrow = true;
+BROKER.addSharesToShortSupply(SYMBOL, 100000);
 
 //exchange.marketmaker = marketmaker;
 
@@ -34,11 +35,8 @@ orderbook.dataSeriesOpen();
 
 const numTraders = 1200;
 let traders = [];
-
-//Save ID's of traders with specific strategies.
-let undecidedTraders = [];
-let dipTraders = [];
-let breakoutTraders = [];
+let BAILOUTS = [];
+let PARTICIPANTS = new Map();
 
 for(let i = 0; i < numTraders; ++i){
     const dice = Math.random();
@@ -50,7 +48,7 @@ for(let i = 0; i < numTraders; ++i){
     //trader.undecided = Math.random() < 0.6 ? true : false;
 
     const rand = Math.random();
-    trader.inverted = rand <= 0.1 ? true : false;
+    trader.inverted = rand <= 0.25 ? true : false;
     traders.push(trader);
 }
 
@@ -83,8 +81,8 @@ for(let r = 0; r < 10; ++r){
 
 let MARKETMAKER = new MarketMaker(EXCHANGE);
 MARKETMAKER.spread = 0.01;
-MARKETMAKER.depth = 10;
-MARKETMAKER.addPosition(SYMBOL, 5.00, 1000000, BUY);
+MARKETMAKER.depth = 50;
+MARKETMAKER.addPosition(SYMBOL, 7.5, 1000000, BUY);
 
 
 update();
@@ -96,17 +94,16 @@ let running = false;
 let orderbookUpdateClock = 0;
 var cancelTimer = 0; //Timer until an unfilled open order is canceled.
 
-function getOrders(){
-
-}
-
 const visualizer = document.querySelector("#candle-canvas");
 var CANDLE_ORIGIN = visualizer.height / 2;
 
 let nextPos = new CandlePos(visualizer.width / 2, CANDLE_ORIGIN);
 let SENTIMENT = BUY;
-let HM = 0.15;
+let HM = 0.25;
 
+
+let BAILOUT_SWITCH = true;
+let bailoutSwitchTimer = 0;
 setInterval(function(){
     if(running){
         autoTrade(tradingLogicComplex2); 

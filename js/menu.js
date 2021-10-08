@@ -117,11 +117,18 @@ buttonPoOk.onclick = function(){
     const amount = parseInt(inputPoAmount.value);
     const symbol = inputPoSymbol.value;
     const price = parseFloat(inputPoPrice.value);
-    const shares = amount / numTraders;
+    
     //const id = parseInt(document.querySelector("#input-id").value);
 
-    for(let acc of BROKER.accounts.values()){
-        acc.addPosition(symbol, price, shares, BUY);
+    const half = Math.floor(numTraders / 2);
+    const shares = Math.floor(amount / half);
+    for(let i = 0; i < half; ++i){
+        const acc = BROKER.accounts.get(i);
+
+        if(acc){
+            acc.addPosition(symbol, price, shares, BUY);
+        }
+        
     }
 
     let message = new Message("Performed public offering for symbol \'" + symbol + "\'.", "Broker");

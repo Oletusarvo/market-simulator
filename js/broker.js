@@ -23,6 +23,8 @@ const ERR_SSR                   = 21;
 const ERR_NO_SHARES             = 22;
 const ERR_VOLATILITY            = 23;
 
+const ERR_LOCATE_NO_SHARES_AVAILABLE = 1;
+
 class Broker{
     constructor(name){
         this.name = name;
@@ -73,18 +75,18 @@ class Broker{
         let pos = acc.positions.get(order.symbol);
 
         if(order.type == LMT){
-            
+
             if(order.side == SEL || order.side == SHT){
                 const ask = orderbook.bestAsk();
                 const refPrice = ask ? ask.price : orderbook.last.price;
-                if(order.price > (refPrice * 1.05)){
+                if(order.price > (refPrice * 1.2)){
                     return ERR_VOLATILITY;
                 }
             }
             else{
                 const bid = orderbook.bestBid();
                 const refPrice = bid ? bid.price : orderbook.last.price;
-                if(order.price < (refPrice * 0.95)){
+                if(order.price < (refPrice * 0.8)){
                     return ERR_VOLATILITY;
                 }
             }
@@ -104,15 +106,10 @@ class Broker{
                 }
             }
 
-            const sharesAvailable = this.sharesAvailable.get(order.symbol);
-            if(this.easyToBorrow && (!sharesAvailable && sharesAvailable < order.size)){
-                return ERR_NO_SHARES;
-            }
-
             //Disalow shorting unless there are located shares available.
-            if(!this.easyToBorrow && order.side == SHT){
+            if(order.side == SHT){
                 let locatedShares = acc.locatedShares.get(order.symbol);
-                if(locatedShares == undefined){
+                if(!locatedShares || locatedShares == 0){
                     return ERR_LOCATED_SHARES;
                 }
                 else if(locatedShares < order.size){
@@ -121,9 +118,19 @@ class Broker{
             }
 
             //Not enough buying power.
-            const newOpenEquity = acc.openEquity + order.size * order.price;
-            if((order.side == SHT || order.side == BUY) && (newOpenEquity > acc.getBuyingPower()))
-                return ERR_BUYINGPOWER;
+            if(order.side == LMT){
+                const newOpenEquity = acc.openEquity + order.size * order.price;
+                if((order.side == SHT || order.side == BUY) && (newOpenEquity > acc.getBuyingPower()))
+                    return ERR_BUYINGPOWER;
+            }
+            else{
+                const bid = orderbook.bestBid();
+                const ask = orderbook.bestAsk();
+                const newOpenEquity = acc.openEquity + order.size * (order.side == BUY ? ask.price : bid.price);
+                if((order.side == SHT || order.side == BUY) && (newOpenEquity > acc.getBuyingPower()))
+                    return ERR_BUYINGPOWER;
+            }
+            
             
             //Disallow orders out on opposite sides at the same time.
             if((acc.openOrderSide == SHT && order.side == BUY) || (acc.openOrderSide == BUY && order.side == SHT)){
@@ -294,12 +301,15 @@ class Broker{
 
                     const amount = equity + gain;
                     buyer.updateCashBuyingPower(amount);
+                    buyer.updateLocatedShares(info.symbol, info.size);
 
                     pos.avgPriceOut = (pos.avgPriceOut * pos.sizeOut + info.size * info.price) / (info.size + pos.sizeOut);
                     pos.sizeOut += info.size; 
 					pos.totalSize -= info.size;
                     pos.realized += (pos.avgPriceIn - info.price) * info.size;
                     //buyer.setBpMultiplier();
+
+                    
                 }
 
                 pos.calcGain(info.price);
@@ -321,6 +331,8 @@ class Broker{
 					buyer.pnl += rec.realized;
                     buyer.positions.delete(info.symbol);
                     //buyer.setBpMultiplier(); 
+
+                    this.returnShares(buyer.id, info.symbol);
 
                }
             }
@@ -354,6 +366,7 @@ class Broker{
         if(seller){
             let pos = seller.positions.get(info.symbol);
             const marginEnabled = seller.marginEnabled;
+
             if(pos){    
                  //If adding to an existing short position, update average price and decrese buying power.
                 if(pos.side == SHT){
@@ -362,6 +375,8 @@ class Broker{
                      seller.updateCashBuyingPower(-amount);
                      pos.totalSize += info.size;
                      pos.sizeIn += info.size;
+                     seller.updateLocatedShares(info.symbol, -info.size);
+
                 }
 
                 //An account selling a long position should have their buying power increased.
@@ -406,7 +421,9 @@ class Broker{
                 seller.addPosition(info.symbol, info.price, info.size, SHT);
                 const amount = info.size * info.price;
                 seller.updateCashBuyingPower(-amount);
+                seller.updateLocatedShares(info.symbol, -info.size);
              }
+            
 
             seller.openEquity -= seller.openEquity > 0 ? info.price * info.size : 0;
             seller.openOrderSize -= seller.openOrderSize > 0 ? info.size : 0; 
@@ -568,19 +585,35 @@ class Broker{
 	}
 	
     locate(id, symbol, size){
-        /*
-            Find an account that has enough shares available and is willing to lend shares.
-        */
+        
 		
         let result = 0;
 		
-		if(this.infiniteShortSupply){
+		if(this.easyToBorrow){
 			let borrower = this.accounts.get(id);
+
 			if(borrower){
-				borrower.locatedShares.set(symbol, size);
+                const sharesWanted = size;
+                let sharesAvailable = this.sharesAvailable.get(symbol);
+
+                if(sharesWanted <= sharesAvailable){
+                    let previousShares = borrower.locatedShares.get(symbol);
+
+                    previousShares = previousShares != undefined ? previousShares : 0;
+                    borrower.locatedShares.set(symbol, previousShares + sharesWanted);
+                    sharesAvailable -= sharesWanted;
+                    this.sharesAvailable.set(symbol, sharesAvailable);
+                }
+                else{
+                    return ERR_LOCATE_NO_SHARES_AVAILABLE;
+                }
+				
 			}
 		}
 		else{
+            /*
+                Find an account that has enough shares available and is willing to lend shares.
+            */
             const accountValues = this.accounts.values();
 			for(let lender of accountValues){
 				if(lender.id != id/*The account is not the one wanting to borrow*/ && lender.willingToBorrow){
@@ -633,10 +666,19 @@ class Broker{
 			if(acc.openEquity != 0){
 				return 3;
 			}
+            else if(acc.hasOpenShortPosition(symbol)){
+                return 3;
+            }
 			else{
-				const numshares = acc.locatedShares.size;
+				const numshares = acc.locatedShares.get(symbol);
 			
-				if(numshares != 0){
+				if(numshares){
+                    if(this.easyToBorrow){
+                        acc.updateLocatedShares(symbol, numshares);
+                        const sharesAvailable = this.sharesAvailable.get(symbol);
+                        this.sharesAvailable.set(symbol, sharesAvailable + numshares);
+                    }
+
 					acc.locatedShares.delete(symbol);
 				}
 				else{
