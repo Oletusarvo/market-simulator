@@ -1,4 +1,10 @@
+/*
+    TODO make chart adapt offset of candes so they dont go off screen.
+*/
+
 class Chart{
+
+    //WORK IN PROGRESS
     constructor(canvas, dataSeries){
         this.canvas = canvas;
         this.dataSeries = dataSeries;
