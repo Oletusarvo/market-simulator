@@ -95,6 +95,8 @@ let orderbookUpdateClock = 0;
 var cancelTimer = 0; //Timer until an unfilled open order is canceled.
 
 const visualizer = document.querySelector("#candle-canvas");
+const CHART = new Chart(visualizer, orderbook.dataSeries);
+
 var CANDLE_ORIGIN = visualizer.height / 2;
 
 let nextPos = new CandlePos(visualizer.width / 2, CANDLE_ORIGIN);
@@ -112,7 +114,7 @@ setInterval(function(){
         
         const candle = orderbook.dataSeries[orderbook.dataSeries.length - 1];
         
-        drawCandleSingle(visualizer, candle, nextPos, 20, HM);
+        CHART.drawCandleSingle(visualizer, candle, nextPos, 20, HM);
         
         if(orderbookUpdateClock >= DATA_INTERVAL){
             orderbookUpdateClock = 0;

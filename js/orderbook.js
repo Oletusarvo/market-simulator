@@ -100,13 +100,13 @@ class OrderBook{
         const lastPriceHistory = this.priceHistory[this.priceHistory.length - 1];
 
         if(this.dataSeries.length == 1){
-            candle.open = this.open;
-            candle.high = this.high;
-            candle.low = this.low;
+            candle.open_price = this.open;
+            candle.high_price = this.high;
+            candle.low_price = this.low;
         }
 
         candle.close(lastPriceHistory.price);
-        console.log(Number(candle.open).toLocaleString() + ";" + Number(candle.low).toLocaleString() + ";" + Number(candle.high).toLocaleString() + ";" + Number(candle.closep).toLocaleString() + ";" + candle.volume);
+        console.log(Number(candle.open_price).toLocaleString() + ";" + Number(candle.low_price).toLocaleString() + ";" + Number(candle.high_price).toLocaleString() + ";" + Number(candle.close_price).toLocaleString() + ";" + candle.volume);
     }
 
     dataSeriesUpdate(){

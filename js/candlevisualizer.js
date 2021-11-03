@@ -2,7 +2,13 @@ class Chart{
     constructor(canvas, dataSeries){
         this.canvas = canvas;
         this.dataSeries = dataSeries;
-        this.currentCandlePos = undefined;
+        this.currentCandlePos = -1;
+        this.currentCandle = undefined;
+        this.drawOrigin = new CandlePos(this.canvas.width / 2, this.canvas.height / 2);
+        this.hzoom = 1;
+        this.vzoom = 1;
+
+        this.advance();
     }
 
     height(){
@@ -12,15 +18,66 @@ class Chart{
     width(){
         return this.canvas.width;
     }
+
+    advance(){
+        this.currentCandlePos++;
+        this.currentCandle = this.dataSeries[this.currentCandlePos];
+    }
+
+    drawCandleSingle(){
+        const candle = this.currentCandle;
+        const pos = this.drawOrigin;
+        const hm = this.hzoom;
+        const cw = 20;
+        const canvas = this.canvas;
+
+        if(candle && candle.low_price && candle.high_price && candle.open_price && candle.close_price){
+            
+            const open = candle.open_price;
+            const close = candle.close_price;
+            const high = candle.high_price;
+            const low = candle.low_price;
+    
+    
+            const ctx = canvas.getContext("2d");
+            const linex = Math.ceil(pos.xpos);
+            
+            const y = Math.ceil(pos.ypos);
+    
+            //Length of the line representing the wicks
+            let lineLowPos = Math.ceil(y + ((open - low) * canvas.height * hm));
+            let lineHighPos = Math.ceil(y - ((high - open) * canvas.height * hm));
+    
+            //Candle dimensions
+            const candleHeight = (open - close) * canvas.height * hm;
+            const candleWidth = cw;
+    
+            //While updating, only erase the part of the canvas where the live candle is forming.
+            ctx.clearRect(pos.xpos - (cw / 2), 0, pos.xpos + (cw / 2), canvas.height);
+    
+            ctx.fillStyle = close >= open ? "green" : "red";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(linex + 0.5, lineLowPos);
+            ctx.lineTo(linex + 0.5, lineHighPos);
+            ctx.stroke();
+    
+            //Draw candle body
+            
+            const candleXpos = Math.ceil(pos.xpos - candleWidth / 2);
+            ctx.fillRect(candleXpos + 0.5, y, candleWidth, candleHeight);
+        }
+        
+    }
 }
 
 function drawCandleSingle(canvas, candle, pos, cw, hm = 1){
-    if(candle && candle.low && candle.high && candle.open && candle.closep){
+    if(candle && candle.low_price && candle.high_price && candle.open_price && candle.close_price){
         
-        const open = candle.open;
-        const close = candle.closep;
-        const high = candle.high;
-        const low = candle.low;
+        const open = candle.open_price;
+        const close = candle.close_price;
+        const high = candle.high_price;
+        const low = candle.low_price;
 
 
         const ctx = canvas.getContext("2d");
@@ -68,7 +125,7 @@ function drawDataRange(dataSeries, lookback, hm, canvas){
         const firstCandle = len < lookback ? dataSeries[0] : dataSeries[len - lookback - 1];
         
         if(lastCandle && firstCandle){
-            return (canvas.height / 2) + ((lastCandle.open - firstCandle.open) * hm * canvas.height);
+            return (canvas.height / 2) + ((lastCandle.open_price - firstCandle.open_price) * hm * canvas.height);
         }
         else{
             return canvas.height / 2;
@@ -94,8 +151,8 @@ function drawDataRange(dataSeries, lookback, hm, canvas){
     for(let c = start; c < end; ++c){
         const candle = dataSeries[c];
 
-        const open = candle.open;
-        const close = candle.closep;
+        const open = candle.open_price;
+        const close = candle.close_price;
 
         const cw = 20;
 

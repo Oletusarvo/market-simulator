@@ -9,33 +9,34 @@ class Candle{
     constructor(open, low = null, high = null, close = null){
 
         if(low == null && high == null && close == null){
-            this.open = this.low = this.high = this.closep = open;
+            this.open_price = this.low_price = this.high_price = this.close_price = open;
         }
         else{
-            this.open = open;
-            this.low = low;
-            this.high = high;
-            this.closep = close;
+            this.open_price = open;
+            this.low_price = low;
+            this.high_price = high;
+            this.close_price = close;
         }
 
         this.previous = null;
         this.next = null;
         this.volume = 0;
+        this.color = this.close_price > this.open_price ? COLOR_GREEN : COLOR_RED;
     }
 
     update(price, volume){
-        this.low = price < this.low ? price : this.low;
-        this.high = price > this.high ? price : this.high;
+        this.low_price = price < this.low_price ? price : this.low_price;
+        this.high_price = price > this.high_price ? price : this.high_price;
         this.volume = volume;
-        this.closep = price;
+        this.close_price = price;
     }
 
     close(price){
-        this.closep = price;
+        this.close_price = price;
     }
 
     getRange(){
-        return this.high - this.low;
+        return this.high_price - this.low_price;
     }
 
     getMagnitude(){
@@ -43,32 +44,32 @@ class Candle{
     }
 
     bullish(){
-        return this.isHammer() || this.closep > this.open;
+        return this.isHammer() || this.close_price > this.open_price;
     }
 
     bearish(){
-        return this.isInvertedHammer() || this.closep < this.open;
+        return this.isInvertedHammer() || this.close_price < this.open_price;
     }
 
     isHammer(){
         //A hammer candle has a long lower wick and short upper wick.
         const candle = this;
-        const color = candle.open > candle.closep ? COLOR_GREEN : COLOR_RED;
+        const color = candle.open_price > candle.closep ? COLOR_GREEN : COLOR_RED;
     
         let result = false;
     
        
         if(color == COLOR_GREEN){
-            let lowerWickLen = candle.open - candle.low;
-            let upperWickLen = candle.high - candle.closep;
-            let bodyLen = candle.closep - candle.open;
+            let lowerWickLen = candle.open_price - candle.low_price;
+            let upperWickLen = candle.high_price - candle.close_price;
+            let bodyLen = candle.close_price - candle.open_price;
     
             result = upperWickLen * hammerMultiplier < lowerWickLen && bodyLen < lowerWickLen;
         }
         else{
-            let lowerWickLen = candle.closep - candle.low;
-            let upperWickLen = candle.high - candle.open;
-            let bodyLen = candle.open - candle.closep;
+            let lowerWickLen = candle.close_price - candle.low_price;
+            let upperWickLen = candle.high_price - candle.open_price;
+            let bodyLen = candle.open_price - candle.close_price;
     
             result = upperWickLen * hammerMultiplier < lowerWickLen && bodyLen < lowerWickLen;
         }
@@ -79,22 +80,22 @@ class Candle{
     isInvertedHammer(){
         //An inverted hammer candle has a long upper wick and short lower wick.
         const candle = this;
-        const color = candle.open > candle.closep ? COLOR_RED : COLOR_GREEN;
+        const color = candle.open_price > candle.close_price ? COLOR_RED : COLOR_GREEN;
     
         let result = false;
     
         if(color == COLOR_GREEN){
-            let lowerWickLen = candle.open - candle.low;
-            let upperWickLen = candle.high - candle.closep;
-            let bodyLen = candle.closep - candle.open;
+            let lowerWickLen = candle.open_price - candle.low_price;
+            let upperWickLen = candle.high_price - candle.close_price;
+            let bodyLen = candle.close_price - candle.open_price;
     
             
             result = lowerWickLen * hammerMultiplier < upperWickLen && bodyLen < upperWickLen;
         }
         else{
-            let lowerWickLen = candle.closep - candle.low;
-            let upperWickLen = candle.high - candle.open;
-            let bodyLen = candle.open - candle.closep;
+            let lowerWickLen = candle.close_price - candle.low_price;
+            let upperWickLen = candle.high_price - candle.open_price;
+            let bodyLen = candle.open_price - candle.close_price;
     
             result = lowerWickLen * hammerMultiplier < upperWickLen && bodyLen < upperWickLen;
         }
@@ -105,26 +106,38 @@ class Candle{
     isDoji(){
         //A doji candle shall be interpreted as a candle with long wicks and the body is smaller than the length of the individual wicks.
         const candle = this;
-        const color = candle.closep >= candle.open ? COLOR_GREEN : COLOR_RED;
+        const color = candle.close_price >= candle.open_price ? COLOR_GREEN : COLOR_RED;
     
         let result = false;
     
         if(color == COLOR_GREEN){
-            let upperWickLen = candle.high - candle.closep;
-            let lowerWickLen = candle.open - candle.low;
-            let bodyLen = candle.closep - candle.open;
+            let upperWickLen = candle.high_price - candle.close_price;
+            let lowerWickLen = candle.open_price - candle.low_price;
+            let bodyLen = candle.close_price - candle.open_price;
     
             result = bodyLen < upperWickLen && bodyLen < lowerWickLen;
         }
         else{
-            let upperWickLen = candle.high - candle.open;
-            let lowerWickLen = candle.open - candle.low;
-            let bodyLen = candle.open - candle.closep;
+            let upperWickLen = candle.high_price - candle.open_price;
+            let lowerWickLen = candle.open_price - candle.low_price;
+            let bodyLen = candle.open_price - candle.close_price;
     
             result = bodyLen < upperWickLen && bodyLen < lowerWickLen;
         }
     
         return result;
+    }
+
+    upperWickLen(){
+        return this.color == COLOR_GREEN ? this.high_price - this.close_price : this.high_price - this.open_price;
+    }
+
+    lowerWickLen(){
+        return this.color == COLOR_GREEN ? this.open_price - this.low : this.close_price - this.low_price;
+    }
+
+    bodyLen(){
+        return this.color == COLOR_GREEN ? this.close_price - this.open_price : this.open_price - this.close_price;
     }
 }
 
@@ -163,8 +176,8 @@ class CandlePattern{
         const firstCandle = candles[0];
         const lastCandle = candles[1];
 
-        return ((this.bullish = lastCandle.closep > firstCandle.open && lastCandle.closep < firstCandle.high) 
-        || (this.bearish = lastCandle.closep < firstCandle.open && lastCandle.closep > firstCandle.low));
+        return ((this.bullish = lastCandle.close_price > firstCandle.open_price && lastCandle.close_price < firstCandle.high_price) 
+        || (this.bearish = lastCandle.close_price < firstCandle.open_price && lastCandle.close_price > firstCandle.low_price));
     }
 
     IsThreeWhiteSoldiers(pattern){
@@ -177,7 +190,7 @@ class CandlePattern{
     
         let numGreen = 0;
         for(candle of candles){
-            if(candle.closep > candle.open){
+            if(candle.close_price > candle.open_price){
                 numGreen++;
             }
         }
@@ -192,7 +205,7 @@ class CandlePattern{
         
         for(let i = 0; i < len; ++i){
             const candle = this.candles[i];
-            const gain = candle.closep - candle.open;
+            const gain = candle.close_price - candle.open_price;
             total += gain;
         }
 
@@ -215,7 +228,7 @@ class CandlePattern{
             let pullback = new CandlePattern();
 
             for(candle of candles){
-                if(candle.closep < candle.previous.closep){
+                if(candle.close_price < candle.previous.close_price){
                     //Part of pullback
                     pullback.push(candle);
                 }
